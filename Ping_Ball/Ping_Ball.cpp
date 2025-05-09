@@ -7,28 +7,35 @@
 #define MAX_LOADSTRING 100
 
 // Global Variables:
+HPEN Brick_Red_Pen, Brick_Blue_Pen;
+HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
+
 const int Global_Scale = 3;
 const int Brick_Width = 15;
 const int Brick_Height = 7;
 const int Cell_Width = 16;
 const int Cell_Height = 8;
+
 const int Level_X_Offset = 8;
 const int Level_Y_Offset = 6;
-const int Level_01_Height = 14;
-const int Level_01_Width = 12;
-unsigned char level_01[Level_01_Height][Level_01_Width] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+const int Level_Height = 14;
+const int Level_Width = 12;
+enum EBrick_Type: unsigned char {EBT_None, EBT_Red, EBT_Blue};
+
+unsigned char level_01[Level_Height][Level_Width] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
@@ -100,12 +107,21 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PINGBALL));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0) );
+    wcex.hbrBackground  = (HBRUSH)CreateSolidBrush(RGB(30, 30, 40) );
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PINGBALL);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
+}
+//------------------------------------------------------------------------------------------------------------
+void Init()
+{
+    Brick_Red_Pen = CreatePen(PS_SOLID, 0, RGB(224, 173, 94) );
+    Brick_Red_Brush = CreateSolidBrush(RGB(224, 173, 94) );
+
+    Brick_Blue_Pen = CreatePen(PS_SOLID, 0, RGB(120, 180, 200) );
+    Brick_Blue_Brush = CreateSolidBrush(RGB(120, 180, 200) );
 }
 //------------------------------------------------------------------------------------------------------------
 //
@@ -120,9 +136,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   RECT window_rect;
+   RECT window_rect{};
    hInst = hInstance; // Store instance handle in our global variable
 
+   Init();
+   
    window_rect.left = 0;
    window_rect.top = 0;
    window_rect.right = 320 * Global_Scale;
@@ -142,42 +160,55 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 //------------------------------------------------------------------------------------------------------------
-void Draw_Brick(HDC hdc, int x, int y, bool is_blue)
+void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 {
-    RECT brick;
+    RECT brick{};
 
-    HBRUSH brush;
-    HPEN pen;
+    HBRUSH brush = 0;
+    HPEN pen = 0;
 
     brick.left = x * Global_Scale;
     brick.top = y * Global_Scale;
     brick.right = brick.left + Brick_Width * Global_Scale;
     brick.bottom = brick.top + Brick_Height * Global_Scale;
 
-    if (is_blue)
+    switch (brick_type)
     {
-        pen = CreatePen(PS_SOLID, 1, RGB(95, 252, 255) );
-        brush = CreateSolidBrush(RGB(95, 252, 255) );
+    case EBT_Red:
+        pen = Brick_Red_Pen;
+        brush = Brick_Red_Brush;
+        break;
+
+    case EBT_Blue:
+        pen = Brick_Blue_Pen;
+        brush = Brick_Blue_Brush;
+        break;
+
+    default:
+        return;
     }
-    else
+    
+    if (pen and brush)
     {
-        pen = CreatePen(PS_SOLID, 1, RGB(246, 91, 255) );
-        brush = CreateSolidBrush(RGB(246, 91, 255) );
+        SelectObject(hdc, pen);
+        SelectObject(hdc, brush);
     }
+    
+    RoundRect(hdc, brick.left, brick.top, brick.right, brick.bottom, 2 * Global_Scale, 2 * Global_Scale);
+}
+//------------------------------------------------------------------------------------------------------------
+void Draw_Level(HDC hdc)
+{
+    int i, j;
 
-    SelectObject(hdc, pen);
-    SelectObject(hdc, brush);
-
-    Rectangle(hdc, brick.left, brick.top, brick.right, brick.bottom);
+    for (i = 0; i < Level_Height; i++)
+        for (j = 0; j < Level_Width; j++)
+            Draw_Brick(hdc, Level_X_Offset + j * Cell_Width, Level_Y_Offset + i * Cell_Height, static_cast<EBrick_Type>(level_01[i][j]) );
 }
 //------------------------------------------------------------------------------------------------------------
 void Draw_Frame(HDC hdc)
 {
-    int i, j;
-  
-    for (i = 0; i < Level_01_Height; i++)
-        for (j = 0; j < Level_01_Width; j++)
-            Draw_Brick(hdc, Level_X_Offset + j * Cell_Width, Level_Y_Offset + i * Cell_Height, (bool)level_01[i][j]);
+    Draw_Level(hdc);
 }
 //------------------------------------------------------------------------------------------------------------
 //
@@ -213,7 +244,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
-            PAINTSTRUCT ps;
+            PAINTSTRUCT ps{};
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Add any drawing code that uses hdc here...
             Draw_Frame(hdc);
