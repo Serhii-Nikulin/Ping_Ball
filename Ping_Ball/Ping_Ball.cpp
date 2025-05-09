@@ -7,6 +7,32 @@
 #define MAX_LOADSTRING 100
 
 // Global Variables:
+const int Global_Scale = 3;
+const int Brick_Width = 15;
+const int Brick_Height = 7;
+const int Cell_Width = 16;
+const int Cell_Height = 8;
+const int Level_X_Offset = 8;
+const int Level_Y_Offset = 6;
+const int Level_01_Height = 14;
+const int Level_01_Width = 12;
+unsigned char level_01[Level_01_Height][Level_01_Width] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
@@ -99,8 +125,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    window_rect.left = 0;
    window_rect.top = 0;
-   window_rect.right = 320 * 3;
-   window_rect.bottom = 200 * 3;
+   window_rect.right = 320 * Global_Scale;
+   window_rect.bottom = 200 * Global_Scale;
    
    AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW, TRUE);
 
@@ -116,8 +142,42 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 //------------------------------------------------------------------------------------------------------------
+void Draw_Brick(HDC hdc, int x, int y, bool is_blue)
+{
+    RECT brick;
+
+    HBRUSH brush;
+    HPEN pen;
+
+    brick.left = x * Global_Scale;
+    brick.top = y * Global_Scale;
+    brick.right = brick.left + Brick_Width * Global_Scale;
+    brick.bottom = brick.top + Brick_Height * Global_Scale;
+
+    if (is_blue)
+    {
+        pen = CreatePen(PS_SOLID, 1, RGB(95, 252, 255) );
+        brush = CreateSolidBrush(RGB(95, 252, 255) );
+    }
+    else
+    {
+        pen = CreatePen(PS_SOLID, 1, RGB(246, 91, 255) );
+        brush = CreateSolidBrush(RGB(246, 91, 255) );
+    }
+
+    SelectObject(hdc, pen);
+    SelectObject(hdc, brush);
+
+    Rectangle(hdc, brick.left, brick.top, brick.right, brick.bottom);
+}
+//------------------------------------------------------------------------------------------------------------
 void Draw_Frame(HDC hdc)
 {
+    int i, j;
+  
+    for (i = 0; i < Level_01_Height; i++)
+        for (j = 0; j < Level_01_Width; j++)
+            Draw_Brick(hdc, Level_X_Offset + j * Cell_Width, Level_Y_Offset + i * Cell_Height, (bool)level_01[i][j]);
 }
 //------------------------------------------------------------------------------------------------------------
 //
