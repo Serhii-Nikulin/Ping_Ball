@@ -4,9 +4,10 @@
 
 HPEN Brick_Red_Pen, Brick_Blue_Pen;
 HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
-HPEN Highlight_Pen;
+HPEN Highlight_Pen, Letter_Pen;
 
 enum EBrick_Type: unsigned char {EBT_None, EBT_Red, EBT_Blue};
+enum ELetter_Type {ELT_None, ELT_O};
 
 const int Brick_Width = 15;
 const int Brick_Height = 7;
@@ -56,6 +57,7 @@ void Init()
     Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 120, 180, 200);
 
 	Highlight_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(200, 100, 180) );
+    Letter_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(60, 60, 70) );
 
     Create_Pen_Brush(Platform_Side_Pen, Platform_Side_Brush, 100, 110, 160);
 	Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 180, 185, 230);
@@ -152,7 +154,7 @@ void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front
 
 }
 //------------------------------------------------------------------------------------------------------------
-void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, int rotation_step)
+void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step)
 {
     XFORM old_xform, new_xform;
     int brick_half_height;
@@ -222,6 +224,16 @@ void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, int rotati
     SelectObject(hdc, front_brush);
 
     Rectangle(hdc, 0, 0 - brick_half_height, Brick_Width * Global_Scale, 0 + brick_half_height);
+
+    if (rotation_step >= 5 and rotation_step <= 12)
+    {
+        if (letter_type == ELT_O)
+        {
+            SelectObject(hdc, Letter_Pen);
+            Ellipse(hdc, 0 + 5 * Global_Scale, 0 - 5 * Global_Scale / 2, 0 + 10 * Global_Scale, 0 + 5 * Global_Scale / 2);
+        }
+    }
+
     SetWorldTransform(hdc, &old_xform);
 }
 //------------------------------------------------------------------------------------------------------------
@@ -234,8 +246,8 @@ void Draw_Frame(HDC hdc)
     int i;
     for (i = 0; i < 16; i++)
     {
-        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 150, EBT_Blue, i);
-        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 180, EBT_Red, i);
+        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 150, EBT_Blue, ELT_O, i);
+        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 180, EBT_Red, ELT_O, i);
     }
 }
 //------------------------------------------------------------------------------------------------------------
