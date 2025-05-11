@@ -131,27 +131,65 @@ void Draw_Level(HDC hdc)
             Draw_Brick(hdc, Level_X_Offset + j * Cell_Width, Level_Y_Offset + i * Cell_Height, static_cast<EBrick_Type>(level_01[i][j]) );
 }
 //------------------------------------------------------------------------------------------------------------
-void Draw_Brick_Letter(HDC hdc, int x, int y, int rotation_step)
+void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush)
+{
+    if (is_switch_color == true)
+    {
+        front_pen = Brick_Blue_Pen;
+        front_brush = Brick_Blue_Brush;
+
+        back_pen = Brick_Red_Pen;
+        back_brush = Brick_Red_Brush;
+    }
+    else
+    {
+        front_pen = Brick_Red_Pen;
+        front_brush = Brick_Red_Brush;
+
+        back_pen = Brick_Blue_Pen;
+        back_brush = Brick_Blue_Brush;
+    }
+
+}
+//------------------------------------------------------------------------------------------------------------
+void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, int rotation_step)
 {
     XFORM old_xform, new_xform;
     int brick_half_height;
     double rotation_angle;
-
+    bool switch_color;
     HPEN front_pen, back_pen;
     HBRUSH front_brush, back_brush;
 
 	brick_half_height = Brick_Height * Global_Scale / 2.0;
 
+    if (rotation_step >= 5 and rotation_step <= 12)
+    {
+        if (brick_type == EBT_Blue)
+            switch_color = false;
+        else
+            switch_color = true;
+    }
+    else
+    {
+        if (brick_type == EBT_Blue)
+            switch_color = true;
+        else
+            switch_color = false;
+    }
+
+    Set_Brick_Letter_Color(switch_color, front_pen, front_brush, back_pen, back_brush);
+
     if (rotation_step == 4 or rotation_step == 12)
     {
-        SelectObject(hdc, Brick_Blue_Pen);
-        SelectObject(hdc, Brick_Blue_Brush);
+        SelectObject(hdc, back_pen);
+        SelectObject(hdc, back_brush);
 
         Rectangle(hdc, x, y + brick_half_height - Global_Scale, x + Brick_Width * Global_Scale, y + brick_half_height);
 
 
-        SelectObject(hdc, Brick_Red_Pen);
-        SelectObject(hdc, Brick_Red_Brush);
+        SelectObject(hdc, front_pen);
+        SelectObject(hdc, front_brush);
 
         Rectangle(hdc, x, y + brick_half_height, x + Brick_Width * Global_Scale, y + brick_half_height + Global_Scale - 1);
         return;
@@ -174,14 +212,14 @@ void Draw_Brick_Letter(HDC hdc, int x, int y, int rotation_step)
     SetWorldTransform(hdc, &new_xform);
 
 
-    SelectObject(hdc, Brick_Blue_Pen);
-    SelectObject(hdc, Brick_Blue_Brush);
+    SelectObject(hdc, back_pen);
+    SelectObject(hdc, back_brush);
 
     Rectangle(hdc, 0, 0 - brick_half_height - offset, Brick_Width * Global_Scale, 0 + brick_half_height - offset);
 
 
-    SelectObject(hdc, Brick_Red_Pen);
-    SelectObject(hdc, Brick_Red_Brush);
+    SelectObject(hdc, front_pen);
+    SelectObject(hdc, front_brush);
 
     Rectangle(hdc, 0, 0 - brick_half_height, Brick_Width * Global_Scale, 0 + brick_half_height);
     SetWorldTransform(hdc, &old_xform);
@@ -195,6 +233,9 @@ void Draw_Frame(HDC hdc)
 
     int i;
     for (i = 0; i < 16; i++)
-        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 150, i);
+    {
+        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 150, EBT_Blue, i);
+        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 180, EBT_Red, i);
+    }
 }
 //------------------------------------------------------------------------------------------------------------
