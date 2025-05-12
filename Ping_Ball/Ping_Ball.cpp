@@ -74,7 +74,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PINGBALL));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)CreateSolidBrush(RGB(30, 30, 40) );
+    wcex.hbrBackground  = (HBRUSH)CreateSolidBrush(RGB(40, 44, 52) );
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PINGBALL);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -96,8 +96,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    RECT window_rect{};
    hInst = hInstance; // Store instance handle in our global variable
-
-   Init();
    
    window_rect.left = 0;
    window_rect.top = 0;
@@ -111,6 +109,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    if (!hWnd)
       return FALSE;
+
+   Init_Engine(hWnd);
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
@@ -149,15 +149,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+
     case WM_PAINT:
         {
             PAINTSTRUCT ps{};
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Add any drawing code that uses hdc here...
-            Draw_Frame(hdc);
+            Draw_Frame(hdc, ps.rcPaint);
             EndPaint(hWnd, &ps);
         }
         break;
+
+    case WM_KEYDOWN:
+    {
+        switch(wParam)
+        {
+        case VK_LEFT:
+            return On_Key_Down(EKT_Left);
+        case VK_RIGHT:
+            return On_Key_Down(EKT_Right);
+        case VK_SPACE:
+            return On_Key_Down(EKT_Space);
+        }
+        break;
+    }
     case WM_DESTROY:
         PostQuitMessage(0);
         break;

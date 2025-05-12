@@ -5,6 +5,9 @@
 HPEN Brick_Red_Pen, Brick_Blue_Pen;
 HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
 HPEN Highlight_Pen, Letter_Pen;
+HWND Hwnd;
+RECT Platform_Rect{}, Prev_Platform_Rect{};
+RECT Level_Rect{};
 
 enum EBrick_Type: unsigned char {EBT_None, EBT_Red, EBT_Blue};
 enum ELetter_Type {ELT_None, ELT_O};
@@ -20,13 +23,19 @@ const int Level_Y_Offset = 6;
 const int Level_Height = 14;
 const int Level_Width = 12;
 
-const int Circle_Size = 7;
-const int Platform_Width = 28;
+const int Platform_Height = 7;
 const int Platform_Y_Pos = 185;
+int Platform_Width = 28;
 int Platform_Inner_Width = 21;
+int Platform_X_Pos = 0;
+int Platform_X_Step = Global_Scale * 2;
+const int Min_X_Pos = 7;
+const int Max_X_Pos = 200;
 
 HPEN Platform_Side_Pen, Platform_Inner_Pen;
 HBRUSH Platform_Side_Brush, Platform_Inner_Brush;
+HPEN BG_Pen;
+HBRUSH BG_Brush;
 
 unsigned char level_01[Level_Height][Level_Width] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -51,8 +60,25 @@ void Create_Pen_Brush(HPEN& pen, HBRUSH& brush, unsigned char r, unsigned char g
 	brush = CreateSolidBrush(RGB(r, g, b));
 }
 //------------------------------------------------------------------------------------------------------------
-void Init()
+void Redraw_Platform()
 {
+    Prev_Platform_Rect = Platform_Rect;
+
+    Platform_Rect.left = (Min_X_Pos + Platform_X_Pos) * Global_Scale;
+    Platform_Rect.top = Platform_Y_Pos * Global_Scale;
+    Platform_Rect.right = Platform_Rect.left + Platform_Width * Global_Scale;
+    Platform_Rect.bottom = Platform_Rect.top + Platform_Height * Global_Scale;
+
+   InvalidateRect(Hwnd, &Platform_Rect, FALSE);
+   InvalidateRect(Hwnd, &Prev_Platform_Rect, FALSE);
+}
+//------------------------------------------------------------------------------------------------------------
+void Init_Engine(HWND hwnd)
+{
+    Hwnd = hwnd;
+
+    Redraw_Platform();
+
     Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 224, 173, 94);
     Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 120, 180, 200);
 
@@ -61,6 +87,22 @@ void Init()
 
     Create_Pen_Brush(Platform_Side_Pen, Platform_Side_Brush, 100, 110, 160);
 	Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 180, 185, 230);
+
+    Create_Pen_Brush(BG_Pen, BG_Brush, 40, 44, 52);
+
+    Level_Rect.left = Level_X_Offset * Global_Scale;
+    Level_Rect.top = Level_Y_Offset * Global_Scale;
+    Level_Rect.right = Level_Rect.left + Level_Width * Cell_Width * Global_Scale;
+    Level_Rect.bottom = Level_Rect.top + Level_Height * Cell_Height * Global_Scale;
+
+    /*Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 148, 99, 85);
+    Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 173, 126, 107);
+
+    Highlight_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(130, 180, 140) );
+    Letter_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(245, 235, 220) );
+
+    Create_Pen_Brush(Platform_Side_Pen, Platform_Side_Brush, 180, 145, 95);
+    Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 100, 115, 130);*/
 }
 //------------------------------------------------------------------------------------------------------------
 void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
@@ -102,11 +144,15 @@ void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 //------------------------------------------------------------------------------------------------------------
 void Draw_Circle(HDC hdc, int x, int y)
 {
-    Ellipse(hdc, x * Global_Scale, y * Global_Scale, (x + Circle_Size) * Global_Scale, (y + Circle_Size) * Global_Scale);
+    Ellipse(hdc, x * Global_Scale, y * Global_Scale, (x + Platform_Height) * Global_Scale, (y + Platform_Height) * Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
 void Draw_Platform(HDC hdc, int x)
-{
+{ 
+    SelectObject(hdc, BG_Pen);
+    SelectObject(hdc, BG_Brush);
+	Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
+
     SelectObject(hdc, Platform_Side_Pen);
     SelectObject(hdc, Platform_Side_Brush);
 
@@ -118,9 +164,9 @@ void Draw_Platform(HDC hdc, int x)
     RoundRect(hdc, (x + 4) * Global_Scale, (Platform_Y_Pos + 1) * Global_Scale, (x + 4 + Platform_Inner_Width - 1) * Global_Scale, (Platform_Y_Pos + 1 + 5) * Global_Scale, Global_Scale * 3, Global_Scale * 3);
 
     SelectObject(hdc, Highlight_Pen);
-    Arc(hdc, (x + 1) * Global_Scale, (Platform_Y_Pos + 1) * Global_Scale, (x + Circle_Size - 1) * Global_Scale, (Platform_Y_Pos + Circle_Size - 1) * Global_Scale, 
-        (x + Circle_Size / 2) * Global_Scale, Platform_Y_Pos * Global_Scale, 
-        x * Global_Scale, (Platform_Y_Pos + Circle_Size / 2 + 1) * Global_Scale);
+    Arc(hdc, (x + 1) * Global_Scale, (Platform_Y_Pos + 1) * Global_Scale, (x + Platform_Height - 1) * Global_Scale, (Platform_Y_Pos + Platform_Height - 1) * Global_Scale, 
+        (x + Platform_Height / 2) * Global_Scale, Platform_Y_Pos * Global_Scale, 
+        x * Global_Scale, (Platform_Y_Pos + Platform_Height / 2 + 1) * Global_Scale);
 
 }
 //------------------------------------------------------------------------------------------------------------
@@ -219,7 +265,6 @@ void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Ty
 
     Rectangle(hdc, 0, 0 - brick_half_height - offset, Brick_Width * Global_Scale, 0 + brick_half_height - offset);
 
-
     SelectObject(hdc, front_pen);
     SelectObject(hdc, front_brush);
 
@@ -237,17 +282,50 @@ void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Ty
     SetWorldTransform(hdc, &old_xform);
 }
 //------------------------------------------------------------------------------------------------------------
-void Draw_Frame(HDC hdc)
+void Draw_Frame(HDC hdc, RECT &paint_area)
 {
-    //Draw_Level(hdc);
-
-    //Draw_Platform(hdc, 117);
-
     int i;
+    RECT intersection_rect{};
+
+    if (IntersectRect(&intersection_rect, &paint_area, &Level_Rect) )
+        Draw_Level(hdc);
+
+    if (IntersectRect(&intersection_rect, &paint_area, &Platform_Rect) )
+        Draw_Platform(hdc, Min_X_Pos + Platform_X_Pos);
+
     for (i = 0; i < 16; i++)
     {
-        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 150, EBT_Blue, ELT_O, i);
-        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 180, EBT_Red, ELT_O, i);
+        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 250, EBT_Blue, ELT_O, i);
+        Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 300, EBT_Red, ELT_O, i);
     }
+}
+//------------------------------------------------------------------------------------------------------------
+int On_Key_Down(EKey_Type key_type)
+{
+    switch (key_type)
+    {
+    case EKT_Left:
+        Platform_X_Pos -= Platform_X_Step;
+
+        if (Platform_X_Pos <= 0)
+			Platform_X_Pos = 0;
+
+        Redraw_Platform();
+        break;
+
+    case EKT_Right:
+        Platform_X_Pos += Platform_X_Step;
+
+		if (Platform_X_Pos >= Max_X_Pos - Platform_Width)
+			Platform_X_Pos = Max_X_Pos - Platform_Width;
+
+        Redraw_Platform();
+        break;
+
+    case EKT_Space:
+        break;
+    }
+
+    return 0;
 }
 //------------------------------------------------------------------------------------------------------------
