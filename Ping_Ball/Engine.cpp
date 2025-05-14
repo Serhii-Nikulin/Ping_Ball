@@ -31,12 +31,10 @@ const int Platform_Height = 7;
 const int Platform_Y_Pos = 185;
 int Platform_Width = 28;
 int Platform_Inner_Width = 21;
-int Platform_X_Pos = 0;
+int Platform_X_Pos = 50;
 int Platform_X_Step = Global_Scale * 2;
 
-const int Min_X_Pos = 7;
 const int Max_X_Pos = 200;
-const int Min_Y_Pos = 4;
 const int Max_Y_Pos = 199;
 
 HPEN Platform_Side_Pen, Platform_Inner_Pen;
@@ -50,8 +48,13 @@ double Ball_Speed = 6.0, Ball_Direction = M_PI_4;
 const int Ball_Size = 4;
 RECT Ball_Rect{}, Prev_Ball_Rect{};
 
+HPEN Border_Blue_Pen, Border_Red_Pen;
+HBRUSH Border_Blue_Brush, Border_Red_Brush;
 
-unsigned char level_01[Level_Height][Level_Width] = {
+const int Border_X_Offset = 6;
+const int Border_Y_Offset = 4;
+
+unsigned char Level_01[Level_Height][Level_Width] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -78,7 +81,7 @@ void Redraw_Platform()
 {
     Prev_Platform_Rect = Platform_Rect;
 
-    Platform_Rect.left = (Min_X_Pos + Platform_X_Pos) * Global_Scale;
+    Platform_Rect.left = (Platform_X_Pos) * Global_Scale;
     Platform_Rect.top = Platform_Y_Pos * Global_Scale;
     Platform_Rect.right = Platform_Rect.left + Platform_Width * Global_Scale;
     Platform_Rect.bottom = Platform_Rect.top + Platform_Height * Global_Scale;
@@ -91,8 +94,8 @@ void Redraw_Ball()
 {
     Prev_Ball_Rect = Ball_Rect;
 
-    Ball_Rect.left = (/*Min_X_Pos*/ + Ball_X_Pos) * Global_Scale;
-    Ball_Rect.top = (/*Min_Y_Pos*/ + Ball_Y_Pos) * Global_Scale;
+    Ball_Rect.left = Ball_X_Pos * Global_Scale;
+    Ball_Rect.top = Ball_Y_Pos * Global_Scale;
     Ball_Rect.right = Ball_Rect.left + Ball_Size * Global_Scale - 1;
     Ball_Rect.bottom = Ball_Rect.top + Ball_Size * Global_Scale - 1;
 
@@ -104,37 +107,37 @@ void Init_Engine(HWND hwnd)
 {
     Hwnd = hwnd;
 
-    Redraw_Platform();
-    Redraw_Ball();
-
-    Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 224, 173, 94);
-    Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 120, 180, 200);
-
-	Highlight_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(200, 100, 180) );
-    Letter_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(60, 60, 70) );
-
-    Create_Pen_Brush(Platform_Side_Pen, Platform_Side_Brush, 100, 110, 160);
-	Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 180, 185, 230);
-
-    Create_Pen_Brush(BG_Pen, BG_Brush, 40, 44, 52);
-
-    Create_Pen_Brush(Ball_Pen, Ball_Brush, 255, 100, 160);
+    SetTimer(Hwnd, Timer_ID, 1000 / 20, NULL);
 
     Level_Rect.left = Level_X_Offset * Global_Scale;
     Level_Rect.top = Level_Y_Offset * Global_Scale;
     Level_Rect.right = Level_Rect.left + Level_Width * Cell_Width * Global_Scale;
     Level_Rect.bottom = Level_Rect.top + Level_Height * Cell_Height * Global_Scale;
 
-    SetTimer(Hwnd, Timer_ID, 1000 / 20, NULL);
+    Redraw_Platform();
+    Redraw_Ball();
 
-    /*Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 148, 99, 85);
-    Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 173, 126, 107);
+    //BG
+    Create_Pen_Brush(BG_Pen, BG_Brush, 15, 15, 35);
 
-    Highlight_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(130, 180, 140) );
-    Letter_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(245, 235, 220) );
+    Letter_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(255, 255, 255) );
+    Highlight_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(255, 255, 255) );
 
-    Create_Pen_Brush(Platform_Side_Pen, Platform_Side_Brush, 180, 145, 95);
-    Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 100, 115, 130);*/
+    //Bricks
+    Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 220, 100, 80);
+    Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 80, 140, 210);
+
+	//Platform
+    Create_Pen_Brush(Platform_Side_Pen, Platform_Side_Brush, 120, 120, 120);
+	Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 60, 60, 60);
+
+    //Ball
+    Create_Pen_Brush(Ball_Pen, Ball_Brush, 255, 255, 255);
+
+    //Border
+	Create_Pen_Brush(Border_Red_Pen, Border_Red_Brush, 220, 100, 80);
+	Create_Pen_Brush(Border_Blue_Pen, Border_Blue_Brush, 80, 140, 210);
+
 }
 //------------------------------------------------------------------------------------------------------------
 void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
@@ -208,7 +211,7 @@ void Draw_Level(HDC hdc)
 
     for (i = 0; i < Level_Height; i++)
         for (j = 0; j < Level_Width; j++)
-            Draw_Brick(hdc, Level_X_Offset + j * Cell_Width, Level_Y_Offset + i * Cell_Height, static_cast<EBrick_Type>(level_01[i][j]) );
+            Draw_Brick(hdc, Level_X_Offset + j * Cell_Width, Level_Y_Offset + i * Cell_Height, static_cast<EBrick_Type>(Level_01[i][j]) );
 }
 //------------------------------------------------------------------------------------------------------------
 void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush)
@@ -325,6 +328,48 @@ void Draw_Ball(HDC hdc)
     Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right, Ball_Rect.bottom);
 }
 //------------------------------------------------------------------------------------------------------------
+void Draw_Border(HDC hdc, int x, int y, bool top_border)
+{
+    //contour
+    SelectObject(hdc, Border_Red_Pen);
+    SelectObject(hdc, Border_Red_Brush);
+
+    if (top_border)
+        Rectangle(hdc, x * Global_Scale, y * Global_Scale, (x + 4) * Global_Scale, (y + 1) * Global_Scale);
+    else
+        Rectangle(hdc, x * Global_Scale, y * Global_Scale, (x + 1) * Global_Scale, (y + 4) * Global_Scale);
+
+    //innner part
+    SelectObject(hdc, Border_Blue_Pen);
+    SelectObject(hdc, Border_Blue_Brush);
+
+    if (top_border)
+        Rectangle(hdc, x * Global_Scale, (y + 1) * Global_Scale, (x + 4) * Global_Scale, (y + 4) * Global_Scale);
+    else
+    Rectangle(hdc, (x + 1) * Global_Scale, y * Global_Scale, (x + 4) * Global_Scale, (y + 4) * Global_Scale);
+
+    //insertion
+    SelectObject(hdc, BG_Pen);
+    SelectObject(hdc, BG_Brush);
+
+    if (top_border)
+        Rectangle(hdc, (x + 2) * Global_Scale, (y + 2) * Global_Scale, (x + 3) * Global_Scale, (y + 3) * Global_Scale);
+    else
+    Rectangle(hdc, (x + 2) * Global_Scale, (y + 1) * Global_Scale, (x + 3) * Global_Scale, (y + 2) * Global_Scale);
+}
+//------------------------------------------------------------------------------------------------------------
+void Draw_Bounds(HDC hdc)
+{
+    int i; 
+
+    for (i = 0; i < 50; i++)
+    {
+        Draw_Border(hdc, 3 + 4 * i, 0, true);
+        Draw_Border(hdc, 2, 1 + 4 * i, false);
+        Draw_Border(hdc, 202, 1 + 4 * i, false);
+    }
+}
+//------------------------------------------------------------------------------------------------------------
 void Draw_Frame(HDC hdc, RECT &paint_area)
 {
     int i;
@@ -337,7 +382,7 @@ void Draw_Frame(HDC hdc, RECT &paint_area)
         Draw_Level(hdc);
 
     if (IntersectRect(&intersection_rect, &paint_area, &Platform_Rect) )
-        Draw_Platform(hdc, Min_X_Pos + Platform_X_Pos);
+        Draw_Platform(hdc, Platform_X_Pos);
 
    /* for (i = 0; i < 16; i++)
     {
@@ -345,6 +390,8 @@ void Draw_Frame(HDC hdc, RECT &paint_area)
         Draw_Brick_Letter(hdc, 100 + i * Cell_Width * Global_Scale, 300, EBT_Red, ELT_O, i);
     }*/
 
+    Draw_Bounds(hdc);
+   
 }
 //------------------------------------------------------------------------------------------------------------
 int On_Key_Down(EKey_Type key_type)
@@ -354,8 +401,8 @@ int On_Key_Down(EKey_Type key_type)
     case EKT_Left:
         Platform_X_Pos -= Platform_X_Step;
 
-        if (Platform_X_Pos <= 0)
-			Platform_X_Pos = 0;
+        if (Platform_X_Pos <= Border_X_Offset)
+			Platform_X_Pos = Border_X_Offset;
 
         Redraw_Platform();
         break;
@@ -363,8 +410,8 @@ int On_Key_Down(EKey_Type key_type)
     case EKT_Right:
         Platform_X_Pos += Platform_X_Step;
 
-		if (Platform_X_Pos >= Max_X_Pos - Platform_Width)
-			Platform_X_Pos = Max_X_Pos - Platform_Width;
+		if (Platform_X_Pos >= Max_X_Pos + 1 - Platform_Width)
+			Platform_X_Pos = Max_X_Pos + 1 - Platform_Width;
 
         Redraw_Platform();
         break;
@@ -376,6 +423,30 @@ int On_Key_Down(EKey_Type key_type)
     return 0;
 }
 //------------------------------------------------------------------------------------------------------------
+void Check_Level_Brick_Hit(int next_x_pos, int &next_y_pos)
+{
+    int i, j;
+    int brick_x_pos, brick_y_pos;
+    for (i = Level_Height - 1; i >= 0; i--)
+        for (j = 0; j < Level_Width; j++)
+        {
+            if(Level_01[i][j] == 0)
+                continue;
+
+            brick_x_pos = Level_X_Offset + j * Cell_Width;
+            brick_y_pos = Level_Y_Offset + i * Cell_Height + Brick_Height;
+
+            if (next_x_pos >= brick_x_pos and next_x_pos <= brick_x_pos + Brick_Width)
+                if (next_y_pos <= brick_y_pos and next_y_pos >= brick_y_pos - Brick_Height)
+                {
+                    Ball_Direction = -Ball_Direction;
+                    next_y_pos = brick_y_pos + (brick_y_pos - next_y_pos);
+
+                    return;
+                }
+        }
+}
+//------------------------------------------------------------------------------------------------------------
 void Move_Ball()
 {
     int next_x_pos, next_y_pos;
@@ -383,10 +454,12 @@ void Move_Ball()
     next_x_pos = Ball_X_Pos + (int)(Ball_Speed * cos(Ball_Direction) );
     next_y_pos = Ball_Y_Pos - (int)(Ball_Speed * sin(Ball_Direction) );
 
-    int min_x_pos = Min_X_Pos;
-    int max_x_pos = Max_X_Pos - Ball_Size;
-    int min_y_pos = Min_Y_Pos;
-    int max_y_pos = Max_Y_Pos - Ball_Size;
+    int min_x_pos = Border_X_Offset;
+    int max_x_pos = Max_X_Pos - Ball_Size + 1;
+    int min_y_pos = Border_Y_Offset;
+    int max_y_pos = Max_Y_Pos - Ball_Size + 1;
+
+	int platform_y_pos = Platform_Y_Pos - Ball_Size + 1;
 
     if (next_x_pos > max_x_pos)
     {
@@ -412,7 +485,18 @@ void Move_Ball()
         next_y_pos = max_y_pos - (next_y_pos - max_y_pos);
     }
 
-	Ball_Direction = fmod(Ball_Direction, 2 * M_PI);
+	if (next_y_pos >= platform_y_pos and next_y_pos <= platform_y_pos + Platform_Height)
+	{
+		if (next_x_pos >= Platform_X_Pos and next_x_pos <= Platform_X_Pos + Platform_Width)
+		{
+			Ball_Direction = -Ball_Direction;
+			next_y_pos = platform_y_pos - (next_y_pos - platform_y_pos);
+		}
+	}
+
+    Check_Level_Brick_Hit(next_x_pos, next_y_pos);
+
+	//Ball_Direction = fmod(Ball_Direction, 2 * M_PI);
 
     Ball_X_Pos = next_x_pos;
     Ball_Y_Pos = next_y_pos;
