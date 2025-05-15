@@ -17,20 +17,6 @@ unsigned char Level_01[AsEngine::Level_Height][AsEngine::Level_Width] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
-AsEngine::AsEngine()
-    :Hwnd(0),BG_Pen(0), BG_Brush(0),
-    Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0),
-    Level_Rect{},
-    Border_Blue_Pen(0), Border_Red_Pen(0), Border_Blue_Brush(0), Border_Red_Brush(0),
-    Platform_Rect{}, Prev_Platform_Rect{}, Highlight_Pen(0), Platform_Side_Pen(0), Platform_Inner_Pen(0), Platform_Side_Brush(0), Platform_Inner_Brush(0), Platform_Width(28), Platform_Inner_Width(21), Platform_X_Pos(50), Platform_X_Step(Global_Scale * 2), 
-    Ball_Pen(0), Ball_Brush(0), Ball_Rect{}, Prev_Ball_Rect{}, Ball_X_Pos(60), Ball_Y_Pos(190), Ball_Speed(6.0), Ball_Direction(M_PI_4)
-{}
-//------------------------------------------------------------------------------------------------------------
-void AsEngine::Create_Pen_Brush(HPEN& pen, HBRUSH& brush, unsigned char r, unsigned char g, unsigned char b)
-{
-	pen = CreatePen(PS_SOLID, 0, RGB(r, g, b) );
-	brush = CreateSolidBrush(RGB(r, g, b));
-}
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush)
 {
@@ -133,31 +119,6 @@ void AsEngine::Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, 
     }
 
     SetWorldTransform(hdc, &old_xform);
-}
-//------------------------------------------------------------------------------------------------------------
-void AsEngine::Check_Level_Brick_Hit(int next_x_pos, int &next_y_pos)
-{
-    int i, j;
-    int brick_x_pos, brick_y_pos;
-
-    for (i = Level_Height - 1; i >= 0; i--)
-        for (j = 0; j < Level_Width; j++)
-        {
-            if(Level_01[i][j] == 0)
-                continue;
-
-            brick_x_pos = Level_X_Offset + j * Cell_Width;
-            brick_y_pos = Level_Y_Offset + i * Cell_Height + Brick_Height;
-
-            if (next_x_pos >= brick_x_pos and next_x_pos <= brick_x_pos + Brick_Width)
-                if (next_y_pos <= brick_y_pos and next_y_pos >= brick_y_pos - Brick_Height)
-                {
-                    Ball_Direction = -Ball_Direction;
-                    next_y_pos = brick_y_pos + (brick_y_pos - next_y_pos);
-
-                    return;
-                }
-        }
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
@@ -289,7 +250,21 @@ void AsEngine::Draw_Platform(HDC hdc, int x)
 
 }
 //------------------------------------------------------------------------------------------------------------
-void AsEngine::Redraw_Ball()
+
+
+
+
+//ABall
+ABall::ABall()
+    :Ball_Pen(0), Ball_Brush(0), Ball_Rect{}, Prev_Ball_Rect{}, Ball_X_Pos(60), Ball_Y_Pos(190), Ball_Speed(6.0), Ball_Direction(M_PI_4)
+{}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Init()
+{
+    AsEngine::Create_Pen_Brush(Ball_Pen, Ball_Brush, 255, 255, 255);
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Redraw(AsEngine *engine)
 {
     Prev_Ball_Rect = Ball_Rect;
 
@@ -298,14 +273,19 @@ void AsEngine::Redraw_Ball()
     Ball_Rect.right = Ball_Rect.left + Ball_Size * Global_Scale - 1;
     Ball_Rect.bottom = Ball_Rect.top + Ball_Size * Global_Scale - 1;
 
-    InvalidateRect(Hwnd, &Prev_Ball_Rect, FALSE);
-    InvalidateRect(Hwnd, &Ball_Rect, FALSE);
+    InvalidateRect(engine->Hwnd, &Prev_Ball_Rect, FALSE);
+    InvalidateRect(engine->Hwnd, &Ball_Rect, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsEngine::Draw_Ball(HDC hdc)
+void ABall::Draw(HDC hdc, RECT &paint_area, AsEngine *engine)
 {
-    SelectObject(hdc, BG_Pen);
-    SelectObject(hdc, BG_Brush);
+    RECT intersection_rect{};
+
+    if (! IntersectRect(&intersection_rect, &paint_area, &Ball_Rect) )
+        return;
+
+    SelectObject(hdc, engine->BG_Pen);
+    SelectObject(hdc, engine->BG_Brush);
     Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right, Prev_Ball_Rect.bottom);
 
     SelectObject(hdc, Ball_Pen);
@@ -313,19 +293,19 @@ void AsEngine::Draw_Ball(HDC hdc)
     Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right, Ball_Rect.bottom);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsEngine::Move_Ball()
+void ABall::Move(AsEngine *engine)
 {
     int next_x_pos, next_y_pos;
 
     next_x_pos = Ball_X_Pos + (int)(Ball_Speed * cos(Ball_Direction) );
     next_y_pos = Ball_Y_Pos - (int)(Ball_Speed * sin(Ball_Direction) );
 
-    int min_x_pos = Border_X_Offset;
-    int max_x_pos = Max_X_Pos - Ball_Size + 1;
-    int min_y_pos = Border_Y_Offset;
-    int max_y_pos = Max_Y_Pos - Ball_Size + 1;
+    int min_x_pos = AsEngine::Border_X_Offset;
+    int max_x_pos = AsEngine::Max_X_Pos - Ball_Size + 1;
+    int min_y_pos = AsEngine::Border_Y_Offset;
+    int max_y_pos = AsEngine::Max_Y_Pos - Ball_Size + 1;
 
-	int platform_y_pos = Platform_Y_Pos - Ball_Size + 1;
+	int platform_y_pos = AsEngine::Platform_Y_Pos - Ball_Size + 1;
 
     if (next_x_pos > max_x_pos)//right limit
     {
@@ -351,23 +331,42 @@ void AsEngine::Move_Ball()
         next_y_pos = max_y_pos - (next_y_pos - max_y_pos);
     }
 
-	if (next_y_pos >= platform_y_pos and next_y_pos <= platform_y_pos + Platform_Height)
+	if (next_y_pos >= platform_y_pos and next_y_pos <= platform_y_pos + AsEngine::Platform_Height)
 	{
-		if (next_x_pos >= Platform_X_Pos and next_x_pos <= Platform_X_Pos + Platform_Width)
+		if (next_x_pos >= engine->Platform_X_Pos and next_x_pos <= engine->Platform_X_Pos + engine->Platform_Width)
 		{
 			Ball_Direction = -Ball_Direction;
 			next_y_pos = platform_y_pos - (next_y_pos - platform_y_pos);
 		}
 	}
 
-    Check_Level_Brick_Hit(next_x_pos, next_y_pos);
+    engine->Check_Level_Brick_Hit(next_x_pos, next_y_pos, Ball_Direction);
 
 	//Ball_Direction = fmod(Ball_Direction, 2 * M_PI);
 
     Ball_X_Pos = next_x_pos;
     Ball_Y_Pos = next_y_pos;
 
-    Redraw_Ball();
+    Redraw(engine);
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+//AsEngine
+//------------------------------------------------------------------------------------------------------------
+AsEngine::AsEngine()
+    :Hwnd(0),BG_Pen(0), BG_Brush(0),
+    Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0),
+    Level_Rect{},
+    Border_Blue_Pen(0), Border_Red_Pen(0), Border_Blue_Brush(0), Border_Red_Brush(0),
+    Platform_Rect{}, Prev_Platform_Rect{}, Highlight_Pen(0), Platform_Side_Pen(0), Platform_Inner_Pen(0), Platform_Side_Brush(0), Platform_Inner_Brush(0), Platform_Width(28), Platform_Inner_Width(21), Platform_X_Pos(50), Platform_X_Step(Global_Scale * 2)
+{}
+//------------------------------------------------------------------------------------------------------------
+void AsEngine::Create_Pen_Brush(HPEN& pen, HBRUSH& brush, unsigned char r, unsigned char g, unsigned char b)
+{
+    pen = CreatePen(PS_SOLID, 0, RGB(r, g, b) );
+    brush = CreateSolidBrush(RGB(r, g, b));
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Init_Engine(HWND hwnd)
@@ -382,7 +381,8 @@ void AsEngine::Init_Engine(HWND hwnd)
     Level_Rect.bottom = Level_Rect.top + Level_Height * Cell_Height * Global_Scale;
 
     Redraw_Platform();
-    Redraw_Ball();
+    Ball.Redraw(this);
+    Ball.Init();
 
     //BG
     Create_Pen_Brush(BG_Pen, BG_Brush, 15, 15, 35);
@@ -398,9 +398,6 @@ void AsEngine::Init_Engine(HWND hwnd)
     Create_Pen_Brush(Platform_Side_Pen, Platform_Side_Brush, 120, 120, 120);
     Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 60, 60, 60);
 
-    //Ball
-    Create_Pen_Brush(Ball_Pen, Ball_Brush, 255, 255, 255);
-
     //Border
     Create_Pen_Brush(Border_Red_Pen, Border_Red_Brush, 220, 100, 80);
     Create_Pen_Brush(Border_Blue_Pen, Border_Blue_Brush, 80, 140, 210);
@@ -412,8 +409,7 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
     int i;
     RECT intersection_rect{};
 
-    if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect) )
-        Draw_Ball(hdc);
+    Ball.Draw(hdc, paint_area, this);
 
     if (IntersectRect(&intersection_rect, &paint_area, &Level_Rect) )
         Draw_Level(hdc);
@@ -462,7 +458,32 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 //------------------------------------------------------------------------------------------------------------
 int AsEngine::On_Timer()
 {
-    Move_Ball();
+    Ball.Move(this);
     return 0;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsEngine::Check_Level_Brick_Hit(int next_x_pos, int &next_y_pos, double &ball_direction)
+{
+    int i, j;
+    int brick_x_pos, brick_y_pos;
+
+    for (i = Level_Height - 1; i >= 0; i--)
+        for (j = 0; j < Level_Width; j++)
+        {
+            if(Level_01[i][j] == 0)
+                continue;
+
+            brick_x_pos = Level_X_Offset + j * Cell_Width;
+            brick_y_pos = Level_Y_Offset + i * Cell_Height + Brick_Height;
+
+            if (next_x_pos >= brick_x_pos and next_x_pos <= brick_x_pos + Brick_Width)
+                if (next_y_pos <= brick_y_pos and next_y_pos >= brick_y_pos - Brick_Height)
+                {
+                    ball_direction = -ball_direction;
+                    next_y_pos = brick_y_pos + (brick_y_pos - next_y_pos);
+
+                    return;
+                }
+        }
 }
 //------------------------------------------------------------------------------------------------------------
