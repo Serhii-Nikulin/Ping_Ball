@@ -14,6 +14,7 @@ enum EBrick_Type: unsigned char {EBT_None, EBT_Red, EBT_Blue};
 
 class AsEngine;
 class ALevel;
+class AsPlatform;
 //------------------------------------------------------------------------------------------------------------
 class ABall
 {
@@ -23,7 +24,8 @@ public:
 	void Init();
 	void Redraw(AsEngine *engine);
 	void Draw(HDC hdc, RECT &paint_area, AsEngine *engine);
-	void Move(AsEngine *engine, ALevel *level);
+	void Move(AsEngine *engine, ALevel *level, AsPlatform *platform);
+
 private:
 	static const int Ball_Size = 4;
 
@@ -67,6 +69,32 @@ private:
 	static const int Level_Y_Offset = 6;
 };
 //------------------------------------------------------------------------------------------------------------
+class AsPlatform
+{
+public:
+	AsPlatform();
+	void Init();
+	void Redraw(AsEngine *engine);
+	void Draw(HDC hdc, RECT &paint_area, AsEngine *engine);
+
+	int Width;
+	int X_Pos;
+	int X_Step;
+
+	static const int Height = 7;
+	static const int Y_Pos = 185;
+
+private:
+	void Draw_Circle(HDC hdc, int x, int y);
+
+	RECT Platform_Rect, Prev_Platform_Rect;
+	HPEN Highlight_Pen;
+	HPEN Platform_Side_Pen, Platform_Inner_Pen;
+	HBRUSH Platform_Side_Brush, Platform_Inner_Brush;
+	
+	int Inner_Width;
+};
+//------------------------------------------------------------------------------------------------------------
 class AsEngine
 {
 public:
@@ -88,34 +116,17 @@ public:
 	static const int Max_X_Pos = 200;
 	static const int Max_Y_Pos = 199;
 
-	//Platform
-	static const int Platform_Y_Pos = 185;
-	static const int Platform_Height = 7;
-	int Platform_Width;
-	int Platform_X_Pos;
-
 private:
 	//Border
 	void Draw_Border(HDC hdc, int x, int y, bool top_border);
 	void Draw_Bounds(HDC hdc);
-	//Platform
-	void Redraw_Platform();
-	void Draw_Circle(HDC hdc, int x, int y);
-	void Draw_Platform(HDC hdc, int x);
 
 	ABall Ball;
 	ALevel Level;
+	AsPlatform Platform;
 
 	//Border
 	HPEN Border_Blue_Pen, Border_Red_Pen;
 	HBRUSH Border_Blue_Brush, Border_Red_Brush;
-
-	//Platform
-	RECT Platform_Rect, Prev_Platform_Rect;
-	HPEN Highlight_Pen;
-	HPEN Platform_Side_Pen, Platform_Inner_Pen;
-	HBRUSH Platform_Side_Brush, Platform_Inner_Brush;
-	int Platform_Inner_Width ;
-	int Platform_X_Step;
 };
 //------------------------------------------------------------------------------------------------------------
