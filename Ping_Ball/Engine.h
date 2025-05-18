@@ -13,6 +13,7 @@ enum ELetter_Type {ELT_None, ELT_O};
 enum EBrick_Type: unsigned char {EBT_None, EBT_Red, EBT_Blue};
 
 class AsEngine;
+class ALevel;
 //------------------------------------------------------------------------------------------------------------
 class ABall
 {
@@ -22,11 +23,10 @@ public:
 	void Init();
 	void Redraw(AsEngine *engine);
 	void Draw(HDC hdc, RECT &paint_area, AsEngine *engine);
-	void Move(AsEngine *engine);
-
+	void Move(AsEngine *engine, ALevel *level);
 private:
-
 	static const int Ball_Size = 4;
+
 	HPEN Ball_Pen;
 	HBRUSH Ball_Brush;
 	RECT Ball_Rect, Prev_Ball_Rect;
@@ -34,6 +34,37 @@ private:
 	int Ball_X_Pos;
 	int Ball_Y_Pos;
 	double Ball_Speed, Ball_Direction;
+};
+//------------------------------------------------------------------------------------------------------------
+class ALevel
+{
+public:
+	ALevel();
+
+	void Init();
+	void Draw(HDC hdc, RECT &paint_area);
+	void Check_Level_Brick_Hit(int next_x_pos, int &next_y_pos, double &ball_direction);
+
+	static const int Level_Height = 14;
+	static const int Level_Width = 12;
+	
+private:
+	void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush);
+	void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step);
+	void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type);
+
+	RECT Level_Rect{};
+	HPEN Letter_Pen;
+	HPEN Brick_Red_Pen, Brick_Blue_Pen;
+	HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
+
+	static const int Brick_Width = 15;
+	static const int Brick_Height = 7;
+	static const int Cell_Width = 16;
+	static const int Cell_Height = 8;
+
+	static const int Level_X_Offset = 8;
+	static const int Level_Y_Offset = 6;
 };
 //------------------------------------------------------------------------------------------------------------
 class AsEngine
@@ -47,16 +78,9 @@ public:
 	int On_Key_Down(EKey_Type key_type);
 	int On_Timer();
 
-	//Level
-	void Check_Level_Brick_Hit(int next_x_pos, int &next_y_pos, double &ball_direction);
-
 	HWND Hwnd;
 	HPEN BG_Pen;
 	HBRUSH BG_Brush;
-
-	//Level
-	static const int Level_Height = 14;
-	static const int Level_Width = 12;
 
 	//Border
 	static const int Border_X_Offset = 6;
@@ -71,11 +95,6 @@ public:
 	int Platform_X_Pos;
 
 private:
-	//Level
-	void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush);
-	void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step);
-	void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type);
-	void Draw_Level(HDC hdc);
 	//Border
 	void Draw_Border(HDC hdc, int x, int y, bool top_border);
 	void Draw_Bounds(HDC hdc);
@@ -85,20 +104,7 @@ private:
 	void Draw_Platform(HDC hdc, int x);
 
 	ABall Ball;
-
-	//Bricks
-	HPEN Letter_Pen;
-	HPEN Brick_Red_Pen, Brick_Blue_Pen;
-	HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
-	static const int Brick_Width = 15;
-	static const int Brick_Height = 7;
-	static const int Cell_Width = 16;
-	static const int Cell_Height = 8;
-
-	//Level
-	RECT Level_Rect{};
-	static const int Level_X_Offset = 8;
-	static const int Level_Y_Offset = 6;
+	ALevel Level;
 
 	//Border
 	HPEN Border_Blue_Pen, Border_Red_Pen;
@@ -112,3 +118,4 @@ private:
 	int Platform_Inner_Width ;
 	int Platform_X_Step;
 };
+//------------------------------------------------------------------------------------------------------------
