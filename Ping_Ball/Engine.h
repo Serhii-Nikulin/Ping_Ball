@@ -1,10 +1,6 @@
 #pragma once
-#include "Windows.h"
+#include "Config.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-const int Global_Scale = 3;
 const int Timer_ID = WM_USER + 1;
 enum EKey_Type {EKT_None, EKT_Left, EKT_Right, EKT_Space};
 
@@ -101,7 +97,7 @@ public:
 	AsBorder();
 
 	void Init();
-	void Bounds(HDC hdc, AsEngine *engine);
+	void Draw(HDC hdc, AsEngine *engine);
 
 	static const int Border_X_Offset = 6;
 	static const int Border_Y_Offset = 4;
@@ -120,7 +116,6 @@ class AsEngine
 public:
 	AsEngine();
 
-	static void Create_Pen_Brush(HPEN& pen, HBRUSH& brush, unsigned char r, unsigned char g, unsigned char b);
 	void Init_Engine(HWND hwnd);
 	void Draw_Frame(HDC hdc, RECT &paint_area);
 	int On_Key_Down(EKey_Type key_type);
