@@ -100,8 +100,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    
    window_rect.left = 0;
    window_rect.top = 0;
-   window_rect.right = 320 * Global_Scale;
-   window_rect.bottom = 200 * Global_Scale;
+   window_rect.right = 320 * AsConfig::Global_Scale;
+   window_rect.bottom = 200 * AsConfig::Global_Scale;
    
    AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW, TRUE);
 
