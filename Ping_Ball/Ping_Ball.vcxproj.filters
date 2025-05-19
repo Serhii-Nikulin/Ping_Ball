@@ -28,6 +28,9 @@
     <Filter Include="Level">
       <UniqueIdentifier>{559563e9-62b3-4202-ab39-234ddddd66ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{6c881b28-c239-4f77-803c-64068309cf6c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -53,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="Level.h">
       <Filter>Level</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>Platform</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +89,9 @@
     </ClCompile>
     <ClCompile Include="Level.cpp">
       <Filter>Level</Filter>
+    </ClCompile>
+    <ClCompile Include="Platform.cpp">
+      <Filter>Platform</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

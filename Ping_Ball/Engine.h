@@ -2,6 +2,7 @@
 
 #include "Border.h"
 #include "Level.h"
+#include "Platform.h"
 
 const int Timer_ID = WM_USER + 1;
 enum EKey_Type {EKT_None, EKT_Left, EKT_Right, EKT_Space};
@@ -29,32 +30,6 @@ private:
 	int Ball_X_Pos;
 	int Ball_Y_Pos;
 	double Ball_Speed, Ball_Direction;
-};
-//------------------------------------------------------------------------------------------------------------
-class AsPlatform
-{
-public:
-	AsPlatform();
-	void Init();
-	void Redraw(AsEngine *engine);
-	void Draw(HDC hdc, RECT &paint_area, AsEngine *engine);
-
-	int Width;
-	int X_Pos;
-	int X_Step;
-
-	static const int Height = 7;
-	static const int Y_Pos = 185;
-
-private:
-	void Draw_Circle(HDC hdc, int x, int y);
-
-	RECT Platform_Rect, Prev_Platform_Rect;
-	HPEN Highlight_Pen;
-	HPEN Platform_Side_Pen, Platform_Inner_Pen;
-	HBRUSH Platform_Side_Brush, Platform_Inner_Brush;
-	
-	int Inner_Width;
 };
 //------------------------------------------------------------------------------------------------------------
 class AsEngine

@@ -101,75 +101,6 @@ void ABall::Move(AsEngine *engine, ALevel *level, AsPlatform *platform)
 
 
 
-//AsPlatform
-//------------------------------------------------------------------------------------------------------------
-AsPlatform::AsPlatform()
-    : Platform_Rect{}, Prev_Platform_Rect{}, Highlight_Pen(0), Platform_Side_Pen(0), Platform_Inner_Pen(0), Platform_Side_Brush(0), Platform_Inner_Brush(0), Width(28), Inner_Width(21), X_Pos(50), X_Step(AsConfig::Global_Scale * 2)
-{
-}
-//------------------------------------------------------------------------------------------------------------
-void AsPlatform::Init()
-{
-    Highlight_Pen = CreatePen(PS_SOLID, AsConfig::Global_Scale, RGB(255, 255, 255) );
-
-    //Platform
-    AsConfig::Create_Pen_Brush(Platform_Side_Pen, Platform_Side_Brush, 120, 120, 120);
-    AsConfig::Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 60, 60, 60);
-}
-//------------------------------------------------------------------------------------------------------------
-void AsPlatform::Redraw(AsEngine *engine)
-{
-    Prev_Platform_Rect = Platform_Rect;
-
-    Platform_Rect.left = (X_Pos) * AsConfig::Global_Scale;
-    Platform_Rect.top = Y_Pos * AsConfig::Global_Scale;
-    Platform_Rect.right = Platform_Rect.left + Width * AsConfig::Global_Scale;
-    Platform_Rect.bottom = Platform_Rect.top + Height * AsConfig::Global_Scale;
-
-    InvalidateRect(engine->Hwnd, &Platform_Rect, FALSE);
-    InvalidateRect(engine->Hwnd, &Prev_Platform_Rect, FALSE);
-}
-//------------------------------------------------------------------------------------------------------------
-void AsPlatform::Draw_Circle(HDC hdc, int x, int y)
-{
-    Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + Height) * AsConfig::Global_Scale, (y + Height) * AsConfig::Global_Scale);
-}
-//------------------------------------------------------------------------------------------------------------
-void AsPlatform::Draw(HDC hdc, RECT &paint_area, AsEngine *engine)
-{ 
-    RECT intersection_rect;
-
-    int x = X_Pos;
-    int y = Y_Pos;
-
-    if (!IntersectRect(&intersection_rect, &paint_area, &Platform_Rect) )
-        return;
-
-    SelectObject(hdc, engine->BG_Pen);
-    SelectObject(hdc, engine->BG_Brush);
-    Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
-
-    SelectObject(hdc, Platform_Side_Pen);
-    SelectObject(hdc, Platform_Side_Brush);
-
-    Draw_Circle(hdc, x, y);
-    Draw_Circle(hdc, x + Inner_Width, y);
-
-    SelectObject(hdc, Platform_Inner_Pen);
-    SelectObject(hdc, Platform_Inner_Brush);
-    RoundRect(hdc, (x + 4) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + 4 + Inner_Width - 1) * AsConfig::Global_Scale, (y + 1 + 5) * AsConfig::Global_Scale, AsConfig::Global_Scale * 3, AsConfig::Global_Scale * 3);
-
-    SelectObject(hdc, Highlight_Pen);
-    Arc(hdc, (x + 1) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + Height - 1) * AsConfig::Global_Scale, (y + Height - 1) * AsConfig::Global_Scale, 
-        (x + Height / 2) * AsConfig::Global_Scale, y * AsConfig::Global_Scale, 
-        x * AsConfig::Global_Scale, (y + Height / 2 + 1) * AsConfig::Global_Scale);
-
-}
-//------------------------------------------------------------------------------------------------------------
-
-
-
-
 //AsEngine
 //------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
@@ -183,7 +114,7 @@ void AsEngine::Init_Engine(HWND hwnd)
     SetTimer(Hwnd, Timer_ID, 1000 / 20, NULL);
 
     Ball.Redraw(this);
-    Platform.Redraw(this);
+    Platform.Redraw(hwnd);
 
     Ball.Init();
     Level.Init();
@@ -201,7 +132,7 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 
     Ball.Draw(hdc, paint_area, this);
     Level.Draw(hdc, paint_area);
-    Platform.Draw(hdc, paint_area, this);
+    Platform.Draw(hdc, paint_area, BG_Pen, BG_Brush);
     Border.Draw(hdc, BG_Pen, BG_Brush);
 
     /*for (i = 0; i < 16; i++)
@@ -221,7 +152,7 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
         if (Platform.X_Pos <= AsBorder::Border_X_Offset)
             Platform.X_Pos = AsBorder::Border_X_Offset;
 
-        Platform.Redraw(this);
+        Platform.Redraw(Hwnd);
         break;
 
     case EKT_Right:
@@ -230,7 +161,7 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
         if (Platform.X_Pos >= AsBorder::Max_X_Pos + 1 - Platform.Width)
             Platform.X_Pos = AsBorder::Max_X_Pos + 1 - Platform.Width;
 
-        Platform.Redraw(this);
+        Platform.Redraw(Hwnd);
         break;
 
     case EKT_Space:
