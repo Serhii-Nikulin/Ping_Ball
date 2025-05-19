@@ -1,36 +1,14 @@
 #pragma once
 
-#include "Border.h"
-#include "Level.h"
-#include "Platform.h"
+//#include "Border.h"
+//#include "Level.h"
+//#include "Platform.h"
+#include "Ball.h"
 
 const int Timer_ID = WM_USER + 1;
 enum EKey_Type {EKT_None, EKT_Left, EKT_Right, EKT_Space};
 
 class AsEngine;
-class AsPlatform;
-//------------------------------------------------------------------------------------------------------------
-class ABall
-{
-public:
-	ABall();
-
-	void Init();
-	void Redraw(AsEngine *engine);
-	void Draw(HDC hdc, RECT &paint_area, AsEngine *engine);
-	void Move(AsEngine *engine, ALevel *level, AsPlatform *platform);
-
-private:
-	static const int Ball_Size = 4;
-
-	HPEN Ball_Pen;
-	HBRUSH Ball_Brush;
-	RECT Ball_Rect, Prev_Ball_Rect;
-
-	int Ball_X_Pos;
-	int Ball_Y_Pos;
-	double Ball_Speed, Ball_Direction;
-};
 //------------------------------------------------------------------------------------------------------------
 class AsEngine
 {
