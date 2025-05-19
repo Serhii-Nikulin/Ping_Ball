@@ -21,9 +21,9 @@ void AsPlatform::Redraw(HWND hwnd)
     Prev_Platform_Rect = Platform_Rect;
 
     Platform_Rect.left = (X_Pos) * AsConfig::Global_Scale;
-    Platform_Rect.top = Y_Pos * AsConfig::Global_Scale;
+    Platform_Rect.top = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
     Platform_Rect.right = Platform_Rect.left + Width * AsConfig::Global_Scale;
-    Platform_Rect.bottom = Platform_Rect.top + Height * AsConfig::Global_Scale;
+    Platform_Rect.bottom = Platform_Rect.top + AsConfig::Platform_Height * AsConfig::Global_Scale;
 
     InvalidateRect(hwnd, &Platform_Rect, FALSE);
     InvalidateRect(hwnd, &Prev_Platform_Rect, FALSE);
@@ -31,7 +31,7 @@ void AsPlatform::Redraw(HWND hwnd)
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Draw_Circle(HDC hdc, int x, int y)
 {
-    Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + Height) * AsConfig::Global_Scale, (y + Height) * AsConfig::Global_Scale);
+    Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + AsConfig::Platform_Height) * AsConfig::Global_Scale, (y + AsConfig::Platform_Height) * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Draw(HDC hdc, RECT &paint_area, HPEN &bg_pen, HBRUSH &bg_brush)
@@ -39,7 +39,7 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area, HPEN &bg_pen, HBRUSH &bg_brush)
     RECT intersection_rect;
 
     int x = X_Pos;
-    int y = Y_Pos;
+    int y = AsConfig::Platform_Y_Pos;
 
     if (!IntersectRect(&intersection_rect, &paint_area, &Platform_Rect) )
         return;
@@ -59,9 +59,8 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area, HPEN &bg_pen, HBRUSH &bg_brush)
     RoundRect(hdc, (x + 4) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + 4 + Inner_Width - 1) * AsConfig::Global_Scale, (y + 1 + 5) * AsConfig::Global_Scale, AsConfig::Global_Scale * 3, AsConfig::Global_Scale * 3);
 
     SelectObject(hdc, Highlight_Pen);
-    Arc(hdc, (x + 1) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + Height - 1) * AsConfig::Global_Scale, (y + Height - 1) * AsConfig::Global_Scale, 
-        (x + Height / 2) * AsConfig::Global_Scale, y * AsConfig::Global_Scale, 
-        x * AsConfig::Global_Scale, (y + Height / 2 + 1) * AsConfig::Global_Scale);
-
+    Arc(hdc, (x + 1) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + AsConfig::Platform_Height- 1) * AsConfig::Global_Scale, (y + AsConfig::Platform_Height - 1) * AsConfig::Global_Scale, 
+        (x + AsConfig::Platform_Height / 2) * AsConfig::Global_Scale, y * AsConfig::Global_Scale, 
+        x * AsConfig::Global_Scale, (y + AsConfig::Platform_Height / 2 + 1) * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------

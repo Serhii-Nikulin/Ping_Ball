@@ -15,9 +15,6 @@ public:
 	int X_Pos;
 	int X_Step;
 
-	static const int Height = 7;
-	static const int Y_Pos = 185;
-
 private:
 	void Draw_Circle(HDC hdc, int x, int y);
 

@@ -1,14 +1,13 @@
 #pragma once
 
-//#include "Border.h"
+#include "Border.h"
 //#include "Level.h"
-//#include "Platform.h"
+#include "Platform.h"
 #include "Ball.h"
 
 const int Timer_ID = WM_USER + 1;
 enum EKey_Type {EKT_None, EKT_Left, EKT_Right, EKT_Space};
 
-class AsEngine;
 //------------------------------------------------------------------------------------------------------------
 class AsEngine
 {

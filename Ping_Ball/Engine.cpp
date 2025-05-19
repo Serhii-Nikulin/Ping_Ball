@@ -48,8 +48,8 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
     case EKT_Left:
         Platform.X_Pos -= Platform.X_Step;
 
-        if (Platform.X_Pos <= AsBorder::Border_X_Offset)
-            Platform.X_Pos = AsBorder::Border_X_Offset;
+        if (Platform.X_Pos <= AsConfig::Border_X_Offset)
+            Platform.X_Pos = AsConfig::Border_X_Offset;
 
         Platform.Redraw(Hwnd);
         break;
@@ -57,8 +57,8 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
     case EKT_Right:
         Platform.X_Pos += Platform.X_Step;
 
-        if (Platform.X_Pos >= AsBorder::Max_X_Pos + 1 - Platform.Width)
-            Platform.X_Pos = AsBorder::Max_X_Pos + 1 - Platform.Width;
+        if (Platform.X_Pos >= AsConfig::Max_X_Pos + 1 - Platform.Width)
+            Platform.X_Pos = AsConfig::Max_X_Pos + 1 - Platform.Width;
 
         Platform.Redraw(Hwnd);
         break;
@@ -72,7 +72,7 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 //------------------------------------------------------------------------------------------------------------
 int AsEngine::On_Timer()
 {
-    Ball.Move(Hwnd, &Level, &Platform);
+    Ball.Move(Hwnd, &Level, Platform.X_Pos, Platform.Width);
     return 0;
 }
 //------------------------------------------------------------------------------------------------------------

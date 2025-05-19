@@ -40,19 +40,19 @@ void ABall::Draw(HDC hdc, RECT &paint_area, HPEN &bg_pen, HBRUSH &bg_brush)
     Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right, Ball_Rect.bottom);
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Move(HWND hwnd, ALevel *level, AsPlatform *platform)
+void ABall::Move(HWND hwnd, ALevel *level, int platform_x_pos, int platform_width)
 {
     int next_x_pos, next_y_pos;
 
     next_x_pos = Ball_X_Pos + (int)(Ball_Speed * cos(Ball_Direction) );
     next_y_pos = Ball_Y_Pos - (int)(Ball_Speed * sin(Ball_Direction) );
 
-    int min_x_pos = AsBorder::Border_X_Offset;
-    int max_x_pos = AsBorder::Max_X_Pos - Ball_Size + 1;
-    int min_y_pos = AsBorder::Border_Y_Offset;
-    int max_y_pos = AsBorder::Max_Y_Pos - Ball_Size + 1;
+    int min_x_pos = AsConfig::Border_X_Offset;
+    int max_x_pos = AsConfig::Max_X_Pos - Ball_Size + 1;
+    int min_y_pos = AsConfig::Border_Y_Offset;
+    int max_y_pos = AsConfig::Max_Y_Pos - Ball_Size + 1;
 
-    int platform_y_pos = AsPlatform::Y_Pos - Ball_Size + 1;
+    int platform_y_pos = AsConfig::Platform_Y_Pos - Ball_Size + 1;
 
     if (next_x_pos > max_x_pos)//right limit
     {
@@ -78,9 +78,9 @@ void ABall::Move(HWND hwnd, ALevel *level, AsPlatform *platform)
         next_y_pos = max_y_pos - (next_y_pos - max_y_pos);
     }
 
-    if (next_y_pos >= platform_y_pos and next_y_pos <= platform_y_pos + AsPlatform::Height)
+    if (next_y_pos >= platform_y_pos and next_y_pos <= platform_y_pos + AsConfig::Platform_Height)
     {
-        if (next_x_pos >= platform->X_Pos and next_x_pos <= platform->X_Pos + platform->Width)
+        if (next_x_pos >= platform_x_pos and next_x_pos <= platform_x_pos + platform_width)
         {
             Ball_Direction = -Ball_Direction;
             next_y_pos = platform_y_pos - (next_y_pos - platform_y_pos);

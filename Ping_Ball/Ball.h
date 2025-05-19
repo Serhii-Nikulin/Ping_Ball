@@ -1,10 +1,7 @@
 #pragma once
 
 #include "Config.h"
-
 #include "Level.h"
-#include "Platform.h"
-#include "Border.h"
 
 //------------------------------------------------------------------------------------------------------------
 class ABall
@@ -15,7 +12,7 @@ public:
 	void Init();
 	void Redraw(HWND hwnd);
 	void Draw(HDC hdc, RECT &paint_area, HPEN &bg_pen, HBRUSH &bg_brush);
-	void Move(HWND hwnd, ALevel *level, AsPlatform *platform);
+	void Move(HWND hwnd, ALevel *level, int platform_x_pos, int platform_width);
 
 private:
 	static const int Ball_Size = 4;
