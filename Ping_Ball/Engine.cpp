@@ -394,65 +394,6 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area, AsEngine *engine)
 
 
 
-//AsBorder
-//------------------------------------------------------------------------------------------------------------
-AsBorder::AsBorder()
-    : Border_Blue_Pen(0), Border_Red_Pen(0), Border_Blue_Brush(0), Border_Red_Brush(0)
-{}
-//------------------------------------------------------------------------------------------------------------
-void AsBorder::Init()
-{
-    //Border
-    AsConfig::Create_Pen_Brush(Border_Red_Pen, Border_Red_Brush, 220, 100, 80);
-    AsConfig::Create_Pen_Brush(Border_Blue_Pen, Border_Blue_Brush, 80, 140, 210);
-}
-//------------------------------------------------------------------------------------------------------------
-void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border, AsEngine *engine)
-{
-    //contour
-    SelectObject(hdc, Border_Red_Pen);
-    SelectObject(hdc, Border_Red_Brush);
-
-    if (top_border)
-        Rectangle(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + 4) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale);
-    else
-        Rectangle(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + 1) * AsConfig::Global_Scale, (y + 4) * AsConfig::Global_Scale);
-
-    //innner part
-    SelectObject(hdc, Border_Blue_Pen);
-    SelectObject(hdc, Border_Blue_Brush);
-
-    if (top_border)
-        Rectangle(hdc, x * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + 4) * AsConfig::Global_Scale, (y + 4) * AsConfig::Global_Scale);
-    else
-        Rectangle(hdc, (x + 1) * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + 4) * AsConfig::Global_Scale, (y + 4) * AsConfig::Global_Scale);
-
-    //insertion
-    SelectObject(hdc, engine->BG_Pen);
-    SelectObject(hdc, engine->BG_Brush);
-
-    if (top_border)
-        Rectangle(hdc, (x + 2) * AsConfig::Global_Scale, (y + 2) * AsConfig::Global_Scale, (x + 3) * AsConfig::Global_Scale, (y + 3) * AsConfig::Global_Scale);
-    else
-        Rectangle(hdc, (x + 2) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + 3) * AsConfig::Global_Scale, (y + 2) * AsConfig::Global_Scale);
-}
-//------------------------------------------------------------------------------------------------------------
-void AsBorder::Draw(HDC hdc, AsEngine *engine)
-{
-    int i; 
-
-    for (i = 0; i < 50; i++)
-    {
-        Draw_Element(hdc, 3 + 4 * i, 0, true, engine);
-        Draw_Element(hdc, 2, 1 + 4 * i, false, engine);
-        Draw_Element(hdc, 202, 1 + 4 * i, false, engine);
-    }
-}
-//------------------------------------------------------------------------------------------------------------
-
-
-
-
 //AsEngine
 //------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
@@ -485,7 +426,7 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
     Ball.Draw(hdc, paint_area, this);
     Level.Draw(hdc, paint_area);
     Platform.Draw(hdc, paint_area, this);
-    Border.Draw(hdc, this);
+    Border.Draw(hdc, BG_Pen, BG_Brush);
 
     /*for (i = 0; i < 16; i++)
     {

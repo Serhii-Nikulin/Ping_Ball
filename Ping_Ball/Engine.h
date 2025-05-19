@@ -1,6 +1,8 @@
 #pragma once
 #include "Config.h"
 
+#include "Border.h"
+
 const int Timer_ID = WM_USER + 1;
 enum EKey_Type {EKT_None, EKT_Left, EKT_Right, EKT_Space};
 
@@ -89,26 +91,6 @@ private:
 	HBRUSH Platform_Side_Brush, Platform_Inner_Brush;
 	
 	int Inner_Width;
-};
-//------------------------------------------------------------------------------------------------------------
-class AsBorder
-{
-public:
-	AsBorder();
-
-	void Init();
-	void Draw(HDC hdc, AsEngine *engine);
-
-	static const int Border_X_Offset = 6;
-	static const int Border_Y_Offset = 4;
-	static const int Max_X_Pos = 200;
-	static const int Max_Y_Pos = 199;
-
-private:
-	void Draw_Element(HDC hdc, int x, int y, bool top_border, AsEngine *engine);
-
-	HPEN Border_Blue_Pen, Border_Red_Pen;
-	HBRUSH Border_Blue_Brush, Border_Red_Brush;
 };
 //------------------------------------------------------------------------------------------------------------
 class AsEngine
