@@ -10,7 +10,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 {
     Hwnd = hwnd;
 
-    SetTimer(Hwnd, Timer_ID, 1000 / 20, NULL);
+    SetTimer(Hwnd, Timer_ID, 1000 / FPS, NULL);
 
     Ball.Redraw(Hwnd);
     Platform.Redraw(Hwnd);
@@ -30,7 +30,7 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
     RECT intersection_rect{};
 
     Ball.Draw(hdc, paint_area, BG_Pen, BG_Brush);
-    Level.Draw(hdc, paint_area);
+    Level.Draw(hdc, paint_area, Hwnd);
     Platform.Draw(hdc, paint_area, BG_Pen, BG_Brush);
     Border.Draw(hdc, BG_Pen, BG_Brush);
 
@@ -73,6 +73,9 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 int AsEngine::On_Timer()
 {
     Ball.Move(Hwnd, &Level, Platform.X_Pos, Platform.Width);
+
+    Level.Active_Brick.Act(Hwnd);
+
     return 0;
 }
 //------------------------------------------------------------------------------------------------------------
