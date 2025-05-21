@@ -34,7 +34,7 @@ void AsPlatform::Draw_Circle(HDC hdc, int x, int y)
     Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + AsConfig::Platform_Height) * AsConfig::Global_Scale, (y + AsConfig::Platform_Height) * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsPlatform::Draw(HDC hdc, RECT &paint_area, HPEN &bg_pen, HBRUSH &bg_brush)
+void AsPlatform::Draw(HDC hdc, RECT &paint_area)
 { 
     RECT intersection_rect;
 
@@ -44,8 +44,8 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area, HPEN &bg_pen, HBRUSH &bg_brush)
     if (!IntersectRect(&intersection_rect, &paint_area, &Platform_Rect) )
         return;
 
-    SelectObject(hdc, bg_pen);
-    SelectObject(hdc, bg_brush);
+    SelectObject(hdc, AsConfig::BG_Pen);
+    SelectObject(hdc, AsConfig::BG_Brush);
     Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
 
     SelectObject(hdc, Platform_Side_Pen);

@@ -45,15 +45,15 @@ void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border, HPEN &bg_pen
         Rectangle(hdc, (x + 2) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + 3) * AsConfig::Global_Scale, (y + 2) * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsBorder::Draw(HDC hdc, HPEN &bg_pen, HBRUSH &bg_brush)
+void AsBorder::Draw(HDC hdc)
 {
     int i; 
 
     for (i = 0; i < 50; i++)
     {
-        Draw_Element(hdc, 3 + 4 * i, 0, true, bg_pen, bg_brush);
-        Draw_Element(hdc, 2, 1 + 4 * i, false, bg_pen, bg_brush);
-        Draw_Element(hdc, 202, 1 + 4 * i, false, bg_pen, bg_brush);
+        Draw_Element(hdc, 3 + 4 * i, 0, true, AsConfig::BG_Pen, AsConfig::BG_Brush);
+        Draw_Element(hdc, 2, 1 + 4 * i, false, AsConfig::BG_Pen, AsConfig::BG_Brush);
+        Draw_Element(hdc, 202, 1 + 4 * i, false, AsConfig::BG_Pen, AsConfig::BG_Brush);
     }
 }
 //------------------------------------------------------------------------------------------------------------

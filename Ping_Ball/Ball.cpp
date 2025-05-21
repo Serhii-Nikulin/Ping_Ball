@@ -24,15 +24,15 @@ void ABall::Redraw(HWND hwnd)
     InvalidateRect(hwnd, &Ball_Rect, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Draw(HDC hdc, RECT &paint_area, HPEN &bg_pen, HBRUSH &bg_brush)
+void ABall::Draw(HDC hdc, RECT &paint_area)
 {
     RECT intersection_rect{};
 
     if (! IntersectRect(&intersection_rect, &paint_area, &Ball_Rect) )
         return;
 
-    SelectObject(hdc, bg_pen);
-    SelectObject(hdc, bg_brush);
+    SelectObject(hdc, AsConfig::BG_Pen);
+    SelectObject(hdc, AsConfig::BG_Brush);
     Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right, Prev_Ball_Rect.bottom);
 
     SelectObject(hdc, Ball_Pen);
@@ -47,10 +47,10 @@ void ABall::Move(HWND hwnd, ALevel *level, int platform_x_pos, int platform_widt
     next_x_pos = Ball_X_Pos + (int)(Ball_Speed * cos(Ball_Direction) );
     next_y_pos = Ball_Y_Pos - (int)(Ball_Speed * sin(Ball_Direction) );
 
-    int min_x_pos = AsConfig::Border_X_Offset;
-    int max_x_pos = AsConfig::Max_X_Pos - Ball_Size + 1;
-    int min_y_pos = AsConfig::Border_Y_Offset;
-    int max_y_pos = AsConfig::Max_Y_Pos - Ball_Size + 1;
+	int min_x_pos = AsConfig::Border_X_Offset;
+	int max_x_pos = AsConfig::Max_X_Pos - Ball_Size + 1;
+	int min_y_pos = AsConfig::Border_Y_Offset;
+	int max_y_pos = AsConfig::Max_Y_Pos - Ball_Size + 1;
 
     int platform_y_pos = AsConfig::Platform_Y_Pos - Ball_Size + 1;
 
@@ -60,11 +60,11 @@ void ABall::Move(HWND hwnd, ALevel *level, int platform_x_pos, int platform_widt
         next_x_pos = max_x_pos - (next_x_pos - max_x_pos);
     }
 
-    if (next_y_pos < min_y_pos)//top limit
-    {
-        Ball_Direction = -Ball_Direction;
-        next_y_pos = min_y_pos + (min_y_pos - next_y_pos);
-    }
+	if (next_y_pos < min_y_pos)//top limit
+	{
+		Ball_Direction = -Ball_Direction;
+		next_y_pos = min_y_pos + (min_y_pos - next_y_pos);
+	}
 
     if (next_x_pos < min_x_pos)//left limit
     {

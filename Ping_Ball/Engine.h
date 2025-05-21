@@ -19,11 +19,11 @@ public:
 	int On_Key_Down(EKey_Type key_type);
 	int On_Timer();
 
-	HWND Hwnd;
-	HPEN BG_Pen;
-	HBRUSH BG_Brush;
-
 private:
+	static const int FPS = 20;
+
+	HWND Hwnd;
+
 	ABall Ball;
 	ALevel Level;
 	AsPlatform Platform;

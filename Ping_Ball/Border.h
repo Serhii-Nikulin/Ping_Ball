@@ -9,7 +9,7 @@ public:
 	AsBorder();
 
 	void Init();
-	void Draw(HDC hdc,  HPEN &bg_pen, HBRUSH &bg_brush);
+	void Draw(HDC hdc);
 
 private:
 	void Draw_Element(HDC hdc, int x, int y, bool top_border, HPEN &bg_pen, HBRUSH &bg_brush);
