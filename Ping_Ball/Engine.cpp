@@ -3,7 +3,7 @@
 //AsEngine
 //------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
-    :Hwnd(0),BG_Pen(0), BG_Brush(0)
+    :Hwnd(0)
 {}
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Init_Engine(HWND hwnd)
@@ -12,6 +12,8 @@ void AsEngine::Init_Engine(HWND hwnd)
 
     SetTimer(Hwnd, Timer_ID, 1000 / FPS, NULL);
 
+    AActive_Brick::Setup_Colors();
+
     Ball.Redraw(Hwnd);
     Platform.Redraw(Hwnd);
 
@@ -19,9 +21,6 @@ void AsEngine::Init_Engine(HWND hwnd)
     Level.Init();
     Platform.Init();
     Border.Init();
-
-    //BG
-    AsConfig::Create_Pen_Brush(BG_Pen, BG_Brush, 15, 15, 35);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
@@ -29,10 +28,10 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
     int i;
     RECT intersection_rect{};
 
-    Ball.Draw(hdc, paint_area, BG_Pen, BG_Brush);
+    Ball.Draw(hdc, paint_area);
     Level.Draw(hdc, paint_area, Hwnd);
-    Platform.Draw(hdc, paint_area, BG_Pen, BG_Brush);
-    Border.Draw(hdc, BG_Pen, BG_Brush);
+    Platform.Draw(hdc, paint_area);
+    Border.Draw(hdc);
 
     /*for (i = 0; i < 16; i++)
     {

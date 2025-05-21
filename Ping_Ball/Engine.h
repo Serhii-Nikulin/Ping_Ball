@@ -23,8 +23,6 @@ private:
 	static const int FPS = 20;
 
 	HWND Hwnd;
-	HPEN BG_Pen;
-	HBRUSH BG_Brush;
 
 	ABall Ball;
 	ALevel Level;

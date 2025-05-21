@@ -2,8 +2,13 @@
 
 //AActive_Brick
 //------------------------------------------------------------------------------------------------------------
-AActive_Brick::AActive_Brick()
-    : Brick_Rect{}, Pen(0), Brush(0), Fade_Step(0)
+HPEN AActive_Brick::Fading_Red_Brick_Pens[Max_Fade_Step];
+HBRUSH AActive_Brick::Fading_Red_Brick_Brushes[Max_Fade_Step];
+HPEN AActive_Brick::Fading_Blue_Brick_Pens[Max_Fade_Step];
+HBRUSH AActive_Brick::Fading_Blue_Brick_Brushes[Max_Fade_Step];
+//------------------------------------------------------------------------------------------------------------
+AActive_Brick::AActive_Brick(EBrick_Type brick_type)
+    : Brick_Type(brick_type), Brick_Rect{}, Pen(0), Brush(0), Fade_Step(0)
 {
     Brick_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
     Brick_Rect.top = AsConfig::Level_Y_Offset * AsConfig::Global_Scale;
@@ -13,21 +18,63 @@ AActive_Brick::AActive_Brick()
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick::Draw(HDC hdc)
 {
-    Pen = CreatePen(PS_SOLID, 0, RGB(80 - Fade_Step * 80 / Max_Fade_Step, 140 -  Fade_Step * 140 / Max_Fade_Step, 210 - Fade_Step * 210 / Max_Fade_Step) );
-    Brush = CreateSolidBrush(RGB(80 - Fade_Step * 80 / Max_Fade_Step, 140 -  Fade_Step * 140 / Max_Fade_Step, 210 - Fade_Step * 210 / Max_Fade_Step) );
+    HPEN pen = 0;
+    HBRUSH brush = 0;
 
-    SelectObject(hdc, Pen);
-    SelectObject(hdc, Brush);
+    switch(Brick_Type)
+    {
+    case EBT_Red:
+		pen = Fading_Red_Brick_Pens[Fade_Step];
+        brush = Fading_Red_Brick_Brushes[Fade_Step];
+        break;
+
+    case EBT_Blue:
+        pen = Fading_Blue_Brick_Pens[Fade_Step];
+        brush = Fading_Blue_Brick_Brushes[Fade_Step];
+        break;
+
+    default:
+        return;
+    }
+
+    SelectObject(hdc, pen);
+    SelectObject(hdc, brush);
     RoundRect(hdc, Brick_Rect.left, Brick_Rect.top, Brick_Rect.right, Brick_Rect.bottom, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick::Act(HWND hwnd)
 {
-    if (Fade_Step >= Max_Fade_Step)
-        Fade_Step = 0;
+	if (Fade_Step < Max_Fade_Step - 1)
+	{
+		Fade_Step += 1;
+		InvalidateRect(hwnd, &Brick_Rect, FALSE);
+	}
+}
+//------------------------------------------------------------------------------------------------------------
+unsigned char AActive_Brick::Get_Fading_Value(int step, int max_value, int min_value)
+{
+	return static_cast<unsigned char>(max_value - step * (max_value - min_value) / (Max_Fade_Step - 1) );
+}
+//------------------------------------------------------------------------------------------------------------
+void AActive_Brick::Get_Fading_Color(const AColor &color, int step, HPEN &pen, HBRUSH &brush)
+{
+    unsigned char r, g, b;
 
-    InvalidateRect(hwnd, &Brick_Rect, FALSE);
+    r = Get_Fading_Value(step, color.R, AsConfig::BG_Color.R);
+    g = Get_Fading_Value(step, color.G, AsConfig::BG_Color.G);
+    b = Get_Fading_Value(step, color.B, AsConfig::BG_Color.B);
 
-    Fade_Step += 1;
+    AsConfig::Create_Pen_Brush(pen, brush, r, g, b);
+}
+//------------------------------------------------------------------------------------------------------------
+void AActive_Brick::Setup_Colors()
+{
+    int i;
+
+	for (i = 0; i < Max_Fade_Step; i++)
+	{
+        Get_Fading_Color(AsConfig::Red_Brick_Color, i, Fading_Red_Brick_Pens[i], Fading_Red_Brick_Brushes[i]);
+        Get_Fading_Color(AsConfig::Blue_Brick_Color, i, Fading_Blue_Brick_Pens[i], Fading_Blue_Brick_Brushes[i]);
+	}
 }
 //------------------------------------------------------------------------------------------------------------

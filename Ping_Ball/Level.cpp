@@ -25,7 +25,7 @@ unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
 //ALevel
 //------------------------------------------------------------------------------------------------------------
 ALevel::ALevel()
-    : Level_Rect{}, Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0) 
+    : Active_Brick(EBT_Blue), Level_Rect{}, Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0) 
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -38,8 +38,8 @@ void ALevel::Init()
 
     Letter_Pen = CreatePen(PS_SOLID, AsConfig::Global_Scale, RGB(255, 255, 255) );
 
-    AsConfig::Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, 220, 100, 80);
-    AsConfig::Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, 80, 140, 210);
+    AsConfig::Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, AsConfig::Red_Brick_Color);
+    AsConfig::Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, AsConfig::Blue_Brick_Color);
 }
 //------------------------------------------------------------------------------------------------------------
 void ALevel::Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush)

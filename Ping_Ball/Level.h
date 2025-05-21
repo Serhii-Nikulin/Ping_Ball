@@ -4,7 +4,6 @@
 
 //Bricks
 enum ELetter_Type {ELT_None, ELT_O};
-enum EBrick_Type: unsigned char {EBT_None, EBT_Red, EBT_Blue};
 
 //------------------------------------------------------------------------------------------------------------
 class ALevel
@@ -17,6 +16,7 @@ public:
 	void Check_Level_Brick_Hit(int next_x_pos, int &next_y_pos, double &ball_direction);
 
 	AActive_Brick Active_Brick;
+
 private:
 	void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush);
 	void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step);
