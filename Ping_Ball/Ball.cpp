@@ -3,7 +3,7 @@
 //ABall
 //------------------------------------------------------------------------------------------------------------
 ABall::ABall()
-    :Ball_Pen(0), Ball_Brush(0), Ball_Rect{}, Prev_Ball_Rect{}, Ball_X_Pos(60), Ball_Y_Pos(190), Ball_Speed(6.0), Ball_Direction(M_PI_4)
+    :Ball_Pen(0), Ball_Brush(0), Ball_Rect{}, Prev_Ball_Rect{}, Ball_X_Pos(100), Ball_Y_Pos(190), Ball_Speed(6.0), Ball_Direction(M_PI_4)
 {}
 //------------------------------------------------------------------------------------------------------------
 void ABall::Init()
