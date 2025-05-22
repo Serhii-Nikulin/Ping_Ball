@@ -21,8 +21,10 @@ public:
 	static void Setup_Colors();
 	static void Create_Pen_Brush(HPEN& pen, HBRUSH& brush, unsigned char r, unsigned char g, unsigned char b);
 	static void Create_Pen_Brush(HPEN& pen, HBRUSH& brush, const AColor &color);
+	static int Rand(int min, int max);
 
 	static const int Global_Scale = 3;
+	static int Current_Timer_Tick;
 
 	static const AColor BG_Color;
 	static const AColor Red_Brick_Color;
