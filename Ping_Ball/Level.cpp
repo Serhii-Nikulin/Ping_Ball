@@ -25,7 +25,7 @@ unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
 //ALevel
 //------------------------------------------------------------------------------------------------------------
 ALevel::ALevel()
-    : Active_Brick(EBT_Blue), Level_Rect{}, Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0) 
+    : Active_Brick(EBT_Red), Level_Rect{}, Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0) 
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -142,7 +142,6 @@ void ALevel::Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, EL
         }
     }
 
-    SetWorldTransform(hdc, &old_xform);
 }
 //------------------------------------------------------------------------------------------------------------
 void ALevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)

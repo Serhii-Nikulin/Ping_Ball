@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Config.h"
-enum EPlatform_State { EPS_Missing, EPS_Normal, EPS_Meltdown };
+
+enum EPlatform_State { EPS_Missing, EPS_Normal, EPS_Meltdown, EPS_Rolling };
 //------------------------------------------------------------------------------------------------------------
 class AsPlatform
 {
@@ -9,18 +10,22 @@ public:
 	AsPlatform();
 	void Init();
 	void Act(HWND hwnd);
+	void Set_State(EPlatform_State new_state);
 
 	void Redraw(HWND hwnd);
 	void Draw(HDC hdc, RECT &paint_area);
+
 
 	int Width;
 	int X_Pos;
 	int X_Step;
 
 private:
-	void Draw_Meltdown(HDC hdc);
 	void Draw_Circle(HDC hdc, int x, int y);
+	void Draw_Circle_Highlight(HDC hdc, int x, int y);
 	void Draw_Normal(HDC hdc);
+	void Draw_Meltdown(HDC hdc);
+	void Draw_Rolling(HDC hdc);
 
 	EPlatform_State Platform_State;
 	RECT Platform_Rect, Prev_Platform_Rect;
@@ -30,8 +35,11 @@ private:
 
 	static const int Meltdown_Speed = 4;
 	static const int Normal_Width = 28;
+	static const int Circle_Size = 7;
+	static const int Max_Rotation_Step = 16;
 
 	int Meltdown_Y_Pos[Normal_Width * AsConfig::Global_Scale];
 	int Inner_Width;
+	int Rotation_Step;
 };
 //------------------------------------------------------------------------------------------------------------
