@@ -42,12 +42,12 @@ void AActive_Brick::Draw(HDC hdc)
     RoundRect(hdc, Brick_Rect.left, Brick_Rect.top, Brick_Rect.right, Brick_Rect.bottom, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
-void AActive_Brick::Act(HWND hwnd)
+void AActive_Brick::Act()
 {
 	if (Fade_Step < Max_Fade_Step - 1)
 	{
 		Fade_Step += 1;
-		InvalidateRect(hwnd, &Brick_Rect, FALSE);
+		InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
 	}
 }
 //------------------------------------------------------------------------------------------------------------

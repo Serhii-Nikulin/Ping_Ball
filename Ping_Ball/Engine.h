@@ -22,8 +22,6 @@ public:
 private:
 	static const int FPS = 20;
 
-	HWND Hwnd;
-
 	ABall Ball;
 	ALevel Level;
 	AsPlatform Platform;

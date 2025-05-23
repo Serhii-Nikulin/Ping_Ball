@@ -181,7 +181,7 @@ void ALevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
     RoundRect(hdc, brick.left, brick.top, brick.right, brick.bottom, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Draw(HDC hdc, RECT &paint_area, HWND hwnd)
+void ALevel::Draw(HDC hdc, RECT &paint_area)
 {
     int i, j;
     RECT intersection_rect;
