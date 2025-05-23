@@ -3,8 +3,9 @@
 //AsPlatform
 //------------------------------------------------------------------------------------------------------------
 AsPlatform::AsPlatform()
-	: Platform_State(EPS_Normal), Platform_Rect{}, Prev_Platform_Rect{}, Highlight_Pen(0), Platform_Side_Pen(0), Platform_Inner_Pen(0), Platform_Side_Brush(0), Platform_Inner_Brush(0), Width(28), Inner_Width(21), X_Pos(50), X_Step(AsConfig::Global_Scale * 2), Meltdown_Y_Pos{}
+	: Platform_State(EPS_Normal), Platform_Rect{}, Prev_Platform_Rect{}, Highlight_Pen(0), Platform_Side_Pen(0), Platform_Inner_Pen(0), Platform_Side_Brush(0), Platform_Inner_Brush(0), Width(28), Inner_Width(21), X_Pos(100), X_Step(AsConfig::Global_Scale * 2), Meltdown_Y_Pos{}, Rotation_Step(13)
 {
+    //X_Pos = (AsConfig::Max_X_Pos + 1 + AsConfig::Border_X_Offset + 1 - Normal_Width) / 2;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Init()
@@ -15,37 +16,68 @@ void AsPlatform::Init()
     AsConfig::Create_Pen_Brush(Platform_Inner_Pen, Platform_Inner_Brush, 60, 60, 60);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsPlatform::Act(HWND hwnd)
+void AsPlatform::Act()
+{
+	switch (Platform_State)
+	{
+    case EPS_Meltdown:
+    case EPS_Rolling:
+    case EPS_Expanding_Rolling:
+        Redraw();
+        break;
+
+    default:
+        return;
+    }
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Set_State(EPlatform_State new_state)
 {
     int i;
     int len = sizeof(Meltdown_Y_Pos) / sizeof(Meltdown_Y_Pos[i]);
 
-    if (Platform_State == EPS_Normal)
-    {
-        Platform_State = EPS_Meltdown;
+	if (new_state == Platform_State)
+        return;
 
-        for (i = 0; i < len; i++)
-            Meltdown_Y_Pos[i] = Platform_Rect.bottom - 1;
+	if (new_state == EPS_Meltdown)
+	{
+		for (i = 0; i < len; i++)
+			Meltdown_Y_Pos[i] = Platform_Rect.bottom - 1;
+	}
+
+    if (new_state == EPS_Rolling)
+        X_Pos = AsConfig::Max_X_Pos + 2;
+
+    if (new_state == EPS_Expanding_Rolling)
+    {
+        Width = 0;
+        Redraw();
     }
 
-	if (Platform_State == EPS_Meltdown)
-		Redraw(hwnd);
+    Platform_State = new_state;
 }
 //------------------------------------------------------------------------------------------------------------
-void AsPlatform::Redraw(HWND hwnd)
+void AsPlatform::Redraw()
 {
+    int width;
+
     Prev_Platform_Rect = Platform_Rect;
+
+	if (Platform_State == EPS_Rolling)
+		width = Circle_Size;
+	else 
+		width = Width;
 
     Platform_Rect.left = X_Pos * AsConfig::Global_Scale;
     Platform_Rect.top = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
-    Platform_Rect.right = Platform_Rect.left + Width * AsConfig::Global_Scale;
+    Platform_Rect.right = Platform_Rect.left + width * AsConfig::Global_Scale;
     Platform_Rect.bottom = Platform_Rect.top + AsConfig::Platform_Height * AsConfig::Global_Scale;
 
     if (Platform_State == EPS_Meltdown)
         Platform_Rect.bottom = (AsConfig::Max_Y_Pos + 1) * AsConfig::Global_Scale;
  
-	InvalidateRect(hwnd, &Platform_Rect, FALSE);
-	InvalidateRect(hwnd, &Prev_Platform_Rect, FALSE);
+	InvalidateRect(AsConfig::Hwnd, &Platform_Rect, FALSE);
+	InvalidateRect(AsConfig::Hwnd, &Prev_Platform_Rect, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Draw(HDC hdc, RECT &paint_area)
@@ -58,11 +90,19 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
 	switch (Platform_State)
 	{
 	case EPS_Normal:
-		Draw_Normal(hdc);
+		Draw_Normal_State(hdc);
 		break;
 
     case EPS_Meltdown:
-		Draw_Meltdown(hdc);
+		Draw_Meltdown_State(hdc);
+		break;
+
+    case EPS_Rolling:
+        Draw_Rolling_State(hdc);
+        break;
+
+	case EPS_Expanding_Rolling:
+		Draw_Expanding_Rolling_State(hdc);
 		break;
 
     default:
@@ -70,7 +110,48 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
     }
 }
 //------------------------------------------------------------------------------------------------------------
-void AsPlatform::Draw_Meltdown(HDC hdc)
+void AsPlatform::Clear_BG(HDC hdc)
+{
+    SelectObject(hdc, AsConfig::BG_Pen);
+    SelectObject(hdc, AsConfig::BG_Brush);
+    Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Circle(HDC hdc, int x, int y)
+{
+    Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + AsConfig::Platform_Height) * AsConfig::Global_Scale, (y + AsConfig::Platform_Height) * AsConfig::Global_Scale);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Circle_Highlight(HDC hdc, int x, int y)
+{
+	SelectObject(hdc, Highlight_Pen);
+    Arc(hdc, (x + 1) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + Circle_Size - 1) * AsConfig::Global_Scale, (y + Circle_Size - 1) * AsConfig::Global_Scale, 
+        (x + Circle_Size / 2) * AsConfig::Global_Scale, y * AsConfig::Global_Scale, 
+        x * AsConfig::Global_Scale, (y + Circle_Size / 2 + 1) * AsConfig::Global_Scale);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Normal_State(HDC hdc)
+{ 
+    int x = X_Pos;
+    int y = AsConfig::Platform_Y_Pos;
+
+    Clear_BG(hdc);
+
+    SelectObject(hdc, Platform_Side_Pen);
+    SelectObject(hdc, Platform_Side_Brush);
+
+    Draw_Circle(hdc, x + Width - Circle_Size, y);
+    Draw_Circle(hdc, x, y);
+
+    SelectObject(hdc, Platform_Inner_Pen);
+    SelectObject(hdc, Platform_Inner_Brush);
+    RoundRect(hdc, (x + 4) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + Width - 4) * AsConfig::Global_Scale, (y + Circle_Size - 1) * AsConfig::Global_Scale, AsConfig::Global_Scale * 3, AsConfig::Global_Scale * 3);
+
+    SelectObject(hdc, Highlight_Pen);
+    Draw_Circle_Highlight(hdc, x, y);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Meltdown_State(HDC hdc)
 {
     int i, j;
     int x, y;
@@ -78,12 +159,12 @@ void AsPlatform::Draw_Meltdown(HDC hdc)
     COLORREF pixel;
     COLORREF bg_pixel = RGB(AsConfig::BG_Color.R, AsConfig::BG_Color.G, AsConfig::BG_Color.B);
 
-	int platform_width = Normal_Width * AsConfig::Global_Scale;
-	int platform_height = AsConfig::Platform_Height * AsConfig::Global_Scale;
+    int platform_width = Normal_Width * AsConfig::Global_Scale;
+    int platform_height = AsConfig::Platform_Height * AsConfig::Global_Scale;
 
     for (i = 0; i < platform_width; i++)
     {
-		x = Platform_Rect.left + i;
+        x = Platform_Rect.left + i;
         y_offset = AsConfig::Rand(1, Meltdown_Speed);
 
         for (j = 0; j < platform_height; j++)
@@ -94,40 +175,90 @@ void AsPlatform::Draw_Meltdown(HDC hdc)
             SetPixel(hdc, x, y + y_offset, pixel);
         }
 
-		for (j = 0; j < y_offset; j++)
-			SetPixel(hdc, x, y + j, bg_pixel);
+        for (j = 0; j < y_offset; j++)
+            SetPixel(hdc, x, y + j, bg_pixel);
 
         Meltdown_Y_Pos[i] += y_offset;
     }
 }
 //------------------------------------------------------------------------------------------------------------
-void AsPlatform::Draw_Circle(HDC hdc, int x, int y)
+void AsPlatform::Draw_Rolling_State(HDC hdc)
 {
-    Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + AsConfig::Platform_Height) * AsConfig::Global_Scale, (y + AsConfig::Platform_Height) * AsConfig::Global_Scale);
-}
-//------------------------------------------------------------------------------------------------------------
-void AsPlatform::Draw_Normal(HDC hdc)
-{ 
+    XFORM old_xform{}, new_xform{};
+    double rotation_angle;
+
     int x = X_Pos;
-    int y = AsConfig::Platform_Y_Pos;
+	int y = AsConfig::Platform_Y_Pos;
+    const int &scale = AsConfig::Global_Scale;
+	int radius = Circle_Size * scale / 2;
+
+    Clear_BG(hdc);
+
+    //Circle
+    SelectObject(hdc, Platform_Side_Pen);
+    SelectObject(hdc, Platform_Side_Brush);
+    Draw_Circle(hdc, x, y);
+
+    //BG Rectangle
+    SetGraphicsMode(hdc, GM_ADVANCED);
+    GetWorldTransform(hdc, &old_xform);
+
+    Rotation_Step %= Max_Rotation_Step;
+    rotation_angle = 2 * M_PI * Rotation_Step / Max_Rotation_Step;
+    Rotation_Step += 1;
+
+    new_xform.eM11 = (FLOAT)cos(rotation_angle);
+    new_xform.eM12 = (FLOAT)-sin(rotation_angle);
+
+    new_xform.eM21 = (FLOAT)sin(rotation_angle);
+    new_xform.eM22 = (FLOAT)cos(rotation_angle);
+
+    new_xform.eDx = (FLOAT)(x * scale + radius);
+    new_xform.eDy = (FLOAT)(y * scale + radius);
+
+    SetWorldTransform(hdc, &new_xform);
 
     SelectObject(hdc, AsConfig::BG_Pen);
     SelectObject(hdc, AsConfig::BG_Brush);
-    Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
+    Rectangle(hdc, 0 - 1 * scale / 2, 0 - radius, 0 + 1 * scale / 2, 0 + radius);
 
-    SelectObject(hdc, Platform_Side_Pen);
-    SelectObject(hdc, Platform_Side_Brush);
+    SetWorldTransform(hdc, &old_xform);
 
-    Draw_Circle(hdc, x, y);
-    Draw_Circle(hdc, x + Inner_Width, y);
-
-    SelectObject(hdc, Platform_Inner_Pen);
-    SelectObject(hdc, Platform_Inner_Brush);
-    RoundRect(hdc, (x + 4) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + 4 + Inner_Width - 1) * AsConfig::Global_Scale, (y + 1 + 5) * AsConfig::Global_Scale, AsConfig::Global_Scale * 3, AsConfig::Global_Scale * 3);
-
+    //Highlight
     SelectObject(hdc, Highlight_Pen);
-    Arc(hdc, (x + 1) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + AsConfig::Platform_Height- 1) * AsConfig::Global_Scale, (y + AsConfig::Platform_Height - 1) * AsConfig::Global_Scale, 
-        (x + AsConfig::Platform_Height / 2) * AsConfig::Global_Scale, y * AsConfig::Global_Scale, 
-        x * AsConfig::Global_Scale, (y + AsConfig::Platform_Height / 2 + 1) * AsConfig::Global_Scale);
+    Draw_Circle_Highlight(hdc, x, y);
+
+	//Check if the platform is finished rolling
+    if (Finish_Rolling_X_Pos == X_Pos)
+    {
+        Set_State(EPS_Expanding_Rolling);
+        return;
+    }
+
+    if (Finish_Rolling_X_Pos >= X_Pos)
+    {
+        X_Pos = Finish_Rolling_X_Pos;
+        return;
+    }
+
+    //roll platform
+    X_Pos -= Rolling_Speed;
+
+}
+//------------------------------------------------------------------------------------------------------------
+void AsPlatform::Draw_Expanding_Rolling_State(HDC hdc)
+{
+    Draw_Normal_State(hdc);
+
+    Width += 3;
+    X_Pos -= 1;
+
+    if (Width >= Normal_Width)
+    {
+        Width = Normal_Width;
+        Set_State(EPS_Normal);
+        Redraw();
+    }
+
 }
 //------------------------------------------------------------------------------------------------------------

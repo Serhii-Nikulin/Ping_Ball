@@ -30,6 +30,8 @@ public:
 	static const AColor Red_Brick_Color;
 	static const AColor Blue_Brick_Color;
 
+	static HWND Hwnd;
+
 	static HPEN BG_Pen;
 	static HBRUSH BG_Brush;
 

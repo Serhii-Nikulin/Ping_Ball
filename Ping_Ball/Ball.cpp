@@ -11,7 +11,7 @@ void ABall::Init()
     AsConfig::Create_Pen_Brush(Ball_Pen, Ball_Brush, 255, 255, 255);
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Redraw(HWND hwnd)
+void ABall::Redraw()
 {
     Prev_Ball_Rect = Ball_Rect;
 
@@ -20,8 +20,8 @@ void ABall::Redraw(HWND hwnd)
     Ball_Rect.right = Ball_Rect.left + Ball_Size * AsConfig::Global_Scale - 1;
     Ball_Rect.bottom = Ball_Rect.top + Ball_Size * AsConfig::Global_Scale - 1;
 
-    InvalidateRect(hwnd, &Prev_Ball_Rect, FALSE);
-    InvalidateRect(hwnd, &Ball_Rect, FALSE);
+    InvalidateRect(AsConfig::Hwnd, &Prev_Ball_Rect, FALSE);
+    InvalidateRect(AsConfig::Hwnd, &Ball_Rect, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
 void ABall::Draw(HDC hdc, RECT &paint_area)
@@ -40,7 +40,7 @@ void ABall::Draw(HDC hdc, RECT &paint_area)
     Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right, Ball_Rect.bottom);
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Move(HWND hwnd, ALevel *level, int platform_x_pos, int platform_width)
+void ABall::Move(ALevel *level, int platform_x_pos, int platform_width)
 {
     int next_x_pos, next_y_pos;
 
@@ -94,6 +94,6 @@ void ABall::Move(HWND hwnd, ALevel *level, int platform_x_pos, int platform_widt
     Ball_X_Pos = next_x_pos;
     Ball_Y_Pos = next_y_pos;
 
-    Redraw(hwnd);
+    Redraw();
 }
 //------------------------------------------------------------------------------------------------------------
