@@ -13,14 +13,14 @@ public:
 
 	void Init();
 	void Draw(HDC hdc, RECT &paint_area);
-	void Check_Level_Brick_Hit(int next_x_pos, int &next_y_pos, double &ball_direction);
+	void Check_Level_Brick_Hit(double next_x_pos, double &next_y_pos, double &ball_direction);
 
 	AActive_Brick Active_Brick;
 
 private:
-	void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush);
+	void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush) const;
 	void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step);
-	void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type);
+	void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type) const;
 
 
 	RECT Level_Rect{};

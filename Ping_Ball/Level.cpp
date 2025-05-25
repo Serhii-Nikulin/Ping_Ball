@@ -42,7 +42,7 @@ void ALevel::Init()
     AsConfig::Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, AsConfig::Blue_Brick_Color);
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush)
+void ALevel::Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush) const
 {
     if (is_switch_color == true)
     {
@@ -144,7 +144,7 @@ void ALevel::Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, EL
 
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
+void ALevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type) const
 {
     RECT brick{};
 
@@ -196,7 +196,7 @@ void ALevel::Draw(HDC hdc, RECT &paint_area)
     Active_Brick.Draw(hdc);
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Check_Level_Brick_Hit(int next_x_pos, int &next_y_pos, double &ball_direction)
+void ALevel::Check_Level_Brick_Hit(double next_x_pos, double &next_y_pos, double &ball_direction)
 {
     int i, j;
     int brick_x_pos, brick_y_pos;
