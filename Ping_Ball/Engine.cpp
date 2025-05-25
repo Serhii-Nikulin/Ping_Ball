@@ -37,8 +37,8 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
     RECT intersection_rect{};
 
     Ball.Draw(hdc, paint_area);
-    Level.Draw(hdc, paint_area);
     Platform.Draw(hdc, paint_area);
+    Level.Draw(hdc, paint_area);
     Border.Draw(hdc);
 
     /*for (i = 0; i < 16; i++)
@@ -96,7 +96,7 @@ int AsEngine::On_Timer()
     switch (Game_State)
     {
     case EGS_Play_Level:
-        Ball.Move(&Level, Platform.X_Pos, Platform.Width);
+        Ball.Move(&Level, Platform.X_Pos, Platform.Width, &Border);
 
         if (Ball.Get_State() == EBS_Lost)
         {

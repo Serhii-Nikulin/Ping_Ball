@@ -95,6 +95,7 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
 	switch (Platform_State)
 	{
 	case EPS_Normal:
+    case EPS_Is_Ready:
 		Draw_Normal_State(hdc);
 		break;
 
