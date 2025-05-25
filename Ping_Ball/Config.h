@@ -35,6 +35,8 @@ public:
 	static HPEN BG_Pen;
 	static HBRUSH BG_Brush;
 
+	static bool Has_Floor;
+
 	//Border
 	static const int Border_X_Offset = 6;
 	static const int Border_Y_Offset = 4;

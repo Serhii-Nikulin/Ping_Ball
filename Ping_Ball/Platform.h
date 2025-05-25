@@ -2,7 +2,7 @@
 
 #include "Config.h"
 
-enum EPlatform_State { EPS_Missing, EPS_Normal, EPS_Meltdown, EPS_Rolling, EPS_Expanding_Rolling };
+enum EPlatform_State { EPS_Is_Ready, EPS_Normal, EPS_Meltdown, EPS_Missing, EPS_Rolling, EPS_Expanding_Rolling };
 //------------------------------------------------------------------------------------------------------------
 class AsPlatform
 {
@@ -10,6 +10,7 @@ public:
 	AsPlatform();
 	void Init();
 	void Act();
+	EPlatform_State Get_State() const;
 	void Set_State(EPlatform_State new_state);
 
 	void Redraw();
@@ -21,9 +22,9 @@ public:
 	int X_Step;
 
 private:
-	void Clear_BG(HDC hdc);
+	void Clear_BG(HDC hdc) const;
 	void Draw_Circle(HDC hdc, int x, int y);
-	void Draw_Circle_Highlight(HDC hdc, int x, int y);
+	void Draw_Circle_Highlight(HDC hdc, int x, int y) const;
 	void Draw_Normal_State(HDC hdc);
 	void Draw_Meltdown_State(HDC hdc);
 	void Draw_Rolling_State(HDC hdc);
