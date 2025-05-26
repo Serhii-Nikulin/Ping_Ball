@@ -7,6 +7,50 @@
 AsBorder::AsBorder()
     : Border_Blue_Pen(0), Border_Red_Pen(0), Border_Blue_Brush(0), Border_Red_Brush(0)
 {}
+bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall* ball)
+{
+	bool got_hit = false;
+
+    int min_x_pos = AsConfig::Border_X_Offset;
+    int max_x_pos = AsConfig::Max_X_Pos + 1;
+    int min_y_pos = AsConfig::Border_Y_Offset;
+    int max_y_pos = AsConfig::Max_Y_Pos + 1;
+
+	double &direction = ball->Ball_Direction;
+    const double &radius = ball->Radius;
+
+    if (next_x_pos + radius > max_x_pos)//right limit
+    {
+        direction = M_PI - direction;
+        got_hit = true;
+    }
+
+    if (next_y_pos - radius < min_y_pos)//top limit
+    {
+        direction = -direction;
+        got_hit = true;
+    }
+
+    if (next_x_pos - radius < min_x_pos)//left limit
+    {
+        ball->Ball_Direction = M_PI - direction;
+        got_hit = true;
+    }
+
+    if (next_y_pos + radius > max_y_pos)//bottom limit
+    {
+        if (AsConfig::Has_Floor)
+        {
+            direction = -direction;
+            got_hit = true;
+        }
+        else
+            if (next_y_pos > max_y_pos + radius)
+                ball->Set_State(EBS_Lost);
+    }
+
+    return got_hit;
+}
 //------------------------------------------------------------------------------------------------------------
 void AsBorder::Init()
 {
@@ -15,7 +59,7 @@ void AsBorder::Init()
     AsConfig::Create_Pen_Brush(Border_Blue_Pen, Border_Blue_Brush, 80, 140, 210);
 }
 //------------------------------------------------------------------------------------------------------------
-void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border, HPEN &bg_pen, HBRUSH &bg_brush)
+void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border, HPEN &bg_pen, HBRUSH &bg_brush) const
 {
     //contour
     SelectObject(hdc, Border_Red_Pen);

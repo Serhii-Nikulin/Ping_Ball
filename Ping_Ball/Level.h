@@ -1,15 +1,18 @@
 #pragma once
 
 #include "Active_Brick.h"
+#include "Ball.h"
 
 //Bricks
 enum ELetter_Type {ELT_None, ELT_O};
 
 //------------------------------------------------------------------------------------------------------------
-class ALevel
+class ALevel: public AHit_Checker
 {
 public:
 	ALevel();
+
+	virtual bool Check_Hit(double next_x_pos, double next_y_pos, ABall *ball);
 
 	void Init();
 	void Draw(HDC hdc, RECT &paint_area);

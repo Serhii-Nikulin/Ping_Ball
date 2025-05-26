@@ -29,6 +29,32 @@ ALevel::ALevel()
 {
 }
 //------------------------------------------------------------------------------------------------------------
+bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
+{
+    int i, j;
+    int brick_x_pos, brick_y_pos;
+	const double& radius = ball->Radius;
+
+    for (i = Level_Height - 1; i >= 0; i--)
+        for (j = 0; j < Level_Width; j++)
+        {
+            if(Level_01[i][j] == 0)
+                continue;
+
+            brick_x_pos = AsConfig::Level_X_Offset + j * Cell_Width;
+            brick_y_pos = AsConfig::Level_Y_Offset + i * Cell_Height + AsConfig::Brick_Height;
+
+            if (next_x_pos >= brick_x_pos and next_x_pos <= brick_x_pos + AsConfig::Brick_Width)
+                if (next_y_pos - radius <= brick_y_pos and next_y_pos - radius >= brick_y_pos - AsConfig::Brick_Height)
+                {
+                    ball->Ball_Direction = -ball->Ball_Direction;
+                    return true;
+                }
+        }
+
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
 void ALevel::Init()
 {
     Level_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
@@ -198,27 +224,7 @@ void ALevel::Draw(HDC hdc, RECT &paint_area)
 //------------------------------------------------------------------------------------------------------------
 void ALevel::Check_Level_Brick_Hit(double next_x_pos, double &next_y_pos, double &ball_direction)
 {
-    int i, j;
-    int brick_x_pos, brick_y_pos;
-
-    for (i = Level_Height - 1; i >= 0; i--)
-        for (j = 0; j < Level_Width; j++)
-        {
-            if(Level_01[i][j] == 0)
-                continue;
-
-            brick_x_pos = AsConfig::Level_X_Offset + j * Cell_Width;
-            brick_y_pos = AsConfig::Level_Y_Offset + i * Cell_Height + AsConfig::Brick_Height;
-
-            if (next_x_pos >= brick_x_pos and next_x_pos <= brick_x_pos + AsConfig::Brick_Width)
-                if (next_y_pos <= brick_y_pos and next_y_pos >= brick_y_pos - AsConfig::Brick_Height)
-                {
-                    ball_direction = -ball_direction;
-                    next_y_pos = brick_y_pos + (brick_y_pos - next_y_pos);
-
-                    return;
-                }
-        }
+    
 }
 //------------------------------------------------------------------------------------------------------------
 
