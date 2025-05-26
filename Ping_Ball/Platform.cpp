@@ -8,6 +8,23 @@ AsPlatform::AsPlatform()
     X_Pos = (AsConfig::Max_X_Pos + 1 + AsConfig::Border_X_Offset + 1 - Normal_Width) / 2;
 }
 //------------------------------------------------------------------------------------------------------------
+bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
+{
+    int platform_y_pos = AsConfig::Platform_Y_Pos + 1;
+	const double &radius = ball->Radius;
+
+    if (next_y_pos + radius  >= platform_y_pos and next_y_pos + radius <= platform_y_pos + AsConfig::Platform_Height)
+    {
+        if (next_x_pos + radius >= X_Pos and next_x_pos - radius <= X_Pos + Width)
+        {
+            ball->Ball_Direction = -ball->Ball_Direction;
+            return true;
+        }
+    }
+
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
 void AsPlatform::Init()
 {
     Highlight_Pen = CreatePen(PS_SOLID, AsConfig::Global_Scale, RGB(255, 255, 255) );

@@ -14,6 +14,10 @@ void AsEngine::Init_Engine(HWND hwnd)
 
     AActive_Brick::Setup_Colors();
 
+    ABall::Add_Hit_Checker(&Border);
+    ABall::Add_Hit_Checker(&Level);
+    ABall::Add_Hit_Checker(&Platform);
+
 	Platform.Set_State(EPS_Normal);
     Platform.Redraw();
 
@@ -96,7 +100,7 @@ int AsEngine::On_Timer()
     switch (Game_State)
     {
     case EGS_Play_Level:
-        Ball.Move(&Level, Platform.X_Pos, Platform.Width, &Border);
+        Ball.Move();
 
         if (Ball.Get_State() == EBS_Lost)
         {

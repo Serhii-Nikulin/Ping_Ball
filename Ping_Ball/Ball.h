@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Config.h"
-#include "Level.h"
 
 enum EBall_State { EBS_Normal, EBS_Lost, EBS_On_Platform };
 
@@ -21,9 +20,10 @@ public:
 	void Init();
 	void Redraw();
 	void Draw(HDC hdc, RECT &paint_area) const;
-	void Move(ALevel *level, int platform_x_pos, int platform_width, AHit_Checker *hit_checker);
+	void Move();
 	EBall_State Get_State() const;
 	void Set_State(EBall_State new_state);
+	static void Add_Hit_Checker(AHit_Checker* hit_checker);
 
 	static const double Radius;
 	double Ball_Direction;
@@ -42,5 +42,8 @@ private:
 	double Center_Y_Pos;
 	double Ball_Speed;
 	double Rest_Distance;
+
+	static int Hit_Checker_Count;
+	static AHit_Checker* Hit_Checkers[3];
 };
 //------------------------------------------------------------------------------------------------------------

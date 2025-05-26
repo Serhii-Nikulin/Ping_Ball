@@ -7,9 +7,11 @@
 const double ABall::Start_Ball_Y_Pos = AsConfig::Platform_Y_Pos + 1 - Radius;
 const double ABall::Start_Ball_X_Pos = (AsConfig::Border_X_Offset + AsConfig::Max_X_Pos) / 2 + 1;
 const double ABall::Radius = 2.0;
+int ABall::Hit_Checker_Count = 0;
+AHit_Checker* ABall::Hit_Checkers[];
 //------------------------------------------------------------------------------------------------------------
 ABall::ABall()
-    : Ball_State(EBS_Normal), Ball_Pen(0), Ball_Brush(0), Ball_Rect{}, Prev_Ball_Rect{}, Center_X_Pos(Start_Ball_X_Pos), Center_Y_Pos(190.0), Ball_Speed(6.0), Ball_Direction(M_PI_4), Rest_Distance(0.0)
+    : Ball_State(EBS_Normal), Ball_Pen(0), Ball_Brush(0), Ball_Rect{}, Prev_Ball_Rect{}, Center_X_Pos(Start_Ball_X_Pos), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(6.0), Ball_Direction(M_PI_4), Rest_Distance(0.0)
 {}
 //------------------------------------------------------------------------------------------------------------
 void ABall::Init()
@@ -49,8 +51,9 @@ void ABall::Draw(HDC hdc, RECT &paint_area) const
     }
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Move(ALevel *level, int platform_x_pos, int platform_width, AHit_Checker *hit_checker)
+void ABall::Move()
 {
+    int i;
     bool got_hit;
     double next_x_pos, next_y_pos;
     double size_step;
@@ -58,9 +61,8 @@ void ABall::Move(ALevel *level, int platform_x_pos, int platform_width, AHit_Che
     if (Ball_State != EBS_Normal)
         return;
 
-    int platform_y_pos = AsConfig::Platform_Y_Pos + 1;
-    size_step = 1.0 / AsConfig::Global_Scale;
     Rest_Distance += Ball_Speed;
+    size_step = 1.0 / AsConfig::Global_Scale;
 
     while (Rest_Distance >= size_step)
     {
@@ -69,7 +71,8 @@ void ABall::Move(ALevel *level, int platform_x_pos, int platform_width, AHit_Che
         next_x_pos = Center_X_Pos + size_step * cos(Ball_Direction);
         next_y_pos = Center_Y_Pos - size_step * sin(Ball_Direction);
     
-		got_hit = hit_checker->Check_Hit(next_x_pos, next_y_pos, this);
+        for (i = 0; i < Hit_Checker_Count; i++)
+			got_hit |= Hit_Checkers[i]->Check_Hit(next_x_pos, next_y_pos, this);
 
         if (got_hit)
             continue;
@@ -79,18 +82,7 @@ void ABall::Move(ALevel *level, int platform_x_pos, int platform_width, AHit_Che
         Rest_Distance -= size_step;
     }
 
-    /*if (next_y_pos >= platform_y_pos and next_y_pos <= platform_y_pos + AsConfig::Platform_Height)
-    {
-        if (next_x_pos >= platform_x_pos and next_x_pos <= platform_x_pos + platform_width)
-        {
-            Ball_Direction = -Ball_Direction;
-            next_y_pos = platform_y_pos - (next_y_pos - platform_y_pos);
-        }
-    }
-
-    level->Check_Level_Brick_Hit(next_x_pos, next_y_pos, Ball_Direction);*/
-
-    //Ball_Direction = fmod(Ball_Direction, 2 * M_PI);
+    Ball_Direction = fmod(Ball_Direction, 2 * M_PI);
 
     Redraw();
 }
@@ -130,3 +122,12 @@ void ABall::Set_State(EBall_State new_state)
 	Ball_State = new_state;
 }
 //------------------------------------------------------------------------------------------------------------
+void ABall::Add_Hit_Checker(AHit_Checker* hit_checker)
+{
+	if (Hit_Checker_Count > sizeof(Hit_Checkers) / sizeof(Hit_Checkers[0]) )
+        return;
+
+	Hit_Checkers[Hit_Checker_Count++] = hit_checker;
+}
+//------------------------------------------------------------------------------------------------------------
+

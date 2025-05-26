@@ -1,13 +1,17 @@
 #pragma once
 
 #include "Config.h"
+#include "Ball.h"
 
 enum EPlatform_State { EPS_Is_Ready, EPS_Normal, EPS_Meltdown, EPS_Missing, EPS_Rolling, EPS_Expanding_Rolling };
 //------------------------------------------------------------------------------------------------------------
-class AsPlatform
+class AsPlatform: public AHit_Checker
 {
 public:
 	AsPlatform();
+
+	virtual bool Check_Hit(double next_x_pos, double next_y_pos, ABall *ball);
+
 	void Init();
 	void Act();
 	EPlatform_State Get_State() const;
