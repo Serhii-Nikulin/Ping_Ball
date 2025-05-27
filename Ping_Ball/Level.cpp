@@ -25,49 +25,146 @@ unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
 //ALevel
 //------------------------------------------------------------------------------------------------------------
 ALevel::ALevel()
-    : Active_Brick(EBT_Red), Level_Rect{}, Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0) 
+    : Active_Brick(EBT_Red), Level_Rect{}, Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0),
+    Current_Brick_Left_Pos(0), Current_Brick_Right_Pos(0), Current_Brick_Top_Pos(0), Current_Brick_Bottom_Pos(0)
 {
 }
 //------------------------------------------------------------------------------------------------------------
 bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 {
     int i, j;
-    int brick_left_pos, brick_right_pos;
-    int brick_top_pos, brick_bottom_pos;
-	const double& radius = ball->Radius;
+    int min_ball_x, max_ball_x;
+    int min_ball_y, max_ball_y;
+    int min_level_x, max_level_x;
+    int min_level_y, max_level_y;
 
-	double direction = ball->Get_Direction();
+    double radius = ball->Radius;
+	
+	min_ball_x = (int)(next_x_pos - radius);
+	max_ball_x = (int)(next_x_pos + radius);
+	min_ball_y = (int)(next_y_pos - radius);
+	max_ball_y = (int)(next_y_pos + radius);
 
-    for (i = Level_Height - 1; i >= 0; i--)
-        for (j = 0; j < Level_Width; j++)
+	if (min_ball_y > AsConfig::Level_Y_Offset + (Level_Height - 1) * Cell_Height + AsConfig::Brick_Height)
+		return false;
+
+    min_level_x = (min_ball_x - AsConfig::Level_X_Offset) / Cell_Width;
+    max_level_x = (max_ball_x - AsConfig::Level_X_Offset) / Cell_Width;
+    min_level_y = (min_ball_y - AsConfig::Level_Y_Offset) / Cell_Height;
+    max_level_y = (max_ball_y - AsConfig::Level_Y_Offset) / Cell_Height;
+
+    for (i = max_level_y; i >= min_level_y; i--)
+        for (j = min_level_x; j <= max_level_x; j++)
         {
             if(Level_01[i][j] == 0)
                 continue;
 
-            brick_left_pos = AsConfig::Level_X_Offset + j * Cell_Width;
-			brick_right_pos = brick_left_pos + AsConfig::Brick_Width;
-			brick_top_pos = AsConfig::Level_Y_Offset + i * Cell_Height;
-            brick_bottom_pos = brick_top_pos + AsConfig::Brick_Height;
+            Current_Brick_Left_Pos = AsConfig::Level_X_Offset + j * Cell_Width;
+            Current_Brick_Right_Pos = Current_Brick_Left_Pos + AsConfig::Brick_Width;
+            Current_Brick_Top_Pos = AsConfig::Level_Y_Offset + i * Cell_Height;
+            Current_Brick_Bottom_Pos = Current_Brick_Top_Pos + AsConfig::Brick_Height;
 
-            // Hit on bottom side of the brick
-            if (direction > 0 and direction < M_PI)
-                if (Hit_Circle_On_Line(next_y_pos - brick_bottom_pos, next_x_pos, brick_left_pos, brick_right_pos, radius) )
-                    return ball->Reflect(true);
+            if (Is_Check_Horizontal_First(next_x_pos, next_y_pos))
+            {
+                if (Check_Horizontal_Hit(next_x_pos, next_y_pos, ball, j, i) )
+                    return true;
 
-            // Hit on top side of the brick
-            if (direction > M_PI and direction < M_PI * 2)
-                if (Hit_Circle_On_Line(brick_top_pos - next_y_pos, next_x_pos, brick_left_pos, brick_right_pos, radius) )
-                    return ball->Reflect(true);
+                if (Check_Vertical_Hit(next_x_pos, next_y_pos, ball, j, i) )
+                    return true;
+            }
+            else
+            {
+                if (Check_Vertical_Hit(next_x_pos, next_y_pos, ball, j, i) )
+                    return true;
 
-            // Hit on left side of the brick
-            if ( (direction  >= 0 and direction < M_PI_2) or (direction > M_PI + M_PI_2 and direction < M_PI * 2 ))
-                if (Hit_Circle_On_Line(brick_left_pos - next_x_pos, next_y_pos, brick_top_pos, brick_bottom_pos, radius) )
-                    return ball->Reflect(false);
+                if (Check_Horizontal_Hit(next_x_pos, next_y_pos, ball, j, i) )
+                    return true;
+            }
+        }
 
-            // Hit on right side of the brick
-            if (direction > M_PI_2 and direction < M_PI + M_PI_2)
-                if (Hit_Circle_On_Line(next_x_pos - brick_right_pos, next_y_pos, brick_top_pos, brick_bottom_pos, radius) )
-                    return ball->Reflect(false);
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
+bool ALevel::Is_Check_Horizontal_First(double next_x_pos, double next_y_pos)
+{
+    double horizontal_distance, vertical_distance, another_distance;
+
+    horizontal_distance = fmod(next_x_pos, Current_Brick_Left_Pos);
+    another_distance = fmod(next_x_pos, Current_Brick_Right_Pos);
+    if (another_distance < horizontal_distance)
+        horizontal_distance = another_distance;
+
+    vertical_distance = fmod(next_y_pos, Current_Brick_Top_Pos);
+    another_distance = fmod(next_y_pos, Current_Brick_Bottom_Pos);
+    if (another_distance < vertical_distance)
+        vertical_distance = another_distance;
+
+    return (horizontal_distance < vertical_distance);
+}
+//------------------------------------------------------------------------------------------------------------
+bool ALevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y)
+{
+    double direction = ball->Get_Direction();
+    double radius = ball->Radius;
+
+    // Hit on bottom side of the brick
+    if (direction > 0 and direction < M_PI)
+        if (Hit_Circle_On_Line(next_y_pos - Current_Brick_Bottom_Pos, next_x_pos, Current_Brick_Left_Pos, Current_Brick_Right_Pos, radius) )
+        {
+            if (brick_y < Level_Height - 1 and Level_01[brick_y + 1][brick_x] == 0)
+            {
+                ball->Reflect(true);
+                return true;
+            }
+            else
+                return false;
+        }
+
+    // Hit on top side of the brick
+    if (direction > M_PI and direction < M_PI * 2)
+        if (Hit_Circle_On_Line(Current_Brick_Top_Pos - next_y_pos, next_x_pos, Current_Brick_Left_Pos, Current_Brick_Right_Pos, radius) )
+        {
+            if (brick_y > 0 and Level_01[brick_y - 1][brick_x] == 0)
+            {
+                ball->Reflect(true);
+                return true;
+            }
+            else
+                return false;
+        }
+
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
+bool ALevel::Check_Horizontal_Hit(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y)
+{
+    double direction = ball->Get_Direction();
+    double radius = ball->Radius;
+
+    // Hit on left side of the brick
+    if ( (direction  >= 0 and direction < M_PI_2) or (direction > M_PI + M_PI_2 and direction < M_PI * 2 ))
+        if (Hit_Circle_On_Line(Current_Brick_Left_Pos - next_x_pos, next_y_pos, Current_Brick_Top_Pos, Current_Brick_Bottom_Pos, radius) )
+        {
+            if (brick_x > 0 and Level_01[brick_y][brick_x - 1] == 0)
+            {
+                ball->Reflect(false);
+                return true;
+            }
+            else
+                return false;
+        }
+
+    // Hit on right side of the brick
+    if (direction > M_PI_2 and direction < M_PI + M_PI_2)
+        if (Hit_Circle_On_Line(next_x_pos - Current_Brick_Right_Pos, next_y_pos, Current_Brick_Top_Pos, Current_Brick_Bottom_Pos, radius) )
+        {
+            if (brick_x < Level_Width - 1 and Level_01[brick_y][brick_x + 1] == 0)
+            {
+                ball->Reflect(false);
+                return true;
+            }
+            else
+                return false;
         }
 
     return false;

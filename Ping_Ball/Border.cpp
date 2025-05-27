@@ -19,19 +19,31 @@ bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall* ball)
     const double &radius = ball->Radius;
 
     if (next_x_pos + radius > max_x_pos)//right limit
-        got_hit = ball->Reflect(false);
-
+    {
+        ball->Reflect(false);
+        got_hit = true;
+    }
+        
     if (next_y_pos - radius < min_y_pos)//top limit
-        got_hit = ball->Reflect(true);
+    {
+        ball->Reflect(true);
+        got_hit = true;
+    }
 
 
     if (next_x_pos - radius < min_x_pos)//left limit
-        got_hit = ball->Reflect(false);
+    {
+        ball->Reflect(false);
+        got_hit = true;
+    }
 
     if (next_y_pos + radius > max_y_pos)//bottom limit
     {
         if (AsConfig::Has_Floor)
-            got_hit = ball->Reflect(true);
+        {
+            ball->Reflect(true);
+            return true;
+        }
         else
             if (next_y_pos > max_y_pos + radius)
                 ball->Set_State(EBS_Lost);

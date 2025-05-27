@@ -146,13 +146,11 @@ double ABall::Get_Direction() const
     return Ball_Direction;
 }
 //------------------------------------------------------------------------------------------------------------
-bool ABall::Reflect(bool is_horizontal_hit)
+void ABall::Reflect(bool is_horizontal_hit)
 {
 	if (is_horizontal_hit)
 		Set_Direction(-Ball_Direction);
     else
 		Set_Direction(M_PI - Ball_Direction);
-
-    return true;
 }
 //------------------------------------------------------------------------------------------------------------

@@ -25,6 +25,10 @@ private:
 	void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step);
 	void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type) const;
 
+	bool Is_Check_Horizontal_First(double next_x_pos, double next_y_pos);
+	bool Check_Horizontal_Hit(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y);
+	bool Check_Vertical_Hit(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y);
+
 
 	RECT Level_Rect{};
 	HPEN Letter_Pen;
@@ -38,5 +42,10 @@ private:
 	static const int Level_Width = 12;
 
 	static unsigned char Level_01[ALevel::Level_Height][ALevel::Level_Width];
+
+	int Current_Brick_Left_Pos;
+	int Current_Brick_Right_Pos;
+	int Current_Brick_Top_Pos;
+	int Current_Brick_Bottom_Pos;
 };
 //------------------------------------------------------------------------------------------------------------

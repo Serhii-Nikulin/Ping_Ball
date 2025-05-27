@@ -28,7 +28,7 @@ public:
 	static const double Radius;
 	void Set_Direction(double new_direction);
 	double Get_Direction() const;
-	bool Reflect(bool is_horizontal_hit);
+	void Reflect(bool is_horizontal_hit);
 
 private:
 	static const double Start_Ball_X_Pos;
