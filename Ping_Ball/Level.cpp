@@ -3,14 +3,14 @@
 //------------------------------------------------------------------------------------------------------------
 unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -32,8 +32,11 @@ ALevel::ALevel()
 bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 {
     int i, j;
-    int brick_x_pos, brick_y_pos;
+    int brick_left_pos, brick_right_pos;
+    int brick_top_pos, brick_bottom_pos;
 	const double& radius = ball->Radius;
+
+	double direction = ball->Get_Direction();
 
     for (i = Level_Height - 1; i >= 0; i--)
         for (j = 0; j < Level_Width; j++)
@@ -41,16 +44,49 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
             if(Level_01[i][j] == 0)
                 continue;
 
-            brick_x_pos = AsConfig::Level_X_Offset + j * Cell_Width;
-            brick_y_pos = AsConfig::Level_Y_Offset + i * Cell_Height + AsConfig::Brick_Height;
+            brick_left_pos = AsConfig::Level_X_Offset + j * Cell_Width;
+			brick_right_pos = brick_left_pos + AsConfig::Brick_Width;
+			brick_top_pos = AsConfig::Level_Y_Offset + i * Cell_Height;
+            brick_bottom_pos = brick_top_pos + AsConfig::Brick_Height;
 
-            if (next_x_pos >= brick_x_pos and next_x_pos <= brick_x_pos + AsConfig::Brick_Width)
-                if (next_y_pos - radius <= brick_y_pos and next_y_pos - radius >= brick_y_pos - AsConfig::Brick_Height)
-                {
-                    ball->Ball_Direction = -ball->Ball_Direction;
-                    return true;
-                }
+            // Hit on bottom side of the brick
+            if (direction > 0 and direction < M_PI)
+                if (Hit_Circle_On_Line(next_y_pos - brick_bottom_pos, next_x_pos, brick_left_pos, brick_right_pos, radius) )
+                    return ball->Reflect(true);
+
+            // Hit on top side of the brick
+            if (direction > M_PI and direction < M_PI * 2)
+                if (Hit_Circle_On_Line(brick_top_pos - next_y_pos, next_x_pos, brick_left_pos, brick_right_pos, radius) )
+                    return ball->Reflect(true);
+
+            // Hit on left side of the brick
+            if ( (direction  >= 0 and direction < M_PI_2) or (direction > M_PI + M_PI_2 and direction < M_PI * 2 ))
+                if (Hit_Circle_On_Line(brick_left_pos - next_x_pos, next_y_pos, brick_top_pos, brick_bottom_pos, radius) )
+                    return ball->Reflect(false);
+
+            // Hit on right side of the brick
+            if (direction > M_PI_2 and direction < M_PI + M_PI_2)
+                if (Hit_Circle_On_Line(next_x_pos - brick_right_pos, next_y_pos, brick_top_pos, brick_bottom_pos, radius) )
+                    return ball->Reflect(false);
         }
+
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
+bool ALevel::Hit_Circle_On_Line(double distance, double position, double min, double max, double radius)
+{
+    double value_pos; // x or y
+    double min_pos, max_pos;
+
+    if (distance > radius)
+        return false;
+
+    value_pos = sqrt(radius * radius - distance * distance);
+    min_pos = position - value_pos;
+    max_pos = position + value_pos;
+
+    if ( (min_pos >= min and min_pos <= max) or (max_pos > min and max_pos < max) )
+        return true;
 
     return false;
 }
@@ -222,10 +258,3 @@ void ALevel::Draw(HDC hdc, RECT &paint_area)
     Active_Brick.Draw(hdc);
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Check_Level_Brick_Hit(double next_x_pos, double &next_y_pos, double &ball_direction)
-{
-    
-}
-//------------------------------------------------------------------------------------------------------------
-
-

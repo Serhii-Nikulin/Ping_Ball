@@ -13,10 +13,10 @@ public:
 	ALevel();
 
 	virtual bool Check_Hit(double next_x_pos, double next_y_pos, ABall *ball);
+	bool Hit_Circle_On_Line(double distance, double position, double min, double max, double radius);
 
 	void Init();
 	void Draw(HDC hdc, RECT &paint_area);
-	void Check_Level_Brick_Hit(double next_x_pos, double &next_y_pos, double &ball_direction);
 
 	AActive_Brick Active_Brick;
 

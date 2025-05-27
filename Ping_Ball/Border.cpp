@@ -16,34 +16,22 @@ bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall* ball)
     int min_y_pos = AsConfig::Border_Y_Offset;
     int max_y_pos = AsConfig::Max_Y_Pos + 1;
 
-	double &direction = ball->Ball_Direction;
     const double &radius = ball->Radius;
 
     if (next_x_pos + radius > max_x_pos)//right limit
-    {
-        direction = M_PI - direction;
-        got_hit = true;
-    }
+        got_hit = ball->Reflect(false);
 
     if (next_y_pos - radius < min_y_pos)//top limit
-    {
-        direction = -direction;
-        got_hit = true;
-    }
+        got_hit = ball->Reflect(true);
+
 
     if (next_x_pos - radius < min_x_pos)//left limit
-    {
-        ball->Ball_Direction = M_PI - direction;
-        got_hit = true;
-    }
+        got_hit = ball->Reflect(false);
 
     if (next_y_pos + radius > max_y_pos)//bottom limit
     {
         if (AsConfig::Has_Floor)
-        {
-            direction = -direction;
-            got_hit = true;
-        }
+            got_hit = ball->Reflect(true);
         else
             if (next_y_pos > max_y_pos + radius)
                 ball->Set_State(EBS_Lost);

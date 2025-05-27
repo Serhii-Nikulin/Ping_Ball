@@ -26,7 +26,9 @@ public:
 	static void Add_Hit_Checker(AHit_Checker* hit_checker);
 
 	static const double Radius;
-	double Ball_Direction;
+	void Set_Direction(double new_direction);
+	double Get_Direction() const;
+	bool Reflect(bool is_horizontal_hit);
 
 private:
 	static const double Start_Ball_X_Pos;
@@ -41,6 +43,7 @@ private:
 	double Center_X_Pos;
 	double Center_Y_Pos;
 	double Ball_Speed;
+	double Ball_Direction;
 	double Rest_Distance;
 
 	static int Hit_Checker_Count;
