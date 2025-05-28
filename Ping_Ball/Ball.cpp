@@ -82,8 +82,6 @@ void ABall::Move()
         Rest_Distance -= size_step;
     }
 
-    Ball_Direction = fmod(Ball_Direction, 2 * M_PI);
-
     Redraw();
 }
 //------------------------------------------------------------------------------------------------------------
@@ -124,10 +122,35 @@ void ABall::Set_State(EBall_State new_state)
 //------------------------------------------------------------------------------------------------------------
 void ABall::Add_Hit_Checker(AHit_Checker* hit_checker)
 {
-	if (Hit_Checker_Count > sizeof(Hit_Checkers) / sizeof(Hit_Checkers[0]) )
+	if (Hit_Checker_Count >= sizeof(Hit_Checkers) / sizeof(Hit_Checkers[0]) )
         return;
 
 	Hit_Checkers[Hit_Checker_Count++] = hit_checker;
 }
 //------------------------------------------------------------------------------------------------------------
+void ABall::Set_Direction(double new_direction)
+{
+    const double pi_2 = M_PI * 2;
 
+    while (new_direction >= pi_2)
+        new_direction -= pi_2;
+
+    while (new_direction < 0)
+        new_direction += pi_2;
+
+    Ball_Direction = new_direction;
+}
+//------------------------------------------------------------------------------------------------------------
+double ABall::Get_Direction() const
+{
+    return Ball_Direction;
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Reflect(bool is_horizontal_hit)
+{
+	if (is_horizontal_hit)
+		Set_Direction(-Ball_Direction);
+    else
+		Set_Direction(M_PI - Ball_Direction);
+}
+//------------------------------------------------------------------------------------------------------------

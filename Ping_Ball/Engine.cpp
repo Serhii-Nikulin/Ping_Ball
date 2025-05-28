@@ -26,6 +26,8 @@ void AsEngine::Init_Engine(HWND hwnd)
     Platform.Init();
     Border.Init();
 
+    Level.Set_Current_Level(ALevel::Level_01);
+
     if (Game_State == EGS_Restart_Level)
     {
         Ball.Set_State(EBS_Lost);

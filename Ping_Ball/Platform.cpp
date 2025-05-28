@@ -17,7 +17,7 @@ bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
     {
         if (next_x_pos + radius >= X_Pos and next_x_pos - radius <= X_Pos + Width)
         {
-            ball->Ball_Direction = -ball->Ball_Direction;
+            ball->Reflect(true);
             return true;
         }
     }
