@@ -36,6 +36,7 @@ public:
 	static HBRUSH BG_Brush;
 
 	static bool Has_Floor;
+	static double Moving_Size_Step;
 
 	//Border
 	static const int Border_X_Offset = 6;
@@ -45,7 +46,6 @@ public:
 
 
 	//Platform
-	static const int Platform_Height = 7;
 	static const int Platform_Y_Pos = 185;
 
 	//Level

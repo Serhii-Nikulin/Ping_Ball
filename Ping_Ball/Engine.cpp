@@ -42,8 +42,8 @@ void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
     int i;
     RECT intersection_rect{};
 
-    Ball.Draw(hdc, paint_area);
     Platform.Draw(hdc, paint_area);
+    Ball.Draw(hdc, paint_area);
     Level.Draw(hdc, paint_area);
     Border.Draw(hdc);
 

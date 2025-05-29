@@ -10,16 +10,78 @@ AsPlatform::AsPlatform()
 //------------------------------------------------------------------------------------------------------------
 bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 {
-    int platform_y_pos = AsConfig::Platform_Y_Pos + 1;
-	const double &radius = ball->Radius;
+    if (next_y_pos + ball->Radius < AsConfig::Platform_Y_Pos)
+        return false;
 
-    if (next_y_pos + radius  >= platform_y_pos and next_y_pos + radius <= platform_y_pos + AsConfig::Platform_Height)
+    if (Reflect_From_Circle(next_x_pos, next_y_pos, ball, X_Pos + Circle_Size / 2.0) )
+        return true;
+
+    if (Reflect_From_Circle(next_x_pos, next_y_pos, ball, X_Pos + Width - Circle_Size / 2.0) )
+        return true;
+
+    if (Reflect_From_Center(next_x_pos, next_y_pos, ball) )
+        return true;
+
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsPlatform::Reflect_From_Circle(double next_x_pos, double next_y_pos, ABall *ball, double circle_x_pos)
+{
+    double delta;
+    double falling_angle, reflecting_angle;
+    double distance;
+    double radius = ball->Radius;
+    double circle_radius = Circle_Size / 2.0;
+    double circle_y_pos = AsConfig::Platform_Y_Pos + circle_radius;
+
+    double dx = next_x_pos - circle_x_pos;
+    double dy = circle_y_pos - next_y_pos;
+
+    distance = sqrt(dx * dx + dy * dy);
+
+    if (distance - (radius + circle_radius) > 1.0 / AsConfig::Global_Scale)
+        return false;
+
+    falling_angle = atan2(dy, dx);
+    delta = ball->Get_Direction() - falling_angle;
+
+    while (delta >= 2 * M_PI)
+        delta -= 2 * M_PI;
+
+    while (delta < 0)
+        delta += 2 * M_PI;
+
+    if (delta > M_PI_2 and delta < M_PI + M_PI_2)
     {
-        if (next_x_pos + radius >= X_Pos and next_x_pos - radius <= X_Pos + Width)
-        {
-            ball->Reflect(true);
-            return true;
-        }
+        reflecting_angle = falling_angle + M_PI - ball->Get_Direction();
+        ball->Set_Direction(reflecting_angle + falling_angle);
+
+        return true;
+    }
+
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsPlatform::Reflect_From_Center(double next_x_pos, double next_y_pos, ABall *ball)
+{
+    double value_pos;
+    int left_x_pos = X_Pos + Circle_Size - 1;
+    int inner_y_pos;
+    int top_y_pos = AsConfig::Platform_Y_Pos + 1;
+    int low_y_pos = AsConfig::Platform_Y_Pos + Height - 1;;
+    int right_x_pos = X_Pos + Width - (Circle_Size - 1);
+
+    const double &radius = ball->Radius;
+
+    if (ball->Is_Moving_Up() )
+        inner_y_pos = low_y_pos;
+    else
+        inner_y_pos = top_y_pos;
+
+    if (Hit_Circle_On_Line(next_y_pos - inner_y_pos, next_x_pos, left_x_pos, right_x_pos, radius, value_pos) )
+    {
+        ball->Reflect(true);
+        return true;
     }
 
     return false;
@@ -93,7 +155,7 @@ void AsPlatform::Redraw()
     Platform_Rect.left = X_Pos * AsConfig::Global_Scale;
     Platform_Rect.top = AsConfig::Platform_Y_Pos * AsConfig::Global_Scale;
     Platform_Rect.right = Platform_Rect.left + width * AsConfig::Global_Scale;
-    Platform_Rect.bottom = Platform_Rect.top + AsConfig::Platform_Height * AsConfig::Global_Scale;
+    Platform_Rect.bottom = Platform_Rect.top + Height * AsConfig::Global_Scale;
 
     if (Platform_State == EPS_Meltdown)
         Platform_Rect.bottom = (AsConfig::Max_Y_Pos + 1) * AsConfig::Global_Scale;
@@ -142,7 +204,7 @@ void AsPlatform::Clear_BG(HDC hdc) const
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Draw_Circle(HDC hdc, int x, int y)
 {
-    Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + AsConfig::Platform_Height) * AsConfig::Global_Scale, (y + AsConfig::Platform_Height) * AsConfig::Global_Scale);
+    Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + Height) * AsConfig::Global_Scale, (y + Height) * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Draw_Circle_Highlight(HDC hdc, int x, int y) const
@@ -184,7 +246,7 @@ void AsPlatform::Draw_Meltdown_State(HDC hdc)
     int offset_colons_count = 0;;
 
     int platform_width = Normal_Width * AsConfig::Global_Scale;
-    int platform_height = AsConfig::Platform_Height * AsConfig::Global_Scale;
+    int platform_height = Height * AsConfig::Global_Scale;
 
 	int max_y_pos = (AsConfig::Max_Y_Pos + 1) * AsConfig::Global_Scale + platform_height;
 

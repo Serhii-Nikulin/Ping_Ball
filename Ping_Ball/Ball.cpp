@@ -1,12 +1,33 @@
 #include "Ball.h"
 
+//AHit_Checker
+//------------------------------------------------------------------------------------------------------------
+bool AHit_Checker::Hit_Circle_On_Line(double distance, double position, double min, double max, double radius, double &value_pos)
+{
+    double min_pos, max_pos;
+
+    if (distance > radius)
+        return false;
+
+    value_pos = sqrt(radius * radius - distance * distance);
+    min_pos = position - value_pos;
+    max_pos = position + value_pos;
+
+    if ( (min_pos >= min and min_pos <= max) or (max_pos > min and max_pos < max) )
+        return true;
+
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
+
+
 
 
 //ABall
 //------------------------------------------------------------------------------------------------------------
 const double ABall::Start_Ball_Y_Pos = AsConfig::Platform_Y_Pos + 1 - Radius;
 const double ABall::Start_Ball_X_Pos = (AsConfig::Border_X_Offset + AsConfig::Max_X_Pos) / 2 + 1;
-const double ABall::Radius = 2.0;
+const double ABall::Radius = 2.0 - 0.5 / AsConfig::Global_Scale;
 int ABall::Hit_Checker_Count = 0;
 AHit_Checker* ABall::Hit_Checkers[];
 //------------------------------------------------------------------------------------------------------------
@@ -25,8 +46,8 @@ void ABall::Redraw()
 
     Ball_Rect.left = (int)((Center_X_Pos - Radius) * AsConfig::Global_Scale);
     Ball_Rect.top = (int)((Center_Y_Pos - Radius) * AsConfig::Global_Scale);
-    Ball_Rect.right = (int)((Center_X_Pos + Radius) * AsConfig::Global_Scale - 1);
-    Ball_Rect.bottom = (int)((Center_Y_Pos + Radius) * AsConfig::Global_Scale - 1);
+    Ball_Rect.right = (int)((Center_X_Pos + Radius) * AsConfig::Global_Scale);
+    Ball_Rect.bottom = (int)((Center_Y_Pos + Radius) * AsConfig::Global_Scale);
 
     InvalidateRect(AsConfig::Hwnd, &Prev_Ball_Rect, FALSE);
     InvalidateRect(AsConfig::Hwnd, &Ball_Rect, FALSE);
@@ -56,20 +77,19 @@ void ABall::Move()
     int i;
     bool got_hit;
     double next_x_pos, next_y_pos;
-    double size_step;
 
     if (Ball_State != EBS_Normal)
         return;
 
     Rest_Distance += Ball_Speed;
-    size_step = 1.0 / AsConfig::Global_Scale;
+    
 
-    while (Rest_Distance >= size_step)
+    while (Rest_Distance >= AsConfig::Moving_Size_Step)
     {
         got_hit = false;
 
-        next_x_pos = Center_X_Pos + size_step * cos(Ball_Direction);
-        next_y_pos = Center_Y_Pos - size_step * sin(Ball_Direction);
+        next_x_pos = Center_X_Pos + AsConfig::Moving_Size_Step * cos(Ball_Direction);
+        next_y_pos = Center_Y_Pos - AsConfig::Moving_Size_Step * sin(Ball_Direction);
     
         for (i = 0; i < Hit_Checker_Count; i++)
 			got_hit |= Hit_Checkers[i]->Check_Hit(next_x_pos, next_y_pos, this);
@@ -79,7 +99,7 @@ void ABall::Move()
 
         Center_X_Pos = next_x_pos;
         Center_Y_Pos = next_y_pos;
-        Rest_Distance -= size_step;
+        Rest_Distance -= AsConfig::Moving_Size_Step;
     }
 
     Redraw();
@@ -146,11 +166,27 @@ double ABall::Get_Direction() const
     return Ball_Direction;
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Reflect(bool is_horizontal_hit)
+void ABall::Reflect(bool is_hit_from_horizontal)
 {
-	if (is_horizontal_hit)
+	if (is_hit_from_horizontal)
 		Set_Direction(-Ball_Direction);
     else
 		Set_Direction(M_PI - Ball_Direction);
+}
+//------------------------------------------------------------------------------------------------------------
+bool ABall::Is_Moving_Up() const
+{
+    if (Ball_Direction > 0 and Ball_Direction < M_PI)
+        return true;
+    else
+        return false;
+}
+//------------------------------------------------------------------------------------------------------------
+bool ABall::Is_Moving_Left() const
+{
+    if (Ball_Direction > M_PI_2 and Ball_Direction < M_PI + M_PI_2)
+        return true;
+    else
+        return false;
 }
 //------------------------------------------------------------------------------------------------------------
