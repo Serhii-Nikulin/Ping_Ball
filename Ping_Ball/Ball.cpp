@@ -27,7 +27,7 @@ bool AHit_Checker::Hit_Circle_On_Line(double distance, double position, double m
 //------------------------------------------------------------------------------------------------------------
 const double ABall::Start_Ball_Y_Pos = AsConfig::Platform_Y_Pos + 1 - Radius;
 const double ABall::Start_Ball_X_Pos = (AsConfig::Border_X_Offset + AsConfig::Max_X_Pos) / 2 + 1;
-const double ABall::Radius = 2.0;
+const double ABall::Radius = 2.0 - 0.5 / AsConfig::Global_Scale;
 int ABall::Hit_Checker_Count = 0;
 AHit_Checker* ABall::Hit_Checkers[];
 //------------------------------------------------------------------------------------------------------------
@@ -46,8 +46,8 @@ void ABall::Redraw()
 
     Ball_Rect.left = (int)((Center_X_Pos - Radius) * AsConfig::Global_Scale);
     Ball_Rect.top = (int)((Center_Y_Pos - Radius) * AsConfig::Global_Scale);
-    Ball_Rect.right = (int)((Center_X_Pos + Radius) * AsConfig::Global_Scale - 1);
-    Ball_Rect.bottom = (int)((Center_Y_Pos + Radius) * AsConfig::Global_Scale - 1);
+    Ball_Rect.right = (int)((Center_X_Pos + Radius) * AsConfig::Global_Scale);
+    Ball_Rect.bottom = (int)((Center_Y_Pos + Radius) * AsConfig::Global_Scale);
 
     InvalidateRect(AsConfig::Hwnd, &Prev_Ball_Rect, FALSE);
     InvalidateRect(AsConfig::Hwnd, &Ball_Rect, FALSE);
@@ -77,20 +77,19 @@ void ABall::Move()
     int i;
     bool got_hit;
     double next_x_pos, next_y_pos;
-    double size_step;
 
     if (Ball_State != EBS_Normal)
         return;
 
     Rest_Distance += Ball_Speed;
-    size_step = 1.0 / AsConfig::Global_Scale;
+    
 
-    while (Rest_Distance >= size_step)
+    while (Rest_Distance >= AsConfig::Moving_Size_Step)
     {
         got_hit = false;
 
-        next_x_pos = Center_X_Pos + size_step * cos(Ball_Direction);
-        next_y_pos = Center_Y_Pos - size_step * sin(Ball_Direction);
+        next_x_pos = Center_X_Pos + AsConfig::Moving_Size_Step * cos(Ball_Direction);
+        next_y_pos = Center_Y_Pos - AsConfig::Moving_Size_Step * sin(Ball_Direction);
     
         for (i = 0; i < Hit_Checker_Count; i++)
 			got_hit |= Hit_Checkers[i]->Check_Hit(next_x_pos, next_y_pos, this);
@@ -100,7 +99,7 @@ void ABall::Move()
 
         Center_X_Pos = next_x_pos;
         Center_Y_Pos = next_y_pos;
-        Rest_Distance -= size_step;
+        Rest_Distance -= AsConfig::Moving_Size_Step;
     }
 
     Redraw();

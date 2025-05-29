@@ -16,6 +16,8 @@ AColor::AColor(unsigned char r, unsigned char g, unsigned char b)
 HWND AsConfig::Hwnd = 0;
 int AsConfig::Current_Timer_Tick = 0;
 bool AsConfig::Has_Floor = true;
+double AsConfig::Moving_Size_Step = 1.0 / AsConfig::Global_Scale;
+
 const AColor AsConfig::BG_Color(15, 15, 35);
 const AColor AsConfig::Red_Brick_Color(220, 100, 80);
 const AColor AsConfig::Blue_Brick_Color(80, 140, 210);
