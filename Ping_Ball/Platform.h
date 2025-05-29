@@ -20,7 +20,6 @@ public:
 	void Redraw();
 	void Draw(HDC hdc, RECT &paint_area);
 
-
 	int Width;
 	int X_Pos;
 	int X_Step;

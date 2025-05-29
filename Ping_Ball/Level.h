@@ -5,7 +5,6 @@
 
 //Bricks
 enum ELetter_Type {ELT_None, ELT_O};
-
 //------------------------------------------------------------------------------------------------------------
 class ALevel: public AHit_Checker
 {
@@ -13,7 +12,6 @@ public:
 	ALevel();
 
 	virtual bool Check_Hit(double next_x_pos, double next_y_pos, ABall *ball);
-	bool Hit_Circle_On_Line(double distance, double position, double min, double max, double radius, double &value_pos);
 
 	void Init();
 	void Draw(HDC hdc, RECT &paint_area);
@@ -31,8 +29,8 @@ private:
 	void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step);
 	void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type) const;
 
-	bool Check_Horizontal_Hit(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance);
-	bool Check_Vertical_Hit(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distnace);
+	bool Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance);
+	bool Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distnace);
 
 
 	RECT Level_Rect{};

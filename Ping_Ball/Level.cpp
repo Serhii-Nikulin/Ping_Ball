@@ -34,8 +34,8 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
     int min_level_x, max_level_x;
     int min_level_y, max_level_y;
 
-    bool is_horizontal_hit;
-    bool is_vertical_hit;
+    bool is_hit_from_vertical;
+    bool is_hit_from_horizontal;
     double distance_x, distance_y;
 
     double radius = ball->Radius;
@@ -45,7 +45,7 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 	min_ball_y = (int)(next_y_pos - radius);
 	max_ball_y = (int)(next_y_pos + radius);
 
-	if (min_ball_y > AsConfig::Level_Y_Offset + (Level_Height - 1) * Cell_Height + AsConfig::Brick_Height)
+	if (max_ball_y > AsConfig::Level_Y_Offset + (Level_Height - 1) * Cell_Height + AsConfig::Brick_Height)
 		return false;
 
     min_level_x = (min_ball_x - AsConfig::Level_X_Offset) / Cell_Width;
@@ -54,7 +54,7 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
     max_level_y = (max_ball_y - AsConfig::Level_Y_Offset) / Cell_Height;
 
 
-    for (i = max_level_y; i >= min_level_y and i < Level_Height; i--)
+    for (i = max_level_y; i >= min_level_y; i--)
         for (j = min_level_x; j <= max_level_x; j++)
         {
             if(Level_01[i][j] == 0)
@@ -65,10 +65,10 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
             Current_Brick_Top_Pos = AsConfig::Level_Y_Offset + i * Cell_Height;
             Current_Brick_Bottom_Pos = Current_Brick_Top_Pos + AsConfig::Brick_Height;
 
-			is_horizontal_hit = Check_Horizontal_Hit(next_x_pos, next_y_pos, ball, j, i, distance_y);
-			is_vertical_hit = Check_Vertical_Hit(next_x_pos, next_y_pos, ball, j, i, distance_x);
+			is_hit_from_vertical = Check_Hit_From_Vertical(next_x_pos, next_y_pos, ball, j, i, distance_y);
+			is_hit_from_horizontal = Check_Hit_From_Horizontal(next_x_pos, next_y_pos, ball, j, i, distance_x);
 
-            if (is_horizontal_hit and is_vertical_hit)
+            if (is_hit_from_vertical and is_hit_from_horizontal)
             {
                 if(distance_x < distance_y)
                 {
@@ -81,12 +81,12 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 					return true;
                 }
             }
-			else if (is_horizontal_hit)
+			else if (is_hit_from_vertical)
 			{
 				ball->Reflect(false);
 				return true;
 			}
-			else if (is_vertical_hit)
+			else if (is_hit_from_horizontal)
 			{
 				ball->Reflect(true);
 				return true;
@@ -96,13 +96,14 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
     return false;
 }
 //------------------------------------------------------------------------------------------------------------
-bool ALevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance)
+bool ALevel::Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance)
 {
     double direction = ball->Get_Direction();
     double radius = ball->Radius;
 
-    // Hit on bottom side of the brick
-    if (direction > 0 and direction < M_PI)
+    // Hit from bottom side of the brick
+    if (ball->Is_Moving_Up() )
+    {
         if (Hit_Circle_On_Line(next_y_pos - Current_Brick_Bottom_Pos, next_x_pos, Current_Brick_Left_Pos, Current_Brick_Right_Pos, radius, distance) )
         {
             if (brick_y == Level_Height - 1 or (brick_y < Level_Height - 1 and Current_Level[brick_y + 1][brick_x] == 0) )
@@ -110,9 +111,9 @@ bool ALevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, ABall *bal
             else
                 return false;
         }
-
-    // Hit on top side of the brick
-    if (direction > M_PI and direction < M_PI * 2)
+    }
+    else // Hit from top side of the brick
+    {
         if (Hit_Circle_On_Line(Current_Brick_Top_Pos - next_y_pos, next_x_pos, Current_Brick_Left_Pos, Current_Brick_Right_Pos, radius, distance) )
         {
             if (brick_y > 0 and Current_Level[brick_y - 1][brick_x] == 0)
@@ -120,27 +121,17 @@ bool ALevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, ABall *bal
             else
                 return false;
         }
-
-    return false;
+    }
 }
 //------------------------------------------------------------------------------------------------------------
-bool ALevel::Check_Horizontal_Hit(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance)
+bool ALevel::Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance)
 {
     double direction = ball->Get_Direction();
     double radius = ball->Radius;
 
-    // Hit on left side of the brick
-    if ( (direction  >= 0 and direction < M_PI_2) or (direction > M_PI + M_PI_2 and direction < M_PI * 2 ))
-        if (Hit_Circle_On_Line(Current_Brick_Left_Pos - next_x_pos, next_y_pos, Current_Brick_Top_Pos, Current_Brick_Bottom_Pos, radius, distance) )
-        {
-            if (brick_x > 0 and Current_Level[brick_y][brick_x - 1] == 0)
-                return true;
-            else
-                return false;
-        }
-
-    // Hit on right side of the brick
-    if (direction > M_PI_2 and direction < M_PI + M_PI_2)
+    // Hit from right side of the brick
+    if (ball->Is_Moving_Left() )
+    {
         if (Hit_Circle_On_Line(next_x_pos - Current_Brick_Right_Pos, next_y_pos, Current_Brick_Top_Pos, Current_Brick_Bottom_Pos, radius, distance) )
         {
             if (brick_x < Level_Width - 1 and Current_Level[brick_y][brick_x + 1] == 0)
@@ -148,25 +139,17 @@ bool ALevel::Check_Horizontal_Hit(double next_x_pos, double next_y_pos, ABall *b
             else
                 return false;
         }
-
-    return false;
-}
-//------------------------------------------------------------------------------------------------------------
-bool ALevel::Hit_Circle_On_Line(double distance, double position, double min, double max, double radius, double &value_pos)
-{
-    double min_pos, max_pos;
-
-    if (distance > radius)
-        return false;
-
-    value_pos = sqrt(radius * radius - distance * distance);
-    min_pos = position - value_pos;
-    max_pos = position + value_pos;
-
-    if ( (min_pos >= min and min_pos <= max) or (max_pos > min and max_pos < max) )
-        return true;
-
-    return false;
+    }
+    else // Hit from left side of the brick
+    {
+        if (Hit_Circle_On_Line(Current_Brick_Left_Pos - next_x_pos, next_y_pos, Current_Brick_Top_Pos, Current_Brick_Bottom_Pos, radius, distance) )
+        {
+            if (brick_x > 0 and Current_Level[brick_y][brick_x - 1] == 0)
+                return true;
+            else
+                return false;
+        }
+    }
 }
 //------------------------------------------------------------------------------------------------------------
 void ALevel::Init()

@@ -1,5 +1,26 @@
 #include "Ball.h"
 
+//AHit_Checker
+//------------------------------------------------------------------------------------------------------------
+bool AHit_Checker::Hit_Circle_On_Line(double distance, double position, double min, double max, double radius, double &value_pos)
+{
+    double min_pos, max_pos;
+
+    if (distance > radius)
+        return false;
+
+    value_pos = sqrt(radius * radius - distance * distance);
+    min_pos = position - value_pos;
+    max_pos = position + value_pos;
+
+    if ( (min_pos >= min and min_pos <= max) or (max_pos > min and max_pos < max) )
+        return true;
+
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
+
+
 
 
 //ABall
@@ -146,11 +167,27 @@ double ABall::Get_Direction() const
     return Ball_Direction;
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Reflect(bool is_horizontal_hit)
+void ABall::Reflect(bool is_hit_from_horizontal)
 {
-	if (is_horizontal_hit)
+	if (is_hit_from_horizontal)
 		Set_Direction(-Ball_Direction);
     else
 		Set_Direction(M_PI - Ball_Direction);
+}
+//------------------------------------------------------------------------------------------------------------
+bool ABall::Is_Moving_Up() const
+{
+    if (Ball_Direction > 0 and Ball_Direction < M_PI)
+        return true;
+    else
+        return false;
+}
+//------------------------------------------------------------------------------------------------------------
+bool ABall::Is_Moving_Left() const
+{
+    if (Ball_Direction > M_PI_2 and Ball_Direction < M_PI + M_PI_2)
+        return true;
+    else
+        return false;
 }
 //------------------------------------------------------------------------------------------------------------

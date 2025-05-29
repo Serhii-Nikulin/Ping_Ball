@@ -10,15 +10,35 @@ AsPlatform::AsPlatform()
 //------------------------------------------------------------------------------------------------------------
 bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 {
-    int platform_y_pos = AsConfig::Platform_Y_Pos + 1;
+    double value_pos;
+    int top_y_pos = AsConfig::Platform_Y_Pos + 1;
+    int low_y_pos = AsConfig::Platform_Y_Pos + AsConfig::Platform_Height - 1;
+    int left_x_pos = X_Pos + Circle_Size - 1;
+    int right_x_pos = X_Pos + Width - (Circle_Size - 1);
+
 	const double &radius = ball->Radius;
 
-    if (next_y_pos + radius  >= platform_y_pos and next_y_pos + radius <= platform_y_pos + AsConfig::Platform_Height)
+    if (next_y_pos + radius  >= top_y_pos and next_y_pos - radius <= low_y_pos)
     {
-        if (next_x_pos + radius >= X_Pos and next_x_pos - radius <= X_Pos + Width)
+        if (ball->Is_Moving_Up() )
         {
-            ball->Reflect(true);
-            return true;
+            if (Hit_Circle_On_Line(next_y_pos - low_y_pos, next_x_pos, left_x_pos, right_x_pos, radius, value_pos) )
+            {
+                ball->Reflect(true);
+                return true;
+            }
+            else
+                return false;
+        }
+        else
+        {
+            if (Hit_Circle_On_Line(top_y_pos - next_y_pos, next_x_pos, left_x_pos, right_x_pos, radius, value_pos) )
+            {
+                ball->Reflect(true);
+                return true;
+            }
+            else
+                return false;
         }
     }
 
