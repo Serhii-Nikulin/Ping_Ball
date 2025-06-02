@@ -15,14 +15,12 @@ public:
 
 	void Init();
 	void Draw(HDC hdc, RECT &paint_area);
-
+	void Act();
 	static const int Level_Height = 14;
 	static const int Level_Width = 12;
 	static unsigned char Level_01[ALevel::Level_Height][ALevel::Level_Width];
 
 	void Set_Current_Level(unsigned char level[ALevel::Level_Height][ALevel::Level_Width]);
-
-	AActive_Brick Active_Brick;
 
 private:
 	void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush) const;
@@ -32,14 +30,12 @@ private:
 	bool Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance);
 	bool Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distnace);
 
+	void Add_Active_Brick(int brick_x, int brick_y);
 
 	RECT Level_Rect{};
 	HPEN Letter_Pen;
 	HPEN Brick_Red_Pen, Brick_Blue_Pen;
 	HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
-
-	static const int Cell_Width = 16;
-	static const int Cell_Height = 8;
 
 	unsigned char Current_Level[ALevel::Level_Height][ALevel::Level_Width];
  
@@ -47,5 +43,8 @@ private:
 	int Current_Brick_Right_Pos;
 	int Current_Brick_Top_Pos;
 	int Current_Brick_Bottom_Pos;
+
+	int Active_Bricks_Count;
+	AActive_Brick *Active_Bricks[AsConfig::Max_Active_Bricks_Count];
 };
 //------------------------------------------------------------------------------------------------------------

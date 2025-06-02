@@ -7,11 +7,11 @@ HBRUSH AActive_Brick::Fading_Red_Brick_Brushes[Max_Fade_Step];
 HPEN AActive_Brick::Fading_Blue_Brick_Pens[Max_Fade_Step];
 HBRUSH AActive_Brick::Fading_Blue_Brick_Brushes[Max_Fade_Step];
 //------------------------------------------------------------------------------------------------------------
-AActive_Brick::AActive_Brick(EBrick_Type brick_type)
+AActive_Brick::AActive_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
     : Brick_Type(brick_type), Brick_Rect{}, Pen(0), Brush(0), Fade_Step(0)
 {
-    Brick_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
-    Brick_Rect.top = AsConfig::Level_Y_Offset * AsConfig::Global_Scale;
+    Brick_Rect.left = (AsConfig::Level_X_Offset + brick_x * AsConfig::Cell_Width) * AsConfig::Global_Scale;
+    Brick_Rect.top = (AsConfig::Level_Y_Offset + brick_y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
     Brick_Rect.right = Brick_Rect.left + AsConfig::Brick_Width * AsConfig::Global_Scale;
     Brick_Rect.bottom = Brick_Rect.top + AsConfig::Brick_Height * AsConfig::Global_Scale;
 }
@@ -49,6 +49,14 @@ void AActive_Brick::Act()
 		Fade_Step += 1;
 		InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
 	}
+}
+//------------------------------------------------------------------------------------------------------------
+bool AActive_Brick::Is_Finished()
+{
+    if (Fade_Step >= Max_Fade_Step - 1)
+        return true;
+    else
+        return false;
 }
 //------------------------------------------------------------------------------------------------------------
 unsigned char AActive_Brick::Get_Fading_Value(int step, int max_value, int min_value)
