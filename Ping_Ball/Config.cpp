@@ -42,8 +42,8 @@ void AsConfig::Create_Pen_Brush(HPEN& pen, HBRUSH& brush, const AColor &color)
     brush = CreateSolidBrush(RGB(color.R, color.G, color.B) );
 }
 //------------------------------------------------------------------------------------------------------------
-int AsConfig::Rand(int min, int max)
+int AsConfig::Rand(int range)
 {
-    return rand() * max / RAND_MAX + min;
+    return rand() * range / RAND_MAX;
 }
 //------------------------------------------------------------------------------------------------------------

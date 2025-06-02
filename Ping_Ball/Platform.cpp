@@ -256,7 +256,7 @@ void AsPlatform::Draw_Meltdown_State(HDC hdc)
             continue;
 
         x = Platform_Rect.left + i;
-        y_offset = AsConfig::Rand(1, Meltdown_Speed);
+        y_offset = AsConfig::Rand(Meltdown_Speed);
 
         for (j = 0; j < platform_height; j++)
         {

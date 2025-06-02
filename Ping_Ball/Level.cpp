@@ -1,5 +1,22 @@
 #include "Level.h"
 
+// AFalling_Letter
+//------------------------------------------------------------------------------------------------------------
+AFalling_Letter::AFalling_Letter(EBrick_Type brick_type, ELetter_Type letter_type, int x, int y)
+    : Brick_Type(brick_type), Letter_Type(letter_type), X(x), Y(y), Letter_Cell{}
+{
+    const int &scale = AsConfig::Global_Scale;
+
+    Letter_Cell.left = x * scale;
+    Letter_Cell.top = y * scale;
+    Letter_Cell.right = Letter_Cell.left + AsConfig::Brick_Width * scale;
+    Letter_Cell.bottom = Letter_Cell.top + AsConfig::Brick_Height * scale;
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
 //------------------------------------------------------------------------------------------------------------
 unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -22,7 +39,7 @@ unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
 //------------------------------------------------------------------------------------------------------------
 ALevel::ALevel()
     : Level_Rect{}, Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0),
-    Current_Brick_Left_Pos(0), Current_Brick_Right_Pos(0), Current_Brick_Top_Pos(0), Current_Brick_Bottom_Pos(0), Current_Level{}, Active_Bricks_Count(0), Active_Bricks{}
+    Current_Brick_Left_Pos(0), Current_Brick_Right_Pos(0), Current_Brick_Top_Pos(0), Current_Brick_Bottom_Pos(0), Current_Level{}, Active_Bricks_Count(0), Active_Bricks{}, Falling_Letter_Count(0), Falling_Letters{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -75,20 +92,21 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 				else
 					ball->Reflect(false);
                 
-                Add_Active_Brick(j, i);
+                On_Hit(j, i);
+                
 				return true;
             }
 			else if (is_hit_from_vertical)
 			{
 				ball->Reflect(false);
-                Add_Active_Brick(j, i);
+                On_Hit(j, i);
 
 				return true;
 			}
 			else if (is_hit_from_horizontal)
 			{
 				ball->Reflect(true);
-                Add_Active_Brick(j, i);
+                On_Hit(j, i);
 
 				return true;
 			}
@@ -123,6 +141,8 @@ bool ALevel::Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABa
                 return false;
         }
     }
+
+    return false;
 }
 //------------------------------------------------------------------------------------------------------------
 bool ALevel::Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance)
@@ -151,6 +171,8 @@ bool ALevel::Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall
                 return false;
         }
     }
+
+    return false;
 }
 //------------------------------------------------------------------------------------------------------------
 void ALevel::Add_Active_Brick(int brick_x, int brick_y)
@@ -190,6 +212,45 @@ void ALevel::Add_Active_Brick(int brick_x, int brick_y)
     }
 }
 //------------------------------------------------------------------------------------------------------------
+void ALevel::Add_Falling_Letter()
+{
+}
+//------------------------------------------------------------------------------------------------------------
+void ALevel::On_Hit(int brick_x, int brick_y)
+{
+    int i;
+    AFalling_Letter *falling_letter;
+    int letter_x, letter_y;
+    EBrick_Type brick_type = (EBrick_Type)Current_Level[brick_y][brick_x];
+    ELetter_Type letter_type = ELT_O;
+
+    if (brick_type == EBT_Blue or brick_type == EBT_Red)
+    {
+        if (AsConfig::Rand(AsConfig::Hits_Per_Letter) == 0)
+        {
+            if (Falling_Letter_Count < AsConfig::Max_Falling_Letter_Count)
+            {
+                for (i = 0; i < AsConfig::Max_Falling_Letter_Count; i++)
+                {
+                    if (Falling_Letters[i] == 0)
+                    {
+                        letter_x = AsConfig::Level_X_Offset + brick_x * AsConfig::Cell_Width;
+                        letter_y = AsConfig::Level_Y_Offset + brick_y * AsConfig::Cell_Height;
+                        falling_letter = new AFalling_Letter(brick_type, letter_type, letter_x, letter_y);
+
+                        Falling_Letters[i] = falling_letter;
+                        Falling_Letter_Count += 1;
+
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    Add_Active_Brick(brick_x, brick_y);
+}
+//------------------------------------------------------------------------------------------------------------
 void ALevel::Init()
 {
     Level_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
@@ -203,6 +264,7 @@ void ALevel::Init()
     AsConfig::Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, AsConfig::Blue_Brick_Color);
 
     memset(Active_Bricks, 0, sizeof(Active_Bricks) );
+    memset(Falling_Letters, 0, sizeof(Falling_Letters) );
     memset(Current_Level, 0, sizeof(Current_Level) );
 }
 //------------------------------------------------------------------------------------------------------------

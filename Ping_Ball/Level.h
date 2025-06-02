@@ -6,6 +6,16 @@
 //Bricks
 enum ELetter_Type {ELT_None, ELT_O};
 //------------------------------------------------------------------------------------------------------------
+class AFalling_Letter
+{
+public:
+	AFalling_Letter(EBrick_Type brick_type, ELetter_Type letter_type, int x, int y);
+	int X, Y;
+	const ELetter_Type Letter_Type;
+	const EBrick_Type Brick_Type;
+	RECT Letter_Cell;
+};
+//------------------------------------------------------------------------------------------------------------
 class ALevel: public AHit_Checker
 {
 public:
@@ -31,6 +41,8 @@ private:
 	bool Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distnace);
 
 	void Add_Active_Brick(int brick_x, int brick_y);
+	void Add_Falling_Letter();
+	void On_Hit(int brick_x, int brick_y);
 
 	RECT Level_Rect{};
 	HPEN Letter_Pen;
@@ -46,5 +58,8 @@ private:
 
 	int Active_Bricks_Count;
 	AActive_Brick *Active_Bricks[AsConfig::Max_Active_Bricks_Count];
+
+	int Falling_Letter_Count;
+	AFalling_Letter *Falling_Letters[AsConfig::Max_Falling_Letter_Count];
 };
 //------------------------------------------------------------------------------------------------------------
