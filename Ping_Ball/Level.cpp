@@ -3,14 +3,14 @@
 //------------------------------------------------------------------------------------------------------------
 unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
-    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-    0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -21,8 +21,8 @@ unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
 //ALevel
 //------------------------------------------------------------------------------------------------------------
 ALevel::ALevel()
-    : Active_Brick(EBT_Red), Level_Rect{}, Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0),
-    Current_Brick_Left_Pos(0), Current_Brick_Right_Pos(0), Current_Brick_Top_Pos(0), Current_Brick_Bottom_Pos(0), Current_Level{}
+    : Level_Rect{}, Letter_Pen(0), Brick_Red_Pen(0), Brick_Blue_Pen(0), Brick_Red_Brush(0), Brick_Blue_Brush(0),
+    Current_Brick_Left_Pos(0), Current_Brick_Right_Pos(0), Current_Brick_Top_Pos(0), Current_Brick_Bottom_Pos(0), Current_Level{}, Active_Bricks_Count(0), Active_Bricks{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -45,24 +45,24 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 	min_ball_y = (int)(next_y_pos - radius);
 	max_ball_y = (int)(next_y_pos + radius);
 
-	if (max_ball_y > AsConfig::Level_Y_Offset + (Level_Height - 1) * Cell_Height + AsConfig::Brick_Height)
+	if (max_ball_y > AsConfig::Level_Y_Offset + (Level_Height - 1) * AsConfig::Cell_Height + AsConfig::Brick_Height)
 		return false;
 
-    min_level_x = (min_ball_x - AsConfig::Level_X_Offset) / Cell_Width;
-    max_level_x = (max_ball_x - AsConfig::Level_X_Offset) / Cell_Width;
-    min_level_y = (min_ball_y - AsConfig::Level_Y_Offset) / Cell_Height;
-    max_level_y = (max_ball_y - AsConfig::Level_Y_Offset) / Cell_Height;
+    min_level_x = (min_ball_x - AsConfig::Level_X_Offset) / AsConfig::Cell_Width;
+    max_level_x = (max_ball_x - AsConfig::Level_X_Offset) / AsConfig::Cell_Width;
+    min_level_y = (min_ball_y - AsConfig::Level_Y_Offset) / AsConfig::Cell_Height;
+    max_level_y = (max_ball_y - AsConfig::Level_Y_Offset) / AsConfig::Cell_Height;
 
 
     for (i = max_level_y; i >= min_level_y; i--)
         for (j = min_level_x; j <= max_level_x; j++)
         {
-            if(Level_01[i][j] == 0)
+            if(Current_Level[i][j] == 0)
                 continue;
 
-            Current_Brick_Left_Pos = AsConfig::Level_X_Offset + j * Cell_Width;
+            Current_Brick_Left_Pos = AsConfig::Level_X_Offset + j * AsConfig::Cell_Width;
             Current_Brick_Right_Pos = Current_Brick_Left_Pos + AsConfig::Brick_Width;
-            Current_Brick_Top_Pos = AsConfig::Level_Y_Offset + i * Cell_Height;
+            Current_Brick_Top_Pos = AsConfig::Level_Y_Offset + i * AsConfig::Cell_Height;
             Current_Brick_Bottom_Pos = Current_Brick_Top_Pos + AsConfig::Brick_Height;
 
 			is_hit_from_vertical = Check_Hit_From_Vertical(next_x_pos, next_y_pos, ball, j, i, distance_y);
@@ -71,24 +71,25 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
             if (is_hit_from_vertical and is_hit_from_horizontal)
             {
                 if(distance_x < distance_y)
-                {
 					ball->Reflect(true);
-					return true;
-				}
 				else
-				{
 					ball->Reflect(false);
-					return true;
-                }
+                
+                Add_Active_Brick(j, i);
+				return true;
             }
 			else if (is_hit_from_vertical)
 			{
 				ball->Reflect(false);
+                Add_Active_Brick(j, i);
+
 				return true;
 			}
 			else if (is_hit_from_horizontal)
 			{
 				ball->Reflect(true);
+                Add_Active_Brick(j, i);
+
 				return true;
 			}
         }
@@ -152,17 +153,57 @@ bool ALevel::Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall
     }
 }
 //------------------------------------------------------------------------------------------------------------
+void ALevel::Add_Active_Brick(int brick_x, int brick_y)
+{
+    int i;
+    EBrick_Type brick_type;
+    AActive_Brick *active_brick = 0;
+
+    if (Active_Bricks_Count >= AsConfig::Max_Active_Bricks_Count)
+        return;
+
+    brick_type = (EBrick_Type)Current_Level[brick_y][brick_x];
+
+    switch (brick_type)
+    {
+    case EBT_None:
+        return;
+
+    case EBT_Red:
+    case EBT_Blue:
+        active_brick = new AActive_Brick(brick_type, brick_x, brick_y);
+        Current_Level[brick_y][brick_x] = 0;
+        break;
+
+    default:
+        return;
+    }
+
+    for (i = 0; i < AsConfig::Max_Active_Bricks_Count; i++)
+    {
+        if (Active_Bricks[i] == 0)
+        {
+            Active_Bricks[Active_Bricks_Count] = active_brick;
+            Active_Bricks_Count += 1;
+            break;
+        }
+    }
+}
+//------------------------------------------------------------------------------------------------------------
 void ALevel::Init()
 {
     Level_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
     Level_Rect.top = AsConfig::Level_Y_Offset * AsConfig::Global_Scale;
-    Level_Rect.right = Level_Rect.left + Level_Width * Cell_Width * AsConfig::Global_Scale;
-    Level_Rect.bottom = Level_Rect.top + Level_Height * Cell_Height * AsConfig::Global_Scale;
+    Level_Rect.right = Level_Rect.left + Level_Width * AsConfig::Cell_Width * AsConfig::Global_Scale;
+    Level_Rect.bottom = Level_Rect.top + Level_Height * AsConfig::Cell_Height * AsConfig::Global_Scale;
 
     Letter_Pen = CreatePen(PS_SOLID, AsConfig::Global_Scale, RGB(255, 255, 255) );
 
     AsConfig::Create_Pen_Brush(Brick_Red_Pen, Brick_Red_Brush, AsConfig::Red_Brick_Color);
     AsConfig::Create_Pen_Brush(Brick_Blue_Pen, Brick_Blue_Brush, AsConfig::Blue_Brick_Color);
+
+    memset(Active_Bricks, 0, sizeof(Active_Bricks) );
+    memset(Current_Level, 0, sizeof(Current_Level) );
 }
 //------------------------------------------------------------------------------------------------------------
 void ALevel::Set_Current_Level(unsigned char level[ALevel::Level_Height][ALevel::Level_Width])
@@ -250,7 +291,6 @@ void ALevel::Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, EL
     int offset = (int)round(sin(rotation_angle) * AsConfig::Global_Scale * 3.0);
     SetWorldTransform(hdc, &new_xform);
 
-
     SelectObject(hdc, back_pen);
     SelectObject(hdc, back_brush);
 
@@ -319,8 +359,31 @@ void ALevel::Draw(HDC hdc, RECT &paint_area)
 
     for (i = 0; i < Level_Height; i++)
         for (j = 0; j < Level_Width; j++)
-            Draw_Brick(hdc, AsConfig::Level_X_Offset + j * Cell_Width, AsConfig::Level_Y_Offset + i * Cell_Height, static_cast<EBrick_Type>(Current_Level[i][j]) );
+            Draw_Brick(hdc, AsConfig::Level_X_Offset + j * AsConfig::Cell_Width, AsConfig::Level_Y_Offset + i * AsConfig::Cell_Height, static_cast<EBrick_Type>(Current_Level[i][j]) );
 
-    Active_Brick.Draw(hdc);
+    for (i = 0; i < AsConfig::Max_Active_Bricks_Count; i++)
+        if (Active_Bricks[i])
+            Active_Bricks[i]->Draw(hdc);
+}
+//------------------------------------------------------------------------------------------------------------
+void ALevel::Act()
+{
+    int i; 
+
+    for (i = 0; i < AsConfig::Max_Active_Bricks_Count; i++)
+    {
+        if (Active_Bricks[i])
+        {
+            Active_Bricks[i]->Act();
+
+            if (Active_Bricks[i]->Is_Finished() )
+            {
+                delete Active_Bricks[i];
+                Active_Bricks[i] = 0;
+
+                Active_Bricks_Count -= 1;
+            }
+        }
+    }
 }
 //------------------------------------------------------------------------------------------------------------

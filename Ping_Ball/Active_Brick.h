@@ -8,9 +8,10 @@ enum EBrick_Type: unsigned char {EBT_None, EBT_Red, EBT_Blue};
 class AActive_Brick
 {
 public:
-	AActive_Brick(EBrick_Type brick_type);
+	AActive_Brick(EBrick_Type brick_type, int brick_x, int brick_y);
 	void Draw(HDC hdc);
 	void Act();
+	bool Is_Finished();
 
 	static void Setup_Colors();
 
