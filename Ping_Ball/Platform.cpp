@@ -204,13 +204,13 @@ void AsPlatform::Clear_BG(HDC hdc) const
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Draw_Circle(HDC hdc, int x, int y)
 {
-    Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + Height) * AsConfig::Global_Scale, (y + Height) * AsConfig::Global_Scale);
+    Ellipse(hdc, x * AsConfig::Global_Scale, y * AsConfig::Global_Scale, (x + Height) * AsConfig::Global_Scale - 1, (y + Height) * AsConfig::Global_Scale - 1);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Draw_Circle_Highlight(HDC hdc, int x, int y) const
 {
 	SelectObject(hdc, Highlight_Pen);
-    Arc(hdc, (x + 1) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + Circle_Size - 1) * AsConfig::Global_Scale, (y + Circle_Size - 1) * AsConfig::Global_Scale, 
+    Arc(hdc, (x + 1) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + Circle_Size - 1) * AsConfig::Global_Scale - 1, (y + Circle_Size - 1) * AsConfig::Global_Scale - 1, 
         (x + Circle_Size / 2) * AsConfig::Global_Scale, y * AsConfig::Global_Scale, 
         x * AsConfig::Global_Scale, (y + Circle_Size / 2 + 1) * AsConfig::Global_Scale);
 }
@@ -230,7 +230,7 @@ void AsPlatform::Draw_Normal_State(HDC hdc)
 
     SelectObject(hdc, Platform_Inner_Pen);
     SelectObject(hdc, Platform_Inner_Brush);
-    RoundRect(hdc, (x + 4) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + Width - 4) * AsConfig::Global_Scale, (y + Circle_Size - 1) * AsConfig::Global_Scale, AsConfig::Global_Scale * 3, AsConfig::Global_Scale * 3);
+    RoundRect(hdc, (x + 4) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + Width - 4) * AsConfig::Global_Scale - 1, (y + Circle_Size - 1) * AsConfig::Global_Scale - 1, AsConfig::Global_Scale * 3, AsConfig::Global_Scale * 3);
 
     SelectObject(hdc, Highlight_Pen);
     Draw_Circle_Highlight(hdc, x, y);
@@ -256,7 +256,7 @@ void AsPlatform::Draw_Meltdown_State(HDC hdc)
             continue;
 
         x = Platform_Rect.left + i;
-        y_offset = AsConfig::Rand(1, Meltdown_Speed);
+        y_offset = AsConfig::Rand(Meltdown_Speed);
 
         for (j = 0; j < platform_height; j++)
         {
@@ -295,7 +295,6 @@ void AsPlatform::Draw_Rolling_State(HDC hdc)
     Draw_Circle(hdc, x, y);
 
     //BG Rectangle
-    SetGraphicsMode(hdc, GM_ADVANCED);
     GetWorldTransform(hdc, &old_xform);
 
     Rotation_Step %= Max_Rotation_Step;

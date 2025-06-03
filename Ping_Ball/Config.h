@@ -21,7 +21,7 @@ public:
 	static void Setup_Colors();
 	static void Create_Pen_Brush(HPEN& pen, HBRUSH& brush, unsigned char r, unsigned char g, unsigned char b);
 	static void Create_Pen_Brush(HPEN& pen, HBRUSH& brush, const AColor &color);
-	static int Rand(int min, int max);
+	static int Rand(int range);
 
 	static const int Global_Scale = 3;
 	static int Current_Timer_Tick;
@@ -37,6 +37,7 @@ public:
 
 	static bool Has_Floor;
 	static double Moving_Size_Step;
+	static const int Hits_Per_Letter = 2;
 
 	//Border
 	static const int Border_X_Offset = 6;
@@ -49,6 +50,10 @@ public:
 	static const int Platform_Y_Pos = 185;
 
 	//Level
+	static HPEN Letter_Pen;
+	static HPEN Brick_Red_Pen, Brick_Blue_Pen;
+	static HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
+
 	static const int Level_X_Offset = 8;
 	static const int Level_Y_Offset = 6;
 	static const int Brick_Width = 15;
@@ -58,5 +63,6 @@ public:
 	static const int Cell_Height = 8;
 
 	static const int Max_Active_Bricks_Count = 20;
+	static const int Max_Falling_Letter_Count = 20;
 };
 //------------------------------------------------------------------------------------------------------------
