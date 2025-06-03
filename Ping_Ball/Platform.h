@@ -8,6 +8,7 @@ enum EPlatform_State { EPS_Is_Ready, EPS_Normal, EPS_Meltdown, EPS_Missing, EPS_
 class AsPlatform: public AHit_Checker
 {
 public:
+	~AsPlatform();
 	AsPlatform();
 
 	virtual bool Check_Hit(double next_x_pos, double next_y_pos, ABall *ball);
@@ -37,8 +38,11 @@ private:
 	bool Reflect_From_Center(double next_x_pos, double next_y_pos, ABall *ball);
 	bool Reflect_From_Circle(double next_x_pos, double next_y_pos, ABall *ball, double circle_x_pos);
 
+	bool Get_Platform_Image_Stroke_Color(int x, int y, int &len, HPEN &pen_color);
+
 	EPlatform_State Platform_State;
 	RECT Platform_Rect, Prev_Platform_Rect;
+	AColor Highlight_Color, Platform_Side_Color, Platform_Inner_Color;
 	HPEN Highlight_Pen;
 	HPEN Platform_Side_Pen, Platform_Inner_Pen;
 	HBRUSH Platform_Side_Brush, Platform_Inner_Brush;
@@ -54,5 +58,9 @@ private:
 	int Inner_Width;
 	int Rotation_Step;
 	int Meltdown_Y_Pos[Normal_Width * AsConfig::Global_Scale];
+
+	int *Normal_Platform_Image;
+	int Normal_Platform_Image_Width;
+	int Normal_Platform_Image_Height;
 };
 //------------------------------------------------------------------------------------------------------------
