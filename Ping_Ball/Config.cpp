@@ -7,6 +7,11 @@ AColor::AColor(unsigned char r, unsigned char g, unsigned char b)
 {
 }
 //------------------------------------------------------------------------------------------------------------
+int AColor::Get_RGB() const
+{
+    return RGB(R, G, B);
+}
+//------------------------------------------------------------------------------------------------------------
 
 
 
@@ -15,7 +20,7 @@ AColor::AColor(unsigned char r, unsigned char g, unsigned char b)
 //------------------------------------------------------------------------------------------------------------
 HWND AsConfig::Hwnd = 0;
 int AsConfig::Current_Timer_Tick = 0;
-bool AsConfig::Has_Floor = true;
+bool AsConfig::Has_Floor = false;
 double AsConfig::Moving_Size_Step = 1.0 / AsConfig::Global_Scale;
 
 const AColor AsConfig::BG_Color(15, 15, 35);

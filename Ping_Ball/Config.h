@@ -12,7 +12,7 @@ public:
 	const unsigned char R, G, B;
 
 	AColor(unsigned char r, unsigned char g, unsigned char b);
-
+	int Get_RGB() const;
 };
 //------------------------------------------------------------------------------------------------------------
 class AsConfig
