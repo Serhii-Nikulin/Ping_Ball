@@ -39,19 +39,12 @@ void AsEngine::Init_Engine(HWND hwnd)
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Draw_Frame(HDC hdc, RECT &paint_area)
 {
-    int i;
-    RECT intersection_rect{};
+    SetGraphicsMode(hdc, GM_ADVANCED);
 
-    Platform.Draw(hdc, paint_area);
-    Ball.Draw(hdc, paint_area);
     Level.Draw(hdc, paint_area);
     Border.Draw(hdc);
-
-    /*for (i = 0; i < 16; i++)
-    {
-    Draw_Brick_Letter(hdc, 100 + i * Cell_Width * AsConfig::Global_Scale, 250, EBT_Blue, ELT_O, i);
-    Draw_Brick_Letter(hdc, 100 + i * Cell_Width * AsConfig::Global_Scale, 300, EBT_Red, ELT_O, i);
-    }*/
+    Platform.Draw(hdc, paint_area);
+    Ball.Draw(hdc, paint_area);
 }
 //------------------------------------------------------------------------------------------------------------
 int AsEngine::On_Key_Down(EKey_Type key_type)

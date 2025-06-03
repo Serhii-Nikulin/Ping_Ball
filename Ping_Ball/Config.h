@@ -50,6 +50,10 @@ public:
 	static const int Platform_Y_Pos = 185;
 
 	//Level
+	static HPEN Letter_Pen;
+	static HPEN Brick_Red_Pen, Brick_Blue_Pen;
+	static HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
+
 	static const int Level_X_Offset = 8;
 	static const int Level_Y_Offset = 6;
 	static const int Brick_Width = 15;

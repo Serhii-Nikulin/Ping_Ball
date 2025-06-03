@@ -10,10 +10,25 @@ class AFalling_Letter
 {
 public:
 	AFalling_Letter(EBrick_Type brick_type, ELetter_Type letter_type, int x, int y);
+
+	void Act();
+	bool Is_Finished();
+	void Draw(HDC hdc, RECT &paint_area);
+
+private:
+
+	void Draw_Brick_Letter(HDC hdc);
+	void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush) const;
+
 	int X, Y;
-	const ELetter_Type Letter_Type;
+	bool Got_Hit;
+	int Rotation_Step;
+	int Next_Rotation_Tick;
 	const EBrick_Type Brick_Type;
-	RECT Letter_Cell;
+	const ELetter_Type Letter_Type;
+	RECT Letter_Cell, Prev_Letter_Cell;
+	static const int Ticks_Per_Step = 4;
+
 };
 //------------------------------------------------------------------------------------------------------------
 class ALevel: public AHit_Checker
@@ -33,21 +48,16 @@ public:
 	void Set_Current_Level(unsigned char level[ALevel::Level_Height][ALevel::Level_Width]);
 
 private:
-	void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush) const;
-	void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step);
 	void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type) const;
 
 	bool Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance);
 	bool Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distnace);
 
-	void Add_Active_Brick(int brick_x, int brick_y);
-	void Add_Falling_Letter();
+	void Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y);
+	bool Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_y);
 	void On_Hit(int brick_x, int brick_y);
 
 	RECT Level_Rect{};
-	HPEN Letter_Pen;
-	HPEN Brick_Red_Pen, Brick_Blue_Pen;
-	HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
 
 	unsigned char Current_Level[ALevel::Level_Height][ALevel::Level_Width];
  
