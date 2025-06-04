@@ -9,8 +9,14 @@ AsEngine::AsEngine()
 void AsEngine::Init_Engine(HWND hwnd)
 {
     AsConfig::Hwnd = hwnd;
+    SYSTEMTIME sys_time;
+    FILETIME file_time;
 
-    SetTimer(AsConfig::Hwnd, Timer_ID, 1000 / FPS, NULL);
+    GetSystemTime(&sys_time);
+    SystemTimeToFileTime(&sys_time, &file_time);
+    srand(file_time.dwLowDateTime);
+
+    SetTimer(AsConfig::Hwnd, Timer_ID, 1000 / AsConfig::FPS, NULL);
 
     AActive_Brick::Setup_Colors();
 
@@ -55,24 +61,14 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 		if (Platform.Get_State() != EPS_Normal)
 			return 0;
 
-        Platform.X_Pos -= Platform.X_Step;
-
-        if (Platform.X_Pos <= AsConfig::Border_X_Offset)
-            Platform.X_Pos = AsConfig::Border_X_Offset;
-
-        Platform.Redraw();
+        Platform.Move(true);
         break;
 
     case EKT_Right:
         if (Platform.Get_State() != EPS_Normal)
             return 0;
 
-        Platform.X_Pos += Platform.X_Step;
-
-        if (Platform.X_Pos >= AsConfig::Max_X_Pos + 1 - Platform.Width)
-            Platform.X_Pos = AsConfig::Max_X_Pos + 1 - Platform.Width;
-
-        Platform.Redraw();
+        Platform.Move(false);
         break;
 
     case EKT_Space:

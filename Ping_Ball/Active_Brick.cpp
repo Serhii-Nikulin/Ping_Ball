@@ -16,7 +16,7 @@ AActive_Brick::AActive_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
     Brick_Rect.bottom = Brick_Rect.top + AsConfig::Brick_Height * AsConfig::Global_Scale;
 }
 //------------------------------------------------------------------------------------------------------------
-void AActive_Brick::Draw(HDC hdc)
+void AActive_Brick::Draw(HDC hdc, RECT &paint_area)
 {
     HPEN pen = 0;
     HBRUSH brush = 0;
