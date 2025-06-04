@@ -34,6 +34,26 @@ bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
     return false;
 }
 //------------------------------------------------------------------------------------------------------------
+void AsPlatform::Move(bool to_left)
+{
+	if (to_left)
+	{
+		X_Pos -= X_Step;
+
+		if (X_Pos <= AsConfig::Border_X_Offset)
+			X_Pos = AsConfig::Border_X_Offset;
+	}
+	else
+	{
+		X_Pos += X_Step;
+
+		if (X_Pos >= AsConfig::Max_X_Pos + 1 - Width)
+			X_Pos = AsConfig::Max_X_Pos + 1 - Width;
+	}
+
+    Redraw();
+}
+//------------------------------------------------------------------------------------------------------------
 bool AsPlatform::Reflect_From_Circle(double next_x_pos, double next_y_pos, ABall *ball, double circle_x_pos)
 {
     double delta;

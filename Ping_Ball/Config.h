@@ -35,6 +35,7 @@ public:
 	static HPEN BG_Pen;
 	static HBRUSH BG_Brush;
 
+	static const int FPS = 20;
 	static bool Has_Floor;
 	static double Moving_Size_Step;
 	static const int Hits_Per_Letter = 2;

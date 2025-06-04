@@ -13,6 +13,7 @@ public:
 
 	virtual bool Check_Hit(double next_x_pos, double next_y_pos, ABall *ball);
 
+	void Move(bool to_left);
 	void Init();
 	void Act();
 

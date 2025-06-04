@@ -20,7 +20,6 @@ public:
 	int On_Timer();
 
 private:
-	static const int FPS = 20;
 
 	EGame_State Game_State;
 
