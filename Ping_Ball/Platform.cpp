@@ -36,6 +36,9 @@ bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Move(bool to_left)
 {
+    if (Get_State() != EPS_Normal)
+        return;
+
 	if (to_left)
 	{
 		X_Pos -= X_Step;
@@ -222,6 +225,19 @@ void AsPlatform::Draw(HDC hdc, RECT &paint_area)
     default:
         return;
     }
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsPlatform::Hit_By(AFalling_Letter *falling_letter)
+{
+    RECT letter_rect{};
+    RECT intersection_rect{};
+
+    falling_letter->Get_Letter_Cell(letter_rect);
+
+    if (IntersectRect(&intersection_rect, &letter_rect, &Platform_Rect) )
+        return true;
+    else
+        return false;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Clear_BG(HDC hdc) const

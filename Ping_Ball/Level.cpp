@@ -1,7 +1,7 @@
 #include "Level.h"
 
 //------------------------------------------------------------------------------------------------------------
-unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
+unsigned char AsLevel::Level_01[AsLevel::Level_Height][AsLevel::Level_Width] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -18,14 +18,14 @@ unsigned char ALevel::Level_01[ALevel::Level_Height][ALevel::Level_Width] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 //------------------------------------------------------------------------------------------------------------
-//ALevel
+//AsLevel
 //------------------------------------------------------------------------------------------------------------
-ALevel::ALevel()
+AsLevel::AsLevel()
     : Level_Rect{}, Current_Brick_Left_Pos(0), Current_Brick_Right_Pos(0), Current_Brick_Top_Pos(0), Current_Brick_Bottom_Pos(0), Current_Level{}, Active_Bricks_Count(0), Active_Bricks{}, Falling_Letter_Count(0), Falling_Letters{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
-bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
+bool AsLevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 {
     int i, j;
     int min_ball_x, max_ball_x;
@@ -100,7 +100,7 @@ bool ALevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
     return false;
 }
 //------------------------------------------------------------------------------------------------------------
-bool ALevel::Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance)
+bool AsLevel::Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance)
 {
     double direction = ball->Get_Direction();
     double radius = ball->Radius;
@@ -130,7 +130,7 @@ bool ALevel::Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABa
     return false;
 }
 //------------------------------------------------------------------------------------------------------------
-bool ALevel::Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance)
+bool AsLevel::Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance)
 {
     double direction = ball->Get_Direction();
     double radius = ball->Radius;
@@ -160,7 +160,7 @@ bool ALevel::Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall
     return false;
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
+void AsLevel::Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
 {
     int i;
     AActive_Brick *active_brick = 0;
@@ -194,7 +194,7 @@ void ALevel::Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
     }
 }
 //------------------------------------------------------------------------------------------------------------
-bool ALevel::Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_y)
+bool AsLevel::Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_y)
 {
     int i;
     AFalling_Letter *falling_letter;
@@ -232,7 +232,7 @@ bool ALevel::Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_y
     return false;
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::On_Hit(int brick_x, int brick_y)
+void AsLevel::On_Hit(int brick_x, int brick_y)
 {
     EBrick_Type brick_type = (EBrick_Type)Current_Level[brick_y][brick_x];
 
@@ -242,7 +242,7 @@ void ALevel::On_Hit(int brick_x, int brick_y)
         Add_Active_Brick(brick_type, brick_x, brick_y);
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Init()
+void AsLevel::Init()
 {
     Level_Rect.left = AsConfig::Level_X_Offset * AsConfig::Global_Scale;
     Level_Rect.top = AsConfig::Level_Y_Offset * AsConfig::Global_Scale;
@@ -259,12 +259,36 @@ void ALevel::Init()
     memset(Current_Level, 0, sizeof(Current_Level) );
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Set_Current_Level(unsigned char level[ALevel::Level_Height][ALevel::Level_Width])
+void AsLevel::Set_Current_Level(unsigned char level[AsLevel::Level_Height][AsLevel::Level_Width])
 {
     memcpy(Current_Level, level, sizeof(Current_Level) );
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type) const
+bool AsLevel::Get_Next_Falling_Letter(int &index, AFalling_Letter **falling_letter)
+{
+    AFalling_Letter *current_letter;
+
+	if (Falling_Letter_Count == 0)
+		return false;
+
+    if (index < 0 or index >= AsConfig::Max_Falling_Letter_Count)
+        return false;
+
+    while (index < AsConfig::Max_Falling_Letter_Count)
+    {
+        current_letter = Falling_Letters[index++];
+
+        if (current_letter != 0)
+        {
+            *falling_letter = current_letter;
+            return true;
+        }
+    }
+
+    return false;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type) const
 {
     HBRUSH brush = 0;
     HPEN pen = 0;
@@ -299,7 +323,7 @@ void ALevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type) const
     RoundRect(hdc, brick_rect.left, brick_rect.top, brick_rect.right - 1, brick_rect.bottom - 1, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Draw(HDC hdc, RECT &paint_area)
+void AsLevel::Draw(HDC hdc, RECT &paint_area)
 {
 	int i, j;
 	RECT brick_rect;
@@ -325,14 +349,14 @@ void ALevel::Draw(HDC hdc, RECT &paint_area)
 	Draw_Objects(hdc, paint_area, (AGraphics_Object**)&Falling_Letters, AsConfig::Max_Falling_Letter_Count, Falling_Letter_Count);
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Act()
+void AsLevel::Act()
 {
     Act_Objects((AGraphics_Object**)&Active_Bricks, AsConfig::Max_Active_Bricks_Count, Active_Bricks_Count);
 
     Act_Objects((AGraphics_Object**)&Falling_Letters, AsConfig::Max_Falling_Letter_Count, Falling_Letter_Count);
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Act_Objects(AGraphics_Object **object_array, const int max_objects_count, int &objects_count)
+void AsLevel::Act_Objects(AGraphics_Object **object_array, const int max_objects_count, int &objects_count)
 {
     int i; 
 
@@ -353,7 +377,7 @@ void ALevel::Act_Objects(AGraphics_Object **object_array, const int max_objects_
     }
 }
 //------------------------------------------------------------------------------------------------------------
-void ALevel::Draw_Objects(HDC hdc, RECT &paint_area, AGraphics_Object **object_array, const int max_objects_count, int &objects_count)
+void AsLevel::Draw_Objects(HDC hdc, RECT &paint_area, AGraphics_Object **object_array, const int max_objects_count, int &objects_count)
 {
     int i;
 

@@ -2,6 +2,7 @@
 
 #include "Config.h"
 #include "Ball.h"
+#include "Falling_Letter.h"
 
 enum EPlatform_State { EPS_Is_Ready, EPS_Normal, EPS_Meltdown, EPS_Missing, EPS_Rolling, EPS_Expanding_Rolling };
 //------------------------------------------------------------------------------------------------------------
@@ -22,6 +23,7 @@ public:
 
 	void Redraw();
 	void Draw(HDC hdc, RECT &paint_area);
+	bool Hit_By(AFalling_Letter *falling_letter);
 
 	int X_Pos;
 	int X_Step;
