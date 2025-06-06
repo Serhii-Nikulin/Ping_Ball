@@ -2,10 +2,10 @@
 
 #include "Config.h"
 
-enum EBall_State { EBS_Normal, EBS_Lost, EBS_On_Platform };
-
-class ABall;
 //------------------------------------------------------------------------------------------------------------
+enum EBall_State { EBS_Normal, EBS_Lost, EBS_On_Platform };
+//------------------------------------------------------------------------------------------------------------
+class ABall;
 class AHit_Checker
 {
 public:
@@ -24,20 +24,18 @@ public:
 	void Move();
 	EBall_State Get_State() const;
 	void Set_State(EBall_State new_state);
-	static void Add_Hit_Checker(AHit_Checker* hit_checker);
 
-	static const double Radius;
-	void Set_Direction(double new_direction);
 	double Get_Direction() const;
+	void Set_Direction(double new_direction);
 	void Reflect(bool is_hit_from_horizontal);
-
 	bool Is_Moving_Up() const;
 	bool Is_Moving_Left() const;
 
+	static void Add_Hit_Checker(AHit_Checker* hit_checker);
+
 	double Ball_Speed;
+	static const double Radius;
 private:
-	static const double Start_Ball_X_Pos;
-	static const double Start_Ball_Y_Pos;
 
 	EBall_State Ball_State;
 
@@ -50,6 +48,8 @@ private:
 	double Ball_Direction;
 	double Rest_Distance;
 
+	static const double Start_Ball_X_Pos;
+	static const double Start_Ball_Y_Pos;
 	static int Hit_Checker_Count;
 	static AHit_Checker* Hit_Checkers[3];
 };
