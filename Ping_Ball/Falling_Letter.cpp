@@ -88,11 +88,24 @@ void AFalling_Letter::Finalize()
     InvalidateRect(AsConfig::Hwnd, &Letter_Cell, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
-
+void AFalling_Letter::Test_Draw_All_Steps(HDC hdc)
+{
+    int i;
+    int x_offset = AsConfig::Cell_Width * AsConfig::Global_Scale;
+   
+    for (i = 0; i < Max_Rotation_Step; i++)
+    {
+        Draw_Brick_Letter(hdc);
+        Rotation_Step += 1;
+        X += x_offset;
+        Letter_Cell.left += x_offset;
+        Letter_Cell.right += x_offset;
+    }
+}
+//------------------------------------------------------------------------------------------------------------
 void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
 {
     XFORM old_xform{}, new_xform{};
-    int brick_half_height;
     double rotation_angle;
     bool switch_color;
     HPEN front_pen, back_pen;
@@ -102,8 +115,7 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
     if (! (Brick_Type == EBT_Blue || Brick_Type == EBT_Red))
         return;
 
-    brick_half_height = (int)(AsConfig::Brick_Height * AsConfig::Global_Scale / 2.0);
-    Rotation_Step %= 16;
+    Rotation_Step %= Max_Rotation_Step;
 
     if (Rotation_Step >= 5 and Rotation_Step <= 12)
     {
@@ -115,9 +127,9 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
     else
     {
         if (Brick_Type == EBT_Red)
-            switch_color = true;
-        else
             switch_color = false;
+        else
+            switch_color = true;
     }
 
     Set_Brick_Letter_Color(switch_color, front_pen, front_brush, back_pen, back_brush);
@@ -127,26 +139,26 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
         SelectObject(hdc, back_pen);
         SelectObject(hdc, back_brush);
 
-        Rectangle(hdc, X, Y + brick_half_height - AsConfig::Global_Scale, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + brick_half_height);
+        Rectangle(hdc, X, Y + Brick_Half_Height - AsConfig::Global_Scale, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height);
 
 
         SelectObject(hdc, front_pen);
         SelectObject(hdc, front_brush);
 
-        Rectangle(hdc, X, Y + brick_half_height, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + brick_half_height + AsConfig::Global_Scale - 1);
+        Rectangle(hdc, X, Y + Brick_Half_Height, X + AsConfig::Brick_Width * AsConfig::Global_Scale, Y + Brick_Half_Height + AsConfig::Global_Scale - 1);
     }
     else
     {
 
-        rotation_angle = Rotation_Step * 2.0 * M_PI / 16.0;
+        rotation_angle = Rotation_Step * 2.0 * M_PI / Max_Rotation_Step;
         new_xform.eM11 = (FLOAT)1;
         new_xform.eM12 = (FLOAT)0;
 
         new_xform.eM21 = (FLOAT)0;
-        new_xform.eM22 = (FLOAT)cos(rotation_angle);
+        new_xform.eM22 = -(FLOAT)cos(rotation_angle);
 
         new_xform.eDx = (FLOAT)X;
-        new_xform.eDy = (FLOAT)(Y + brick_half_height);
+        new_xform.eDy = (FLOAT)(Y + Brick_Half_Height);
 
         offset = sin(rotation_angle) * AsConfig::Global_Scale * 3.0 / 2.0;
 
@@ -156,19 +168,115 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
         SelectObject(hdc, back_pen);
         SelectObject(hdc, back_brush);
 
-        Rectangle(hdc, 0, 0 - brick_half_height - offset, AsConfig::Brick_Width * AsConfig::Global_Scale, 0 + brick_half_height - offset);
+        Rectangle(hdc, 0, 0 - Brick_Half_Height + offset, AsConfig::Brick_Width * AsConfig::Global_Scale, 0 + Brick_Half_Height + offset);
 
         SelectObject(hdc, front_pen);
         SelectObject(hdc, front_brush);
 
-        Rectangle(hdc, 0, 0 - brick_half_height, AsConfig::Brick_Width * AsConfig::Global_Scale, 0 + brick_half_height);
+        Rectangle(hdc, 0, 0 - Brick_Half_Height, AsConfig::Brick_Width * AsConfig::Global_Scale, 0 + Brick_Half_Height);
 
         if (Rotation_Step >= 5 and Rotation_Step <= 12)
         {
-            if (Letter_Type == ELT_O)
+            switch (Letter_Type)
             {
-                SelectObject(hdc, AsConfig::Letter_Pen);
-                Ellipse(hdc, 0 + 5 * AsConfig::Global_Scale, 0 - 5 * AsConfig::Global_Scale / 2, 0 + 10 * AsConfig::Global_Scale, 0 + 5 * AsConfig::Global_Scale / 2);
+                case ELT_S:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+
+                    //верхн€€ горизонтальна€
+                    Draw_Line(hdc, 5, 1, 10, 1);
+                 
+                    // Ћева€ верхн€€ вертикаль
+                    Draw_Line(hdc, 5, 1, 5, 3);
+                  
+                    // —редн€€ горизонтальна€
+                    Draw_Line(hdc, 5, 3, 10, 3);
+                 
+                    // ѕрава€ нижн€€ вертикаль
+                    Draw_Line(hdc, 10, 3, 10, 5);
+              
+                    // Ќижн€€ горизонтальна€ лини€
+                    Draw_Line(hdc, 10, 5, 5, 5);
+                    break;
+
+                case ELT_L:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+
+                    //верхн€€ горизонтальна€
+                    Draw_Line(hdc, 6, 1, 6, 5);
+
+                    // Ћева€ верхн€€ вертикаль
+                    Draw_Line(hdc, 6, 5, 9, 5);
+
+                case ELT_HP:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+                    Draw_Line(hdc, 4, 1, 4, 5);
+                    Draw_Line(hdc, 7, 1, 7, 5);
+                    Draw_Line(hdc, 4, 3, 7, 3);
+
+                    Draw_Line(hdc, 9, 1, 9, 5);
+                    Draw_Line(hdc, 9, 1, 11, 1);
+                    Draw_Line(hdc, 11, 1, 11, 3);
+                    Draw_Line(hdc, 11, 3, 9, 3);
+                    break;
+
+                case ELT_T:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+                    Draw_Line(hdc, 4, 1, 10, 1);
+                    Draw_Line(hdc, 7, 1, 7, 5);
+                    break;
+                   
+                case ELT_X:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+                    Draw_Line(hdc, 5, 1, 10, 5);
+                    Draw_Line(hdc, 10, 1, 5, 5);
+                    break;
+
+                case ELT_C:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+                    Draw_Line(hdc, 6, 1, 9, 1);
+                    Draw_Line(hdc, 9, 1, 9, 2);
+                    Draw_Line(hdc, 6, 1, 6, 5);
+                    Draw_Line(hdc, 6, 5, 9, 5);
+                    Draw_Line(hdc, 9, 5, 9, 4);
+                    break;
+
+                case ELT_W:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+                    Draw_Line(hdc, 4, 1, 5, 5);
+                    Draw_Line(hdc, 5, 5, 7, 2);
+                    Draw_Line(hdc, 7, 2, 9, 5);
+                    Draw_Line(hdc, 9, 5, 10, 1);
+                    break;
+
+                case ELT_M:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+                    Draw_Line(hdc, 5, 5, 5, 1);
+                    Draw_Line(hdc, 5, 1, 7, 4);
+                    Draw_Line(hdc, 7, 4, 9, 1);
+                    Draw_Line(hdc, 9, 1, 9, 5);
+                    break;
+
+                case ELT_F:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+                    Draw_Line(hdc, 6, 1, 6, 5);
+                    Draw_Line(hdc, 6, 1, 9, 1);
+                    Draw_Line(hdc, 6, 3, 9, 3);
+                    break;
+
+                case ELT_R:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+                    Draw_Line(hdc, 6, 1, 9, 1);
+                    Draw_Line(hdc, 9, 1, 9, 3);
+                    Draw_Line(hdc, 9, 3, 6, 3);
+                    Draw_Line(hdc, 6, 3, 9, 5);
+                    Draw_Line(hdc, 6, 1, 6, 5);
+                    break;
+
+                case ELT_Plus:
+                    SelectObject(hdc, AsConfig::Letter_Pen);
+                    Draw_Line(hdc, 7, 1, 7, 5);
+                    Draw_Line(hdc, 4, 3, 10, 3);
+                    break;
             }
         }
 
@@ -195,5 +303,11 @@ void AFalling_Letter::Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_p
         back_brush = AsConfig::Brick_Blue_Brush;
     }
 
+}
+//------------------------------------------------------------------------------------------------------------
+void AFalling_Letter::Draw_Line(HDC hdc, int x_1, int y_1, int x_2, int y_2)
+{
+    MoveToEx(hdc, x_1 * AsConfig::Global_Scale, y_1 * AsConfig::Global_Scale - Brick_Half_Height + 1, NULL);
+    LineTo(hdc, x_2 * AsConfig::Global_Scale, y_2 * AsConfig::Global_Scale - Brick_Half_Height + 1);
 }
 //------------------------------------------------------------------------------------------------------------

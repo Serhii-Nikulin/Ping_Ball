@@ -200,7 +200,7 @@ bool AsLevel::Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_
     AFalling_Letter *falling_letter;
     int letter_x, letter_y;
  
-    ELetter_Type letter_type = ELT_O;
+    ELetter_Type letter_type = ELT_S;
 
     if (brick_type == EBT_Blue or brick_type == EBT_Red)
     {
@@ -328,6 +328,12 @@ void AsLevel::Draw(HDC hdc, RECT &paint_area)
 	int i, j;
 	RECT brick_rect;
 	RECT intersection_rect;
+    AFalling_Letter *falling_letter = new AFalling_Letter(EBT_Red, ELT_Plus, 5 * AsConfig::Global_Scale, 150 * AsConfig::Global_Scale);
+
+    AFalling_Letter *falling_letter_2 = new AFalling_Letter(EBT_Blue, ELT_Plus, 5 * AsConfig::Global_Scale, 170 * AsConfig::Global_Scale);
+
+    falling_letter->Test_Draw_All_Steps(hdc);
+    falling_letter_2->Test_Draw_All_Steps(hdc);
 
 	if (IntersectRect(&intersection_rect, &paint_area, &Level_Rect))
 	{

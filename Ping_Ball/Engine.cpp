@@ -3,7 +3,8 @@
 //AsEngine
 //------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
-    : Game_State(EGS_Play_Level)
+    //: Game_State(EGS_Play_Level)
+   : Game_State(EGS_Lost_Ball)
 {}
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Init_Engine(HWND hwnd)
@@ -34,11 +35,11 @@ void AsEngine::Init_Engine(HWND hwnd)
 
     Level.Set_Current_Level(AsLevel::Level_01);
 
-    if (Game_State == EGS_Restart_Level)
+    if (Game_State == EGS_Lost_Ball)
     {
         Ball.Set_State(EBS_Lost);
-        Platform.Set_State(EPS_Rolling);
-        Ball.Redraw();
+        Platform.Set_State(EPS_Missing);
+        //Ball.Redraw();
         Platform.Redraw();
     }
 }

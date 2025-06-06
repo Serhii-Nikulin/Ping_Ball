@@ -23,7 +23,7 @@ bool AHit_Checker::Hit_Circle_On_Line(double distance, double position, double m
 
 
 //ABall
-const double ABall::Start_Ball_Y_Pos = AsConfig::Platform_Y_Pos + 1 - Radius;
+const double ABall::Start_Ball_Y_Pos = AsConfig::Platform_Y_Pos - Radius;
 const double ABall::Start_Ball_X_Pos = (AsConfig::Border_X_Offset + AsConfig::Max_X_Pos) / 2 + 1;
 const double ABall::Radius = 2.0 - 0.5 / AsConfig::Global_Scale;
 int ABall::Hit_Checker_Count = 0;

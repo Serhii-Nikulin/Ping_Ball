@@ -288,7 +288,7 @@ void AsPlatform::Draw_Normal_State(HDC hdc)
         {
             offset = 0;
             Normal_Platform_Image = new int[Normal_Platform_Image_Height * Normal_Platform_Image_Width];
-
+            
             for (i = 0; i < Normal_Platform_Image_Height; i++)
                 for (j = 0; j < Normal_Platform_Image_Width; j++)
                     Normal_Platform_Image[offset++] = GetPixel(hdc, x * AsConfig::Global_Scale + j, y * AsConfig::Global_Scale + i);
@@ -448,6 +448,7 @@ void AsPlatform::Draw_Rolling_State(HDC hdc)
 void AsPlatform::Draw_Expanding_Rolling_State(HDC hdc)
 {
     Draw_Normal_State(hdc);
+
 
     Width += 3;
     X_Pos -= 1;
