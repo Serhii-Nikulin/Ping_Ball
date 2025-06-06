@@ -1,6 +1,5 @@
 #include "Ball.h"
 
-//AHit_Checker
 //------------------------------------------------------------------------------------------------------------
 bool AHit_Checker::Hit_Circle_On_Line(double distance, double position, double min, double max, double radius, double &value_pos)
 {
@@ -24,7 +23,6 @@ bool AHit_Checker::Hit_Circle_On_Line(double distance, double position, double m
 
 
 //ABall
-//------------------------------------------------------------------------------------------------------------
 const double ABall::Start_Ball_Y_Pos = AsConfig::Platform_Y_Pos + 1 - Radius;
 const double ABall::Start_Ball_X_Pos = (AsConfig::Border_X_Offset + AsConfig::Max_X_Pos) / 2 + 1;
 const double ABall::Radius = 2.0 - 0.5 / AsConfig::Global_Scale;
@@ -140,14 +138,12 @@ void ABall::Set_State(EBall_State new_state)
 	Ball_State = new_state;
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Add_Hit_Checker(AHit_Checker* hit_checker)
+double ABall::Get_Direction() const
 {
-	if (Hit_Checker_Count >= sizeof(Hit_Checkers) / sizeof(Hit_Checkers[0]) )
-        return;
-
-	Hit_Checkers[Hit_Checker_Count++] = hit_checker;
+    return Ball_Direction;
 }
 //------------------------------------------------------------------------------------------------------------
+
 void ABall::Set_Direction(double new_direction)
 {
     const double pi_2 = M_PI * 2;
@@ -159,11 +155,6 @@ void ABall::Set_Direction(double new_direction)
         new_direction += pi_2;
 
     Ball_Direction = new_direction;
-}
-//------------------------------------------------------------------------------------------------------------
-double ABall::Get_Direction() const
-{
-    return Ball_Direction;
 }
 //------------------------------------------------------------------------------------------------------------
 void ABall::Reflect(bool is_hit_from_horizontal)
@@ -188,5 +179,13 @@ bool ABall::Is_Moving_Left() const
         return true;
     else
         return false;
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Add_Hit_Checker(AHit_Checker* hit_checker)
+{
+    if (Hit_Checker_Count >= sizeof(Hit_Checkers) / sizeof(Hit_Checkers[0]) )
+        return;
+
+    Hit_Checkers[Hit_Checker_Count++] = hit_checker;
 }
 //------------------------------------------------------------------------------------------------------------

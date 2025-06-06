@@ -1,12 +1,12 @@
-#include "Config.h"
-
 #include "Border.h"
 
 //AsBorder
 //------------------------------------------------------------------------------------------------------------
 AsBorder::AsBorder()
     : Border_Blue_Pen(0), Border_Red_Pen(0), Border_Blue_Brush(0), Border_Red_Brush(0)
-{}
+{
+}
+//------------------------------------------------------------------------------------------------------------
 bool AsBorder::Check_Hit(double next_x_pos, double next_y_pos, ABall* ball)
 {
 	bool got_hit = false;
@@ -59,6 +59,18 @@ void AsBorder::Init()
     AsConfig::Create_Pen_Brush(Border_Blue_Pen, Border_Blue_Brush, 80, 140, 210);
 }
 //------------------------------------------------------------------------------------------------------------
+void AsBorder::Draw(HDC hdc)
+{
+    int i; 
+
+    for (i = 0; i < 50; i++)
+    {
+        Draw_Element(hdc, 3 + 4 * i, 0, true, AsConfig::BG_Pen, AsConfig::BG_Brush);
+        Draw_Element(hdc, 2, 1 + 4 * i, false, AsConfig::BG_Pen, AsConfig::BG_Brush);
+        Draw_Element(hdc, 202, 1 + 4 * i, false, AsConfig::BG_Pen, AsConfig::BG_Brush);
+    }
+}
+//------------------------------------------------------------------------------------------------------------
 void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border, HPEN &bg_pen, HBRUSH &bg_brush) const
 {
     //contour
@@ -87,17 +99,5 @@ void AsBorder::Draw_Element(HDC hdc, int x, int y, bool top_border, HPEN &bg_pen
         Rectangle(hdc, (x + 2) * AsConfig::Global_Scale, (y + 2) * AsConfig::Global_Scale, (x + 3) * AsConfig::Global_Scale - 1, (y + 3) * AsConfig::Global_Scale - 1);
     else
         Rectangle(hdc, (x + 2) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + 3) * AsConfig::Global_Scale - 1, (y + 2) * AsConfig::Global_Scale - 1);
-}
-//------------------------------------------------------------------------------------------------------------
-void AsBorder::Draw(HDC hdc)
-{
-    int i; 
-
-    for (i = 0; i < 50; i++)
-    {
-        Draw_Element(hdc, 3 + 4 * i, 0, true, AsConfig::BG_Pen, AsConfig::BG_Brush);
-        Draw_Element(hdc, 2, 1 + 4 * i, false, AsConfig::BG_Pen, AsConfig::BG_Brush);
-        Draw_Element(hdc, 202, 1 + 4 * i, false, AsConfig::BG_Pen, AsConfig::BG_Brush);
-    }
 }
 //------------------------------------------------------------------------------------------------------------

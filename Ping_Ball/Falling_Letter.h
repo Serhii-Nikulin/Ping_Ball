@@ -3,7 +3,7 @@
 
 //Bricks
 enum ELetter_Type {ELT_None, ELT_O};
-
+enum EFalling_Letter_State {EFLS_Normal, EFLS_Finalizing, EFLS_Finished};
 //------------------------------------------------------------------------------------------------------------
 class AFalling_Letter: public AGraphics_Object
 {
@@ -13,6 +13,9 @@ public:
 	virtual void Act();
 	virtual void Draw(HDC hdc, RECT &paint_area);
 	virtual bool Is_Finished();
+
+	void Get_Letter_Cell(RECT &letter_rect);
+	void Finalize();
 
 private:
 
@@ -27,6 +30,6 @@ private:
 	const ELetter_Type Letter_Type;
 	RECT Letter_Cell, Prev_Letter_Cell;
 	static const int Ticks_Per_Step = 4;
-
+	EFalling_Letter_State Falling_Letter_State;
 };
 //------------------------------------------------------------------------------------------------------------

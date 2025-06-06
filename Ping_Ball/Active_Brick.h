@@ -8,8 +8,8 @@ enum EBrick_Type: unsigned char {EBT_None, EBT_Red, EBT_Blue};
 class AGraphics_Object
 {
 public:
-	virtual void Draw(HDC hdc, RECT &paint_area) = 0;
 	virtual void Act() = 0;
+	virtual void Draw(HDC hdc, RECT &paint_area) = 0;
 	virtual bool Is_Finished() = 0;
 };
 //------------------------------------------------------------------------------------------------------------
@@ -18,8 +18,8 @@ class AActive_Brick: public AGraphics_Object
 public:
 	AActive_Brick(EBrick_Type brick_type, int brick_x, int brick_y);
 
-	virtual void Draw(HDC hdc, RECT &paint_area);
 	virtual void Act();
+	virtual void Draw(HDC hdc, RECT &paint_area);
 	virtual bool Is_Finished();
 
 	static void Setup_Colors();

@@ -21,10 +21,13 @@ public:
 
 private:
 
+	void Act();
+	void On_Falling_Letter(AFalling_Letter *falling_letter);
+
 	EGame_State Game_State;
 
 	ABall Ball;
-	ALevel Level;
+	AsLevel Level;
 	AsPlatform Platform;
 	AsBorder Border;
 };

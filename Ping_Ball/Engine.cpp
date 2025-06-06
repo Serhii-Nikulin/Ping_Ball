@@ -32,7 +32,7 @@ void AsEngine::Init_Engine(HWND hwnd)
     Platform.Init();
     Border.Init();
 
-    Level.Set_Current_Level(ALevel::Level_01);
+    Level.Set_Current_Level(AsLevel::Level_01);
 
     if (Game_State == EGS_Restart_Level)
     {
@@ -58,16 +58,10 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
     switch (key_type)
     {
     case EKT_Left:
-		if (Platform.Get_State() != EPS_Normal)
-			return 0;
-
         Platform.Move(true);
         break;
 
     case EKT_Right:
-        if (Platform.Get_State() != EPS_Normal)
-            return 0;
-
         Platform.Move(false);
         break;
 
@@ -86,42 +80,58 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 //------------------------------------------------------------------------------------------------------------
 int AsEngine::On_Timer()
 {
-    AsConfig::Current_Timer_Tick += 1;
+	AsConfig::Current_Timer_Tick += 1;
 
-    switch (Game_State)
-    {
-    case EGS_Play_Level:
-        Ball.Move();
+	switch (Game_State)
+	{
+	case EGS_Play_Level:
+		Ball.Move();
 
-        if (Ball.Get_State() == EBS_Lost)
-        {
+		if (Ball.Get_State() == EBS_Lost)
+		{
 			Game_State = EGS_Lost_Ball;
-            Platform.Set_State(EPS_Meltdown);
-        }
+			Platform.Set_State(EPS_Meltdown);
+		}
 
-        break;
+		break;
 
-    case EGS_Lost_Ball:
+	case EGS_Lost_Ball:
 
-        if (Platform.Get_State() == EPS_Missing)
-        {
-            Game_State = EGS_Restart_Level;
-            Platform.Set_State(EPS_Rolling);
-        }
-        break;
+		if (Platform.Get_State() == EPS_Missing)
+		{
+			Game_State = EGS_Restart_Level;
+			Platform.Set_State(EPS_Rolling);
+		}
+		break;
 
-    case EGS_Restart_Level:
-        if (Platform.Get_State() == EPS_Is_Ready)
-        {
-            Game_State = EGS_Play_Level;
-            Ball.Set_State(EBS_On_Platform);
-        }
-        break;
-    }
+	case EGS_Restart_Level:
+		if (Platform.Get_State() == EPS_Is_Ready)
+		{
+			Game_State = EGS_Play_Level;
+			Ball.Set_State(EBS_On_Platform);
+		}
+		break;
+	}
 
+	Act();
+
+    return 0;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsEngine::Act()
+{
+    int index = 0;
+    AFalling_Letter *falling_letter;
     Platform.Act();
     Level.Act();
 
-    return 0;
+    while (Level.Get_Next_Falling_Letter(index, &falling_letter) )
+        if (Platform.Hit_By(falling_letter) )
+            On_Falling_Letter(falling_letter);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsEngine::On_Falling_Letter(AFalling_Letter *falling_letter)
+{
+    falling_letter->Finalize();
 }
 //------------------------------------------------------------------------------------------------------------
