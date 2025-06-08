@@ -30,13 +30,8 @@ int ABall::Hit_Checker_Count = 0;
 AHit_Checker* ABall::Hit_Checkers[];
 //------------------------------------------------------------------------------------------------------------
 ABall::ABall()
-    : Ball_State(EBS_Normal), Ball_Pen(0), Ball_Brush(0), Ball_Rect{}, Prev_Ball_Rect{}, Center_X_Pos(Start_Ball_X_Pos), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(6.0), Ball_Direction(M_PI_4), Rest_Distance(0.0)
+    : Ball_State(EBS_Normal), Ball_Rect{}, Prev_Ball_Rect{}, Center_X_Pos(Start_Ball_X_Pos), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(6.0), Ball_Direction(M_PI_4), Rest_Distance(0.0)
 {}
-//------------------------------------------------------------------------------------------------------------
-void ABall::Init()
-{
-    AsConfig::Create_Pen_Brush(Ball_Pen, Ball_Brush, 255, 255, 255);
-}
 //------------------------------------------------------------------------------------------------------------
 void ABall::Redraw()
 {
@@ -57,15 +52,13 @@ void ABall::Draw(HDC hdc, RECT &paint_area) const
 
     if (IntersectRect(&intersection_rect, &paint_area, &Prev_Ball_Rect) )
     {
-        SelectObject(hdc, AsConfig::BG_Pen);
-        SelectObject(hdc, AsConfig::BG_Brush);
+        AsConfig::BG_Color.Select(hdc);
         Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right - 1, Prev_Ball_Rect.bottom - 1);
     }
 
     if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect) )
     {
-        SelectObject(hdc, Ball_Pen);
-        SelectObject(hdc, Ball_Brush);
+        AsConfig::White_Color.Select(hdc);
         Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right - 1, Ball_Rect.bottom - 1);
     }
 }

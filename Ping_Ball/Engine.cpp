@@ -28,11 +28,8 @@ void AsEngine::Init_Engine(HWND hwnd)
 	Platform.Set_State(EPS_Normal);
     Platform.Redraw();
 
-    Ball.Init();
     Level.Init();
     AFalling_Letter::Init();
-    Platform.Init();
-    Border.Init();
 
     Level.Set_Current_Level(AsLevel::Level_01);
 

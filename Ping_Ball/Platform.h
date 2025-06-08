@@ -15,7 +15,6 @@ public:
 	virtual bool Check_Hit(double next_x_pos, double next_y_pos, ABall *ball);
 
 	void Move(bool to_left);
-	void Init();
 	void Act();
 
 	EPlatform_State Get_State() const;
@@ -41,14 +40,11 @@ private:
 	bool Reflect_From_Center(double next_x_pos, double next_y_pos, ABall *ball);
 	bool Reflect_From_Circle(double next_x_pos, double next_y_pos, ABall *ball, double circle_x_pos);
 
-	bool Get_Platform_Image_Stroke_Color(int x, int y, int &len, HPEN &pen_color);
+	bool Get_Platform_Image_Stroke_Color(int x, int y, int &len, const AColor **pen_color);
 
 	EPlatform_State Platform_State;
 	RECT Platform_Rect, Prev_Platform_Rect;
 	AColor Highlight_Color, Platform_Side_Color, Platform_Inner_Color;
-	HPEN Highlight_Pen;
-	HPEN Platform_Side_Pen, Platform_Inner_Pen;
-	HBRUSH Platform_Side_Brush, Platform_Inner_Brush;
 
 	static const int Height = 7;
 	static const int Circle_Size = 7;

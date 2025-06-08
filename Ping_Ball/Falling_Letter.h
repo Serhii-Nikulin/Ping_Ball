@@ -42,7 +42,7 @@ public:
 private:
 
 	void Draw_Brick_Letter(HDC hdc);
-	void Set_Brick_Letter_Color(bool is_switch_color, HPEN &front_pen, HBRUSH &front_brush, HPEN &back_pen, HBRUSH &back_brush) const;
+	void Set_Brick_Letter_Color(bool is_switch_color, const AColor **front_color, const AColor **back_color) const;
 	void Draw_Line(HDC hdc, int x_1, int y_1, int x_2, int y_2);
 
 	int X, Y;
