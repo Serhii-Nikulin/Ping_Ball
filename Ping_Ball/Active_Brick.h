@@ -28,19 +28,15 @@ private:
 	EBrick_Type Brick_Type;
 
 	RECT Brick_Rect;
-	HPEN Pen;
-	HBRUSH Brush;
 
 	int Fade_Step;
 
 	static unsigned char Get_Fading_Value(int step, int max_value, int min_value);
-	static void Get_Fading_Color(const AColor &color, int step, HPEN &pen, HBRUSH &brush);
+	static void Get_Fading_Color(const AColor &origin_color, int step, AColor &fading_color);
 
 	static const int Max_Fade_Step = AsConfig::FPS;
 
-	static HPEN Fading_Red_Brick_Pens[Max_Fade_Step];
-	static HBRUSH Fading_Red_Brick_Brushes[Max_Fade_Step];
-	static HPEN Fading_Blue_Brick_Pens[Max_Fade_Step];
-	static HBRUSH Fading_Blue_Brick_Brushes[Max_Fade_Step];
+	static AColor Fading_Red_Brick_Colors[Max_Fade_Step];
+	static AColor Fading_Blue_Brick_Colors[Max_Fade_Step];
 };
 //------------------------------------------------------------------------------------------------------------

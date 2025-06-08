@@ -9,36 +9,38 @@
 class AColor
 {
 public:
-	const unsigned char R, G, B;
+	unsigned char R, G, B;
 
+	AColor();
 	AColor(unsigned char r, unsigned char g, unsigned char b);
 	int Get_RGB() const;
+	void Select(HDC hdc) const;
+	void Select_Pen(HDC hdc) const;
+
+private:
+	HPEN  Pen;
+	HBRUSH Brush;
 };
 //------------------------------------------------------------------------------------------------------------
 class AsConfig
 {
 public:
-	static void Setup_Colors();
-	static void Create_Pen_Brush(HPEN& pen, HBRUSH& brush, unsigned char r, unsigned char g, unsigned char b);
-	static void Create_Pen_Brush(HPEN& pen, HBRUSH& brush, const AColor &color);
 	static int Rand(int range);
 
 	static const int Global_Scale = 3;
 	static int Current_Timer_Tick;
 
 	static const AColor BG_Color;
-	static const AColor Red_Brick_Color;
-	static const AColor Blue_Brick_Color;
+	static const AColor Red_Color;
+	static const AColor Blue_Color;
+	static const AColor White_Color;
 
 	static HWND Hwnd;
-
-	static HPEN BG_Pen;
-	static HBRUSH BG_Brush;
 
 	static const int FPS = 20;
 	static bool Has_Floor;
 	static double Moving_Size_Step;
-	static const int Hits_Per_Letter = 1;
+	static const int Hits_Per_Letter = 10;
 
 	//Border
 	static const int Border_X_Offset = 6;
@@ -52,8 +54,6 @@ public:
 
 	//Level
 	static HPEN Letter_Pen;
-	static HPEN Brick_Red_Pen, Brick_Blue_Pen;
-	static HBRUSH Brick_Red_Brush, Brick_Blue_Brush;
 
 	static const int Level_X_Offset = 8;
 	static const int Level_Y_Offset = 6;

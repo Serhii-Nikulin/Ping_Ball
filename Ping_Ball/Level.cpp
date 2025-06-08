@@ -250,9 +250,6 @@ void AsLevel::Init()
 
     AsConfig::Letter_Pen = CreatePen(PS_SOLID, AsConfig::Global_Scale, RGB(255, 255, 255) );
 
-    AsConfig::Create_Pen_Brush(AsConfig::Brick_Red_Pen, AsConfig::Brick_Red_Brush, AsConfig::Red_Brick_Color);
-    AsConfig::Create_Pen_Brush(AsConfig::Brick_Blue_Pen, AsConfig::Brick_Blue_Brush, AsConfig::Blue_Brick_Color);
-
     memset(Active_Bricks, 0, sizeof(Active_Bricks) );
     memset(Falling_Letters, 0, sizeof(Falling_Letters) );
     memset(Current_Level, 0, sizeof(Current_Level) );
@@ -289,44 +286,38 @@ bool AsLevel::Get_Next_Falling_Letter(int &index, AFalling_Letter **falling_lett
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type) const
 {
-    HBRUSH brush = 0;
-    HPEN pen = 0;
+    const AColor *color;
 
     switch (brick_type)
     {
     case EBT_None:
-        pen = AsConfig::BG_Pen;
-        brush = AsConfig::BG_Brush;
+        color = &AsConfig::BG_Color;
         break;
 
     case EBT_Red:
-        pen = AsConfig::Brick_Red_Pen;
-        brush = AsConfig::Brick_Red_Brush;
+        color = &AsConfig::Red_Color;
         break;
 
     case EBT_Blue:
-        pen = AsConfig::Brick_Blue_Pen;
-        brush = AsConfig::Brick_Blue_Brush;
+        color = &AsConfig::Blue_Color;
         break;
 
     default:
         return;
     }
 
-    if (pen and brush)
+    if (color)
     {
-        SelectObject(hdc, pen);
-        SelectObject(hdc, brush);
+        color->Select(hdc);
+        RoundRect(hdc, brick_rect.left, brick_rect.top, brick_rect.right - 1, brick_rect.bottom - 1, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
     }
-
-    RoundRect(hdc, brick_rect.left, brick_rect.top, brick_rect.right - 1, brick_rect.bottom - 1, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Draw(HDC hdc, RECT &paint_area)
 {
 	int i, j;
-	RECT brick_rect;
-	RECT intersection_rect;
+    RECT brick_rect{};
+    RECT intersection_rect{};
     /*AFalling_Letter *falling_letter = new AFalling_Letter(EBT_Red, ELT_Plus, 5 * AsConfig::Global_Scale, 150 * AsConfig::Global_Scale);
 
     AFalling_Letter *falling_letter_2 = new AFalling_Letter(EBT_Blue, ELT_Plus, 5 * AsConfig::Global_Scale, 170 * AsConfig::Global_Scale);
