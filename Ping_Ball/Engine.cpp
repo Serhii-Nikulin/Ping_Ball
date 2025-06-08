@@ -30,6 +30,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 
     Ball.Init();
     Level.Init();
+    AFalling_Letter::Init();
     Platform.Init();
     Border.Init();
 

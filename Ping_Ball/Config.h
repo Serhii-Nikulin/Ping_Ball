@@ -38,7 +38,7 @@ public:
 	static const int FPS = 20;
 	static bool Has_Floor;
 	static double Moving_Size_Step;
-	static const int Hits_Per_Letter = 2;
+	static const int Hits_Per_Letter = 1;
 
 	//Border
 	static const int Border_X_Offset = 6;

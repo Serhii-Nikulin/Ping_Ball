@@ -1,7 +1,11 @@
 #include "Falling_Letter.h"
 
 
+
+
 // AFalling_Letter
+int AFalling_Letter::Letters_Popularity[ELT_Max] = {7, 7, 7, 7, 7, 7, 7, 3, 3, 3, 1};
+int AFalling_Letter::All_Letters_Popularity = 0;
 //------------------------------------------------------------------------------------------------------------
 AFalling_Letter::AFalling_Letter(EBrick_Type brick_type, ELetter_Type letter_type, int x, int y)
     : Brick_Type(brick_type), Letter_Type(letter_type), X(x), Y(y), Letter_Cell{}, Prev_Letter_Cell{}, Rotation_Step(0), Got_Hit(false), Next_Rotation_Tick(AsConfig::Current_Timer_Tick + Ticks_Per_Step), Falling_Letter_State(EFLS_Normal)
@@ -103,6 +107,30 @@ void AFalling_Letter::Test_Draw_All_Steps(HDC hdc)
     }
 }
 //------------------------------------------------------------------------------------------------------------
+void AFalling_Letter::Init()
+{
+    int i;
+
+    for (i = 0; i < ELT_Max; i++)
+		All_Letters_Popularity += Letters_Popularity[i];
+}
+//------------------------------------------------------------------------------------------------------------
+ELetter_Type AFalling_Letter::Get_Random_Letter_Type()
+{
+    int i;
+    int letters_popularity = AsConfig::Rand(AFalling_Letter::All_Letters_Popularity);
+
+    for (i = 0; i < ELT_Max; i++)
+    {
+        if (letters_popularity < AFalling_Letter::Letters_Popularity[i])
+            return static_cast<ELetter_Type>(i);
+
+        letters_popularity -= AFalling_Letter::Letters_Popularity[i];
+    }
+
+    return ELT_X;
+}
+//------------------------------------------------------------------------------------------------------------
 void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
 {
     XFORM old_xform{}, new_xform{};
@@ -181,31 +209,18 @@ void AFalling_Letter::Draw_Brick_Letter(HDC hdc)
             {
                 case ELT_S:
                     SelectObject(hdc, AsConfig::Letter_Pen);
-
-                    //верхн€€ горизонтальна€
                     Draw_Line(hdc, 5, 1, 10, 1);
-                 
-                    // Ћева€ верхн€€ вертикаль
                     Draw_Line(hdc, 5, 1, 5, 3);
-                  
-                    // —редн€€ горизонтальна€
                     Draw_Line(hdc, 5, 3, 10, 3);
-                 
-                    // ѕрава€ нижн€€ вертикаль
                     Draw_Line(hdc, 10, 3, 10, 5);
-              
-                    // Ќижн€€ горизонтальна€ лини€
                     Draw_Line(hdc, 10, 5, 5, 5);
                     break;
 
                 case ELT_L:
                     SelectObject(hdc, AsConfig::Letter_Pen);
-
-                    //верхн€€ горизонтальна€
                     Draw_Line(hdc, 6, 1, 6, 5);
-
-                    // Ћева€ верхн€€ вертикаль
                     Draw_Line(hdc, 6, 5, 9, 5);
+                    break;
 
                 case ELT_HP:
                     SelectObject(hdc, AsConfig::Letter_Pen);

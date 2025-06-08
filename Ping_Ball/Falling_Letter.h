@@ -2,7 +2,25 @@
 #include "Active_Brick.h"
 
 //Bricks
-enum ELetter_Type {ELT_None, ELT_S, ELT_L, ELT_HP, ELT_T, ELT_X, ELT_C, ELT_W, ELT_M, ELT_F, ELT_R, ELT_Plus};
+enum ELetter_Type 
+{
+	ELT_X, // cancel effects
+	ELT_R, // reverse
+	ELT_S, // slow ball
+	ELT_M, // kill monster
+	ELT_HP, // get one more life
+	ELT_W, // wide platform
+	ELT_C, // clay platform 7
+
+	ELT_T, // triple bal 3
+	ELT_L, // lazer platform 3
+	ELT_F, // floor 3
+
+	ELT_Plus, // next level 1
+
+	ELT_Max
+};
+
 enum EFalling_Letter_State {EFLS_Normal, EFLS_Finalizing, EFLS_Finished};
 //------------------------------------------------------------------------------------------------------------
 class AFalling_Letter: public AGraphics_Object
@@ -18,6 +36,9 @@ public:
 	void Finalize();
 	void Test_Draw_All_Steps(HDC hdc);
 
+	static void Init();
+	static ELetter_Type Get_Random_Letter_Type();
+
 private:
 
 	void Draw_Brick_Letter(HDC hdc);
@@ -31,9 +52,11 @@ private:
 	const EBrick_Type Brick_Type;
 	const ELetter_Type Letter_Type;
 	RECT Letter_Cell, Prev_Letter_Cell;
+	EFalling_Letter_State Falling_Letter_State;
 	static const int Ticks_Per_Step = 4;
 	static const int Max_Rotation_Step = 16;
-	static const int Brick_Half_Height = (int)(AsConfig::Brick_Height * AsConfig::Global_Scale / 2.0);
-	EFalling_Letter_State Falling_Letter_State;
+	static const int Brick_Half_Height = AsConfig::Brick_Height * AsConfig::Global_Scale / 2;
+	static int Letters_Popularity[ELT_Max];
+	static int All_Letters_Popularity;
 };
 //------------------------------------------------------------------------------------------------------------

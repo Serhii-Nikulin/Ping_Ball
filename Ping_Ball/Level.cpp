@@ -200,34 +200,33 @@ bool AsLevel::Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_
     AFalling_Letter *falling_letter;
     int letter_x, letter_y;
  
-    ELetter_Type letter_type = ELT_S;
+    ELetter_Type letter_type;
 
-    if (brick_type == EBT_Blue or brick_type == EBT_Red)
-    {
-        if (AsConfig::Rand(AsConfig::Hits_Per_Letter) == 0)
-        {
-            if (Falling_Letter_Count < AsConfig::Max_Falling_Letter_Count)
-            {
-                for (i = 0; i < AsConfig::Max_Falling_Letter_Count; i++)
-                {
-                    if (Falling_Letters[i] == 0)
-                    {
-                        letter_x = (AsConfig::Level_X_Offset + brick_x * AsConfig::Cell_Width) * AsConfig::Global_Scale;
-                        letter_y = (AsConfig::Level_Y_Offset + brick_y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
-                        falling_letter = new AFalling_Letter(brick_type, letter_type, letter_x, letter_y);
+	if (! (brick_type == EBT_Blue or brick_type == EBT_Red))
+		return false;
 
-                        Falling_Letters[i] = falling_letter;
-                        Falling_Letter_Count += 1;
+	if (AsConfig::Rand(AsConfig::Hits_Per_Letter) != 0)
+		return false;
 
-                        break;
-                    }
+	if (Falling_Letter_Count >= AsConfig::Max_Falling_Letter_Count)
+		return false;
 
-                }
+	for (i = 0; i < AsConfig::Max_Falling_Letter_Count; i++)
+	{
+		if (Falling_Letters[i] == 0)
+		{
+			letter_x = (AsConfig::Level_X_Offset + brick_x * AsConfig::Cell_Width) * AsConfig::Global_Scale;
+			letter_y = (AsConfig::Level_Y_Offset + brick_y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
 
-                return true;
-            }
-        }
-    }
+            letter_type = AFalling_Letter::Get_Random_Letter_Type();
+			falling_letter = new AFalling_Letter(brick_type, letter_type, letter_x, letter_y);
+
+			Falling_Letters[i] = falling_letter;
+			Falling_Letter_Count += 1;
+
+			return true;
+		}
+	}
 
     return false;
 }
@@ -328,12 +327,12 @@ void AsLevel::Draw(HDC hdc, RECT &paint_area)
 	int i, j;
 	RECT brick_rect;
 	RECT intersection_rect;
-    AFalling_Letter *falling_letter = new AFalling_Letter(EBT_Red, ELT_Plus, 5 * AsConfig::Global_Scale, 150 * AsConfig::Global_Scale);
+    /*AFalling_Letter *falling_letter = new AFalling_Letter(EBT_Red, ELT_Plus, 5 * AsConfig::Global_Scale, 150 * AsConfig::Global_Scale);
 
     AFalling_Letter *falling_letter_2 = new AFalling_Letter(EBT_Blue, ELT_Plus, 5 * AsConfig::Global_Scale, 170 * AsConfig::Global_Scale);
 
     falling_letter->Test_Draw_All_Steps(hdc);
-    falling_letter_2->Test_Draw_All_Steps(hdc);
+    falling_letter_2->Test_Draw_All_Steps(hdc);*/
 
 	if (IntersectRect(&intersection_rect, &paint_area, &Level_Rect))
 	{
