@@ -1,11 +1,23 @@
 #include "Active_Brick.h"
 
-//AActive_Brick
-AColor AActive_Brick::Fading_Red_Brick_Colors[Max_Fade_Step];
-AColor AActive_Brick::Fading_Blue_Brick_Colors[Max_Fade_Step];
+// AGraphics_Object
+//------------------------------------------------------------------------------------------------------------
+AGraphics_Object::~AGraphics_Object()
+{
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+// AActive_Brick
+//------------------------------------------------------------------------------------------------------------
+AActive_Brick::~AActive_Brick()
+{
+}
 //------------------------------------------------------------------------------------------------------------
 AActive_Brick::AActive_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
-    : Brick_Type(brick_type), Brick_Rect{}, Fade_Step(0)
+    : Brick_Type(brick_type), Brick_Rect{}
 {
     Brick_Rect.left = (AsConfig::Level_X_Offset + brick_x * AsConfig::Cell_Width) * AsConfig::Global_Scale;
     Brick_Rect.top = (AsConfig::Level_Y_Offset + brick_y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
@@ -13,7 +25,24 @@ AActive_Brick::AActive_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
     Brick_Rect.bottom = Brick_Rect.top + AsConfig::Brick_Height * AsConfig::Global_Scale;
 }
 //------------------------------------------------------------------------------------------------------------
-void AActive_Brick::Act()
+
+
+
+
+// AActive_Brick_Red_Blue
+AColor AActive_Brick_Red_Blue::Fading_Red_Brick_Colors[Max_Fade_Step];
+AColor AActive_Brick_Red_Blue::Fading_Blue_Brick_Colors[Max_Fade_Step];
+//------------------------------------------------------------------------------------------------------------
+AActive_Brick_Red_Blue::~AActive_Brick_Red_Blue()
+{
+}
+//------------------------------------------------------------------------------------------------------------
+AActive_Brick_Red_Blue::AActive_Brick_Red_Blue(EBrick_Type brick_type, int brick_x, int brick_y)
+	: AActive_Brick(brick_type, brick_x, brick_y), Fade_Step(0)
+{
+}
+//------------------------------------------------------------------------------------------------------------
+void AActive_Brick_Red_Blue::Act()
 {
     if (Fade_Step < Max_Fade_Step - 1)
     {
@@ -22,7 +51,7 @@ void AActive_Brick::Act()
     }
 }
 //------------------------------------------------------------------------------------------------------------
-void AActive_Brick::Draw(HDC hdc, RECT &paint_area)
+void AActive_Brick_Red_Blue::Draw(HDC hdc, RECT &paint_area)
 {
     switch(Brick_Type)
     {
@@ -41,7 +70,7 @@ void AActive_Brick::Draw(HDC hdc, RECT &paint_area)
     RoundRect(hdc, Brick_Rect.left, Brick_Rect.top, Brick_Rect.right - 1, Brick_Rect.bottom - 1, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
 }
 //------------------------------------------------------------------------------------------------------------
-bool AActive_Brick::Is_Finished()
+bool AActive_Brick_Red_Blue::Is_Finished()
 {
     if (Fade_Step >= Max_Fade_Step - 1)
         return true;
@@ -49,7 +78,7 @@ bool AActive_Brick::Is_Finished()
         return false;
 }
 //------------------------------------------------------------------------------------------------------------
-void AActive_Brick::Setup_Colors()
+void AActive_Brick_Red_Blue::Setup_Colors()
 {
     int i;
 
@@ -60,12 +89,12 @@ void AActive_Brick::Setup_Colors()
     }
 }
 //------------------------------------------------------------------------------------------------------------
-unsigned char AActive_Brick::Get_Fading_Value(int step, int max_value, int min_value)
+unsigned char AActive_Brick_Red_Blue::Get_Fading_Value(int step, int max_value, int min_value)
 {
 	return static_cast<unsigned char>(max_value - step * (max_value - min_value) / (Max_Fade_Step - 1) );
 }
 //------------------------------------------------------------------------------------------------------------
-void AActive_Brick::Get_Fading_Color(const AColor &origin_color, int step, AColor &fading_color)
+void AActive_Brick_Red_Blue::Get_Fading_Color(const AColor &origin_color, int step, AColor &fading_color)
 {
     unsigned char r, g, b;
 
@@ -74,5 +103,43 @@ void AActive_Brick::Get_Fading_Color(const AColor &origin_color, int step, AColo
     b = Get_Fading_Value(step, origin_color.B, AsConfig::BG_Color.B);
 
     fading_color = AColor(r, g, b);
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+// AActive_Brick_Unbreakable
+//------------------------------------------------------------------------------------------------------------
+AActive_Brick_Unbreakable::~AActive_Brick_Unbreakable()
+{
+}
+//------------------------------------------------------------------------------------------------------------
+AActive_Brick_Unbreakable::AActive_Brick_Unbreakable(EBrick_Type brick_type, int brick_x, int brick_y)
+	: AActive_Brick(brick_type, brick_x, brick_y), Unbreakable_Animation_Step(0)
+{
+}
+//------------------------------------------------------------------------------------------------------------
+void AActive_Brick_Unbreakable::Act()
+{
+    if (Unbreakable_Animation_Step <= Max_Unbreakable_Animation_Step)
+    {
+        InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
+        Unbreakable_Animation_Step += 1;
+    }
+}
+//------------------------------------------------------------------------------------------------------------
+void AActive_Brick_Unbreakable::Draw(HDC hdc, RECT& paint_area)
+{
+	AsConfig::White_Color.Select(hdc);
+	RoundRect(hdc, Brick_Rect.left, Brick_Rect.top, Brick_Rect.right - 1, Brick_Rect.bottom - 1, 2 * AsConfig::Global_Scale, 2 * AsConfig::Global_Scale);
+}
+//------------------------------------------------------------------------------------------------------------
+bool AActive_Brick_Unbreakable::Is_Finished()
+{
+    if (Unbreakable_Animation_Step > Unbreakable_Animation_Step)
+        return true;
+    else
+        return false;
 }
 //------------------------------------------------------------------------------------------------------------

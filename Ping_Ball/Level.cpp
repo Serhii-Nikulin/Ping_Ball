@@ -10,7 +10,7 @@ unsigned char AsLevel::Level_01[AsLevel::Level_Height][AsLevel::Level_Width] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -175,9 +175,13 @@ void AsLevel::Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
 
     case EBT_Red:
     case EBT_Blue:
-        active_brick = new AActive_Brick(brick_type, brick_x, brick_y);
+        active_brick = new AActive_Brick_Red_Blue(brick_type, brick_x, brick_y);
         Current_Level[brick_y][brick_x] = EBT_None;
         break;
+
+    case EBT_Unbreakable:
+		active_brick = new AActive_Brick_Unbreakable(brick_type, brick_x, brick_y);
+		break;
 
     default:
         return;
@@ -301,6 +305,10 @@ void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type) cons
     case EBT_Blue:
         color = &AsConfig::Blue_Color;
         break;
+
+	case EBT_Unbreakable:
+		color = &AsConfig::White_Color;
+		break;
 
     default:
         return;
