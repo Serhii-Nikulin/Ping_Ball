@@ -19,7 +19,7 @@ void AsEngine::Init_Engine(HWND hwnd)
 
     SetTimer(AsConfig::Hwnd, Timer_ID, 1000 / AsConfig::FPS, NULL);
 
-    AActive_Brick::Setup_Colors();
+    AActive_Brick_Red_Blue::Setup_Colors();
 
     ABall::Add_Hit_Checker(&Border);
     ABall::Add_Hit_Checker(&Level);
