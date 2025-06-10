@@ -13,6 +13,7 @@ public:
 
 	AColor();
 	AColor(unsigned char r, unsigned char g, unsigned char b);
+	AColor(const AColor &color, int pen_size);
 	int Get_RGB() const;
 	void Select(HDC hdc) const;
 	void Select_Pen(HDC hdc) const;
@@ -25,6 +26,7 @@ private:
 class AsConfig
 {
 public:
+	static void Round_Rect(HDC hdc, RECT &rect, int corner_size = 2);
 	static int Rand(int range);
 
 	static const int Global_Scale = 3;

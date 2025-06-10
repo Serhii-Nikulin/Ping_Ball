@@ -257,6 +257,7 @@ void AsPlatform::Draw_Normal_State(HDC hdc)
     int offset;
     int x = X_Pos;
     int y = AsConfig::Platform_Y_Pos;
+    RECT inner_rect;
 
     Clear_BG(hdc);
 
@@ -266,7 +267,11 @@ void AsPlatform::Draw_Normal_State(HDC hdc)
     Draw_Circle(hdc, x, y);
 
     Platform_Inner_Color.Select(hdc);
-    RoundRect(hdc, (x + 4) * AsConfig::Global_Scale, (y + 1) * AsConfig::Global_Scale, (x + Width - 4) * AsConfig::Global_Scale - 1, (y + Circle_Size - 1) * AsConfig::Global_Scale - 1, AsConfig::Global_Scale * 3, AsConfig::Global_Scale * 3);
+    inner_rect.left = (x + 4) * AsConfig::Global_Scale;
+    inner_rect.top = (y + 1) * AsConfig::Global_Scale;
+    inner_rect.right = (x + Width - 4) * AsConfig::Global_Scale;
+    inner_rect.bottom = (y + Circle_Size - 1) * AsConfig::Global_Scale;
+    AsConfig::Round_Rect(hdc, inner_rect, 3);
 
     Highlight_Color.Select(hdc);
     Draw_Circle_Highlight(hdc, x, y);

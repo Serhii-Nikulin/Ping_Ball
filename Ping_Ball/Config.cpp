@@ -14,6 +14,13 @@ AColor::AColor(unsigned char r, unsigned char g, unsigned char b)
 	Brush = CreateSolidBrush(RGB(R, G, B));
 }
 //------------------------------------------------------------------------------------------------------------
+AColor::AColor(const AColor &color, int pen_size)
+	: R(color.R), G(color.G), B(color.B)
+{
+	Pen = CreatePen(PS_SOLID, pen_size, RGB(R, G, B));
+	Brush = CreateSolidBrush(RGB(R, G, B));
+}
+//------------------------------------------------------------------------------------------------------------
 int AColor::Get_RGB() const
 {
     return RGB(R, G, B);
@@ -47,6 +54,12 @@ const AColor AsConfig::Blue_Color(80, 140, 210);
 const AColor AsConfig::White_Color(255, 255, 255);
 
 HPEN AsConfig::Letter_Pen(0);
+//------------------------------------------------------------------------------------------------------------
+void AsConfig::Round_Rect(HDC hdc, RECT &rect, int corner_size)
+{
+	int corner = corner_size * AsConfig::Global_Scale;
+	RoundRect(hdc, rect.left, rect.top, rect.right - 1, rect.bottom - 1, corner, corner);
+}
 //------------------------------------------------------------------------------------------------------------
 int AsConfig::Rand(int range)
 {
