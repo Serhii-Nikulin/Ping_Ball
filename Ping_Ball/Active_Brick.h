@@ -1,8 +1,12 @@
 #pragma once
-
 #include "Config.h"
 
-enum EBrick_Type: unsigned char {EBT_None, EBT_Red, EBT_Blue, EBT_Unbreakable};
+enum EBrick_Type: unsigned char {
+	EBT_None, 
+	EBT_Red, EBT_Blue, 
+	EBT_Unbreakable, 
+	EBT_Multihit_1, EBT_Multihit_2, EBT_Multihit_3, EBT_Multihit_4
+};
 //------------------------------------------------------------------------------------------------------------
 class AGraphics_Object
 {
@@ -63,11 +67,37 @@ public:
 	static void Draw_In_Level(HDC hdc, RECT &rect);
 
 private:
-	static AColor Red_Highlight;
-	static AColor Blue_Highlight;
+	const static AColor Red_Highlight;
+	const static AColor Blue_Highlight;
 
 	HRGN Region;
 	int Animation_Step;
 	static const int Max_Animation_Step = 11;
+};
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+// AActive_Brick_Multihit
+//------------------------------------------------------------------------------------------------------------
+class AActive_Brick_Multihit : public AActive_Brick
+{
+public:
+	virtual ~AActive_Brick_Multihit();
+	AActive_Brick_Multihit(EBrick_Type brick_type, int brick_x, int brick_y);
+
+	virtual void Act();
+	virtual void Draw(HDC hdc, RECT &paint_area);
+	virtual bool Is_Finished();
+
+	static void Draw_In_Level(HDC hdc, EBrick_Type brick_type, RECT &rect);
+
+private:
+	static void Draw_Brick_Elements(HDC hdc, RECT &brick_rect, int width, int elements, int offset);
+
+	int Rotation_Step;
+	static const int Rotation_Step_Per_Turn = 20;
+	static const int Max_Rotation_Step = 20 * 3;
 };
 //------------------------------------------------------------------------------------------------------------
