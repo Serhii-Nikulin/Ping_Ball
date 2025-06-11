@@ -10,12 +10,13 @@ unsigned char AsLevel::Level_01[AsLevel::Level_Height][AsLevel::Level_Width] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3,
+    //2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 4,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 //------------------------------------------------------------------------------------------------------------
 //AsLevel
@@ -183,6 +184,18 @@ void AsLevel::Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
 		active_brick = new AActive_Brick_Unbreakable(brick_type, brick_x, brick_y);
 		break;
 
+    case EBT_Multihit_1:
+        Current_Level[brick_y][brick_x] = EBT_None;
+        active_brick = new AActive_Brick_Multihit(EBT_Multihit_1, brick_x, brick_y);
+
+        break;
+
+    case EBT_Multihit_2:
+    case EBT_Multihit_3:
+    case EBT_Multihit_4:
+        Current_Level[brick_y][brick_x] = brick_type - 1;
+        break;
+
     default:
         return;
     }
@@ -196,6 +209,18 @@ void AsLevel::Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
             break;
         }
     }
+}
+//------------------------------------------------------------------------------------------------------------
+void AsLevel::Redraw_Brick(int brick_x, int brick_y)
+{
+    RECT brick_rect{};
+
+    brick_rect.left = (AsConfig::Level_X_Offset + brick_x * AsConfig::Cell_Width) * AsConfig::Global_Scale;
+    brick_rect.top = (AsConfig::Level_Y_Offset + brick_y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
+    brick_rect.right = brick_rect.left + AsConfig::Brick_Width * AsConfig::Global_Scale;
+    brick_rect.bottom = brick_rect.top + AsConfig::Brick_Height * AsConfig::Global_Scale;
+
+	InvalidateRect(AsConfig::Hwnd, &brick_rect, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsLevel::Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_y)
@@ -243,6 +268,8 @@ void AsLevel::On_Hit(int brick_x, int brick_y)
         Current_Level[brick_y][brick_x] = EBT_None;
     else
         Add_Active_Brick(brick_type, brick_x, brick_y);
+
+    Redraw_Brick(brick_x, brick_y);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Init()
@@ -290,8 +317,6 @@ bool AsLevel::Get_Next_Falling_Letter(int &index, AFalling_Letter **falling_lett
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type) const
 {
-    const AColor *color;
-
     switch (brick_type)
     {
     case EBT_None:
@@ -303,6 +328,13 @@ void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type) cons
 	case EBT_Unbreakable:
         AActive_Brick_Unbreakable::Draw_In_Level(hdc, brick_rect);
 		break;
+
+    case EBT_Multihit_1:
+    case EBT_Multihit_2:
+    case EBT_Multihit_3:
+    case EBT_Multihit_4:
+        AActive_Brick_Multihit::Draw_In_Level(hdc, brick_type, brick_rect);
+        break;
 
     default:
         return;
