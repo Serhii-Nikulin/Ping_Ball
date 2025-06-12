@@ -428,7 +428,7 @@ void AsLevel::Draw_Parachute_In_Level(HDC hdc, RECT &brick_rect) const
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Draw_Elements_Of_Parachute(HDC hdc, RECT &brick_rect, int offset, int width) const
 {
-    RECT rect;
+    RECT rect{};
     const int &scale = AsConfig::Global_Scale;
 
     Parachute_Color.Select(hdc);
