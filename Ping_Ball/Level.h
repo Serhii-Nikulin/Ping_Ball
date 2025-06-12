@@ -30,13 +30,15 @@ private:
 	void Redraw_Brick(int brick_x, int brick_y);
 
 	bool Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_y);
-	void On_Hit(int brick_x, int brick_y);
+	void On_Hit(int brick_x, int brick_y, ABall *ball);
 
 	void Act_Objects(AGraphics_Object **object_array, const int max_objects_count, int &objects_count);
 	void Draw_Objects(HDC hdc, RECT &paint_area, AGraphics_Object **object_array, const int max_objects_count, int &objects_count);
 
-	RECT Level_Rect{};
+	void Draw_Parachute_In_Level(HDC hdc, RECT &brick_rect) const;
+	void Draw_Elements_Of_Parachute(HDC hdc, RECT &brick_rect, int offset, int width) const;
 
+	RECT Level_Rect{};
 	unsigned char Current_Level[AsLevel::Level_Height][AsLevel::Level_Width];
  
 	int Current_Brick_Left_Pos;
@@ -49,5 +51,7 @@ private:
 
 	int Falling_Letter_Count;
 	AFalling_Letter *Falling_Letters[AsConfig::Max_Falling_Letter_Count];
+
+	AColor Parachute_Color;
 };
 //------------------------------------------------------------------------------------------------------------

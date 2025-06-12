@@ -3,7 +3,7 @@
 #include "Config.h"
 
 //------------------------------------------------------------------------------------------------------------
-enum EBall_State { EBS_Normal, EBS_Lost, EBS_On_Platform };
+enum EBall_State { EBS_Normal, EBS_Lost, EBS_On_Platform, EBS_On_Parachute };
 //------------------------------------------------------------------------------------------------------------
 class ABall;
 class AHit_Checker
@@ -19,7 +19,7 @@ public:
 	ABall();
 
 	void Redraw();
-	void Draw(HDC hdc, RECT &paint_area) const;
+	void Draw(HDC hdc, RECT &paint_area);
 	void Move();
 	EBall_State Get_State() const;
 	void Set_State(EBall_State new_state);
@@ -32,13 +32,18 @@ public:
 
 	static void Add_Hit_Checker(AHit_Checker* hit_checker);
 
+	void Set_On_Parachute(int brick_x, int brick_y);
+
 	double Ball_Speed;
 	static const double Radius;
 private:
 
+	void Draw_Parachute(HDC hdc, RECT &paint_area);
+
 	EBall_State Ball_State;
 
 	RECT Ball_Rect, Prev_Ball_Rect;
+	RECT Parachute_Rect;
 
 	double Center_X_Pos;
 	double Center_Y_Pos;
@@ -49,5 +54,7 @@ private:
 	static const double Start_Ball_Y_Pos;
 	static int Hit_Checker_Count;
 	static AHit_Checker* Hit_Checkers[3];
+
+	static const int Parachute_Size = 15;
 };
 //------------------------------------------------------------------------------------------------------------

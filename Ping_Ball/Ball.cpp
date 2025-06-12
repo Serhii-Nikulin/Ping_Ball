@@ -30,7 +30,7 @@ int ABall::Hit_Checker_Count = 0;
 AHit_Checker* ABall::Hit_Checkers[];
 //------------------------------------------------------------------------------------------------------------
 ABall::ABall()
-    : Ball_State(EBS_Normal), Ball_Rect{}, Prev_Ball_Rect{}, Center_X_Pos(Start_Ball_X_Pos), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(6.0), Ball_Direction(M_PI_4), Rest_Distance(0.0)
+    : Ball_State(EBS_Normal), Ball_Rect{}, Prev_Ball_Rect{}, Center_X_Pos(Start_Ball_X_Pos), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(6.0), Ball_Direction(M_PI_4), Rest_Distance(0.0), Parachute_Rect{}
 {}
 //------------------------------------------------------------------------------------------------------------
 void ABall::Redraw()
@@ -46,7 +46,7 @@ void ABall::Redraw()
     InvalidateRect(AsConfig::Hwnd, &Ball_Rect, FALSE);
 }
 //------------------------------------------------------------------------------------------------------------
-void ABall::Draw(HDC hdc, RECT &paint_area) const
+void ABall::Draw(HDC hdc, RECT &paint_area)
 {
     RECT intersection_rect{};
 
@@ -55,6 +55,9 @@ void ABall::Draw(HDC hdc, RECT &paint_area) const
         AsConfig::BG_Color.Select(hdc);
         Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right - 1, Prev_Ball_Rect.bottom - 1);
     }
+
+    if (Ball_State == EBS_On_Parachute)
+        Draw_Parachute(hdc, paint_area);
 
     if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect) )
     {
@@ -69,7 +72,7 @@ void ABall::Move()
     bool got_hit;
     double next_x_pos, next_y_pos;
 
-    if (Ball_State != EBS_Normal)
+    if (! (Ball_State == EBS_Normal or Ball_State == EBS_On_Parachute) )
         return;
 
     Rest_Distance += Ball_Speed;
@@ -180,5 +183,37 @@ void ABall::Add_Hit_Checker(AHit_Checker* hit_checker)
         return;
 
     Hit_Checkers[Hit_Checker_Count++] = hit_checker;
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Set_On_Parachute(int brick_x, int brick_y)
+{
+    int x_pos, y_pos;
+
+    Ball_State = EBS_On_Parachute;
+    x_pos = AsConfig::Level_X_Offset + brick_x * AsConfig::Cell_Width;
+    y_pos = AsConfig::Level_Y_Offset + brick_y * AsConfig::Cell_Height;
+
+	Parachute_Rect.left = x_pos * AsConfig::Global_Scale;
+	Parachute_Rect.top = y_pos * AsConfig::Global_Scale;
+	Parachute_Rect.right = Parachute_Rect.left + Parachute_Size * AsConfig::Global_Scale;
+	Parachute_Rect.bottom = Parachute_Rect.top + Parachute_Size * AsConfig::Global_Scale;
+
+	Center_X_Pos = x_pos + AsConfig::Cell_Width / 2;
+	Center_Y_Pos = y_pos + Parachute_Size;
+
+	Ball_Direction = M_PI + M_PI_2;
+	Rest_Distance = 0.0;
+    Ball_Speed = 1.0;
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Draw_Parachute(HDC hdc, RECT &paint_area)
+{
+	RECT intersection_rect{};
+
+    if (! IntersectRect(&intersection_rect, &paint_area, &Parachute_Rect) )
+        return;
+
+    AsConfig::Blue_Color.Select(hdc);
+    AsConfig::Round_Rect(hdc, Parachute_Rect, 14);
 }
 //------------------------------------------------------------------------------------------------------------

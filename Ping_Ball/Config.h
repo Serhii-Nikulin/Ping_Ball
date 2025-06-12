@@ -14,6 +14,7 @@ public:
 	AColor();
 	AColor(unsigned char r, unsigned char g, unsigned char b);
 	AColor(const AColor &color, int pen_size);
+	AColor(const AColor &pen_color, const AColor &brush_color, int pen_size);
 	int Get_RGB() const;
 	void Select(HDC hdc) const;
 	void Select_Pen(HDC hdc) const;
