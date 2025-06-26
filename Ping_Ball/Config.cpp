@@ -21,6 +21,13 @@ AColor::AColor(const AColor &color, int pen_size)
 	Brush = CreateSolidBrush(RGB(R, G, B));
 }
 //------------------------------------------------------------------------------------------------------------
+AColor::AColor(const AColor &pen_color, const AColor &brush_color, int pen_size)
+	: R(0), G(0), B(0), Pen(0), Brush(0)
+{
+	Pen = CreatePen(PS_SOLID, pen_size, RGB(pen_color.R, pen_color.G, pen_color.B));
+	Brush = CreateSolidBrush(RGB(brush_color.R, brush_color.G, brush_color.B));
+}
+//------------------------------------------------------------------------------------------------------------
 int AColor::Get_RGB() const
 {
     return RGB(R, G, B);
