@@ -10,8 +10,7 @@ unsigned char AsLevel::Level_01[AsLevel::Level_Height][AsLevel::Level_Width] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    //2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 9,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -55,7 +54,6 @@ bool AsLevel::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
     max_level_x = (max_ball_x - AsConfig::Level_X_Offset) / AsConfig::Cell_Width;
     min_level_y = (min_ball_y - AsConfig::Level_Y_Offset) / AsConfig::Cell_Height;
     max_level_y = (max_ball_y - AsConfig::Level_Y_Offset) / AsConfig::Cell_Height;
-
 
     for (i = max_level_y; i >= min_level_y; i--)
         for (j = min_level_x; j <= max_level_x; j++)
@@ -161,9 +159,10 @@ bool AsLevel::Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABal
     return false;
 }
 //------------------------------------------------------------------------------------------------------------
-void AsLevel::Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
+void AsLevel::Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball)
 {
     int i;
+    double ball_x, ball_y;
     AActive_Brick *active_brick = 0;
 
     if (Active_Bricks_Count >= AsConfig::Max_Active_Bricks_Count)
@@ -194,6 +193,17 @@ void AsLevel::Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
     case EBT_Multihit_3:
     case EBT_Multihit_4:
         Current_Level[brick_y][brick_x] = brick_type - 1;
+        break;
+
+    case EBT_Parachute:
+        return;
+
+    case EBT_Teleport:
+        ball_x = AsConfig::Level_X_Offset + brick_x * AsConfig::Cell_Width + AsConfig::Brick_Width / 2.0;
+        ball_y = AsConfig::Level_Y_Offset + brick_y * AsConfig::Cell_Height + AsConfig::Brick_Height / 2.0;
+        ball->Set_State(EBS_Teleporting, ball_x, ball_y);
+
+		active_brick = new AActive_Brick_Teleport(EBT_Parachute, brick_x, brick_y, ball);
         break;
 
     default:
@@ -272,7 +282,7 @@ void AsLevel::On_Hit(int brick_x, int brick_y, ABall *ball)
     else if (Add_Falling_Letter(brick_type, brick_x, brick_y) )
         Current_Level[brick_y][brick_x] = EBT_None;
     else
-        Add_Active_Brick(brick_type, brick_x, brick_y);
+        Add_Active_Brick(brick_type, brick_x, brick_y, ball);
 
     Redraw_Brick(brick_x, brick_y);
 }
@@ -344,6 +354,10 @@ void AsLevel::Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type) cons
     case EBT_Parachute:
         Draw_Parachute_In_Level(hdc, brick_rect);
         break;
+
+    case EBT_Teleport:
+		AActive_Brick_Teleport::Draw_In_Level(hdc, brick_rect);
+		break;
 
     default:
         return;

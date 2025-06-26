@@ -1,8 +1,6 @@
 #include "Falling_Letter.h"
 
 
-
-
 // AFalling_Letter
 int AFalling_Letter::Letters_Popularity[ELT_Max] = {7, 7, 7, 7, 7, 7, 7, 3, 3, 3, 1};
 int AFalling_Letter::All_Letters_Popularity = 0;

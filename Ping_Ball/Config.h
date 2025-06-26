@@ -37,6 +37,7 @@ public:
 	static const AColor Red_Color;
 	static const AColor Blue_Color;
 	static const AColor White_Color;
+	static const AColor Teleport_Color;
 
 	static HWND Hwnd;
 

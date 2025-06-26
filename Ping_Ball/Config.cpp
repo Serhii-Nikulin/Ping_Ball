@@ -59,7 +59,7 @@ const AColor AsConfig::BG_Color(15, 15, 35);
 const AColor AsConfig::Red_Color(220, 100, 80);
 const AColor AsConfig::Blue_Color(80, 140, 210);
 const AColor AsConfig::White_Color(255, 255, 255);
-
+const AColor AsConfig::Teleport_Color(AsConfig::Blue_Color, AsConfig::BG_Color, 1 * AsConfig::Global_Scale);
 HPEN AsConfig::Letter_Pen(0);
 //------------------------------------------------------------------------------------------------------------
 void AsConfig::Round_Rect(HDC hdc, RECT &rect, int corner_size)
