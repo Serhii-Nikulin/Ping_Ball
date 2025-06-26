@@ -19,19 +19,27 @@ AsPlatform::AsPlatform()
 //------------------------------------------------------------------------------------------------------------
 bool AsPlatform::Check_Hit(double next_x_pos, double next_y_pos, ABall *ball)
 {
+    //clean up on exit
+
     if (next_y_pos + ball->Radius < AsConfig::Platform_Y_Pos)
-        return false;
+		return false;
 
     if (Reflect_From_Circle(next_x_pos, next_y_pos, ball, X_Pos + Circle_Size / 2.0) )
-        return true;
+        goto _on_hit;
 
     if (Reflect_From_Circle(next_x_pos, next_y_pos, ball, X_Pos + Width - Circle_Size / 2.0) )
-        return true;
+		goto _on_hit;
 
     if (Reflect_From_Center(next_x_pos, next_y_pos, ball) )
-        return true;
+		goto _on_hit;
 
     return false;
+
+_on_hit:
+    if (ball->Get_State() == EBS_On_Parachute)
+		ball->Set_State(EBS_Off_Parachute);
+
+    return true;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsPlatform::Move(bool to_left)
@@ -257,7 +265,7 @@ void AsPlatform::Draw_Normal_State(HDC hdc)
     int offset;
     int x = X_Pos;
     int y = AsConfig::Platform_Y_Pos;
-    RECT inner_rect;
+    RECT inner_rect{};
 
     Clear_BG(hdc);
 
@@ -278,7 +286,7 @@ void AsPlatform::Draw_Normal_State(HDC hdc)
 
     if (Normal_Platform_Image == 0)
     {
-        if (Platform_State == EPS_Normal)
+        if (Platform_State == EPS_Is_Ready)
         {
             offset = 0;
             Normal_Platform_Image = new int[Normal_Platform_Image_Height * Normal_Platform_Image_Width];

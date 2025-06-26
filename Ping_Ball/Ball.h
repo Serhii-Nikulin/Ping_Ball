@@ -3,7 +3,7 @@
 #include "Config.h"
 
 //------------------------------------------------------------------------------------------------------------
-enum EBall_State { EBS_Normal, EBS_Lost, EBS_On_Platform, EBS_On_Parachute };
+enum EBall_State { EBS_Normal, EBS_Lost, EBS_On_Platform, EBS_Off_Parachute, EBS_On_Parachute };
 //------------------------------------------------------------------------------------------------------------
 class ABall;
 class AHit_Checker
@@ -22,7 +22,7 @@ public:
 	void Draw(HDC hdc, RECT &paint_area);
 	void Move();
 	EBall_State Get_State() const;
-	void Set_State(EBall_State new_state);
+	void Set_State(EBall_State new_state, double ball_x_pos = Start_Ball_X_Pos, double ball_y_pos = Start_Ball_Y_Pos);
 
 	double Get_Direction() const;
 	void Set_Direction(double new_direction);
@@ -39,11 +39,13 @@ public:
 private:
 
 	void Draw_Parachute(HDC hdc, RECT &paint_area);
+	void Redraw_Parachute();
+	void Clear_Parachute(HDC hdc);
 
-	EBall_State Ball_State;
+	EBall_State Ball_State, Prev_Ball_State;
 
 	RECT Ball_Rect, Prev_Ball_Rect;
-	RECT Parachute_Rect;
+	RECT Parachute_Rect, Prev_Parachute_Rect;
 
 	double Center_X_Pos;
 	double Center_Y_Pos;
