@@ -29,6 +29,8 @@ protected:
 
 	EBrick_Type Brick_Type;
 	RECT Brick_Rect;
+
+	int Level_X, Level_Y;
 };
 //------------------------------------------------------------------------------------------------------------
 class AActive_Brick_Red_Blue: public AActive_Brick
@@ -69,9 +71,6 @@ public:
 	static void Draw_In_Level(HDC hdc, RECT &rect);
 
 private:
-	const static AColor Red_Highlight;
-	const static AColor Blue_Highlight;
-
 	HRGN Region;
 	int Animation_Step;
 	static const int Max_Animation_Step = 11;
@@ -106,13 +105,21 @@ private:
 
 
 
+
 // AActive_Brick_Teleport
+//------------------------------------------------------------------------------------------------------------
+enum ETeleport_State 
+{ 
+	ETS_Starting, 
+	ETS_Finishing, 
+	ETS_Done
+};
 //------------------------------------------------------------------------------------------------------------
 class AActive_Brick_Teleport: public AActive_Brick
 {
 public:
 	virtual ~AActive_Brick_Teleport();
-	AActive_Brick_Teleport(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball);
+	AActive_Brick_Teleport(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball, AActive_Brick*destination_teleport_brick);
 
 	virtual void Act();
 	virtual void Draw(HDC hdc, RECT &paint_area);
@@ -120,9 +127,14 @@ public:
 
 	static void Draw_In_Level(HDC hdc, RECT &rect, int step = 0);
 
+	void Set_Ball(ABall *ball);
+
 private:
+
+	ETeleport_State Teleport_State;
 	ABall *Ball;
+	AActive_Brick* Destination_Teleport_Brick;
 	int Animation_Step;
-	static const int Max_Animation_Step = 35;
+	static const int Max_Animation_Step = 10;
 };
 //------------------------------------------------------------------------------------------------------------

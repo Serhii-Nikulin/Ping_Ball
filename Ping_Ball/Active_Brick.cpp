@@ -19,6 +19,9 @@ AActive_Brick::~AActive_Brick()
 AActive_Brick::AActive_Brick(EBrick_Type brick_type, int brick_x, int brick_y)
 	: Brick_Type(brick_type), Brick_Rect{}
 {
+	Level_X = brick_x;
+	Level_Y = brick_y;
+
 	Brick_Rect.left = (AsConfig::Level_X_Offset + brick_x * AsConfig::Cell_Width) * AsConfig::Global_Scale;
 	Brick_Rect.top = (AsConfig::Level_Y_Offset + brick_y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
 	Brick_Rect.right = Brick_Rect.left + AsConfig::Brick_Width * AsConfig::Global_Scale;
@@ -136,8 +139,6 @@ void AActive_Brick_Red_Blue::Draw_In_Level(HDC hdc, EBrick_Type brick_type, RECT
 
 
 // AActive_Brick_Unbreakable
-const AColor AActive_Brick_Unbreakable::Red_Highlight(AsConfig::Red_Color, 2 * AsConfig::Global_Scale);
-const AColor AActive_Brick_Unbreakable::Blue_Highlight(AsConfig::Blue_Color, 1 * AsConfig::Global_Scale);
 //------------------------------------------------------------------------------------------------------------
 AActive_Brick_Unbreakable::~AActive_Brick_Unbreakable()
 {
@@ -167,11 +168,11 @@ void AActive_Brick_Unbreakable::Draw(HDC hdc, RECT& paint_area)
 	SelectClipRgn(hdc, Region);
 	offset = -9 * AsConfig::Global_Scale + Animation_Step * AsConfig::Global_Scale * 2;
 
-	Blue_Highlight.Select_Pen(hdc);
+	AsConfig::Blue_Highlight_Unbreakable.Select_Pen(hdc);
 	MoveToEx(hdc, Brick_Rect.left - 1 * AsConfig::Global_Scale + offset, Brick_Rect.top + 8 * AsConfig::Global_Scale, 0);
 	LineTo(hdc, Brick_Rect.left + 9 * AsConfig::Global_Scale + offset, Brick_Rect.top - 2 * AsConfig::Global_Scale);
 
-	Red_Highlight.Select_Pen(hdc);
+	AsConfig::Red_Highlight_Unbreakable.Select_Pen(hdc);
 	MoveToEx(hdc, Brick_Rect.left + 1 * AsConfig::Global_Scale + offset, Brick_Rect.top + 8 * AsConfig::Global_Scale, 0);
 	LineTo(hdc, Brick_Rect.left + 10 * AsConfig::Global_Scale + offset, Brick_Rect.top - 1 * AsConfig::Global_Scale);
 
@@ -218,7 +219,7 @@ void AActive_Brick_Multihit::Act()
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick_Multihit::Draw(HDC hdc, RECT& paint_area)
 {
-	RECT rect;
+	RECT rect{};
 	XFORM old_xform{}, new_xform{};
 	const int& scale = AsConfig::Global_Scale;
 	int rotation_step;
@@ -333,29 +334,84 @@ AActive_Brick_Teleport::~AActive_Brick_Teleport()
 {
 }
 //------------------------------------------------------------------------------------------------------------
-AActive_Brick_Teleport::AActive_Brick_Teleport(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball)
-	: AActive_Brick(brick_type, brick_x, brick_y), Animation_Step(0), Ball(ball)
+AActive_Brick_Teleport::AActive_Brick_Teleport(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball, AActive_Brick *destination_teleport_brick)
+	: AActive_Brick(brick_type, brick_x, brick_y), Animation_Step(0), Ball(0), Teleport_State(ETS_Starting), Destination_Teleport_Brick(destination_teleport_brick)
 {
+	Set_Ball(ball);
 }
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick_Teleport::Act()
 {
-	InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
-	Animation_Step += 1;
+	double center_x_pos, center_y_pos;
+
+	if (Animation_Step < Max_Animation_Step)
+	{
+		InvalidateRect(AsConfig::Hwnd, &Brick_Rect, FALSE);
+		Animation_Step += 1;
+	}
+	else
+	{
+		switch (Teleport_State)
+		{
+		case ETS_Starting:
+			Animation_Step = 0;
+			Teleport_State = ETS_Finishing;
+
+			if (Destination_Teleport_Brick != 0)
+			{
+				( (AActive_Brick_Teleport*)Destination_Teleport_Brick)->Set_Ball(Ball);
+				Ball = 0;
+			}
+
+			break;
+
+		case ETS_Finishing:
+			Animation_Step = 0;
+			Teleport_State = ETS_Done;
+
+			if (Ball != 0)
+			{
+				Ball->Get_Center(center_x_pos, center_y_pos);
+				Ball->Set_State(EBS_Normal, center_x_pos, center_y_pos);
+			}
+
+			break;
+
+		case ETS_Done:
+			break;
+		}
+	}
 }
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick_Teleport::Draw(HDC hdc, RECT& paint_area)
 {
+	int step = 0;
 	Draw_In_Level(hdc, Brick_Rect, Animation_Step);
-	Ball->Draw_Teleporting(hdc, Animation_Step);
+
+	switch (Teleport_State)
+	{
+	case ETS_Starting:
+		step = Animation_Step;
+		break;
+
+	case ETS_Finishing:
+		step = Max_Animation_Step - Animation_Step;
+		break;
+
+	default:
+		return;
+	}
+
+	if (Ball != 0)
+		Ball->Draw_Teleporting(hdc, step);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AActive_Brick_Teleport::Is_Finished()
 {
-	if (Animation_Step < Max_Animation_Step)
-		return false;
-	else
+	if (Teleport_State == ETS_Done)
 		return true;
+	else
+		return false;
 }
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick_Teleport::Draw_In_Level(HDC hdc, RECT& brick_rect, int step)
@@ -370,5 +426,20 @@ void AActive_Brick_Teleport::Draw_In_Level(HDC hdc, RECT& brick_rect, int step)
 
 	AsConfig::Teleport_Color.Select(hdc);
 	RoundRect(hdc, brick_rect.left + 3 * scale + 1, top_y, brick_rect.left + 11 * scale + 1, low_y, 6 * scale, 6 * scale);
+}
+//------------------------------------------------------------------------------------------------------------
+void AActive_Brick_Teleport::Set_Ball(ABall *ball)
+{
+	double ball_x, ball_y;
+
+	if (ball == 0)
+		return;
+
+	Ball = ball;
+
+	ball_x = AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width + AsConfig::Brick_Width / 2.0;
+	ball_y = AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height + AsConfig::Brick_Height / 2.0;
+
+	Ball->Set_State(EBS_Teleporting, ball_x, ball_y);
 }
 //------------------------------------------------------------------------------------------------------------

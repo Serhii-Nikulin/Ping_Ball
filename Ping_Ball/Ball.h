@@ -31,6 +31,8 @@ public:
 	void Set_Direction(double new_direction);
 	void Reflect(bool is_hit_from_horizontal);
 
+	void Get_Center(double &center_x_pos, double &center_y_pos);
+
 	static void Add_Hit_Checker(AHit_Checker* hit_checker);
 
 	static const double Radius;

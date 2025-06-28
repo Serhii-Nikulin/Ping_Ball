@@ -79,6 +79,8 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
 		Set_State(EBS_Normal, Center_X_Pos, Center_Y_Pos);
 		break;
 
+	case EBS_Teleporting:
+		return;
 	}
 
 	if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect))
@@ -194,7 +196,7 @@ void ABall::Set_State(EBall_State new_state, double ball_x_pos, double ball_y_po
 		break;
 
 	case EBS_Teleporting:
-		if (!(Ball_State == EBS_Normal or Ball_State == EBS_Teleporting) )
+		if (! (Ball_State == EBS_Normal or Ball_State == EBS_On_Parachute or Ball_State == EBS_Teleporting) )
 			return;
 
 		Ball_Speed = 0.0;
@@ -236,6 +238,12 @@ void ABall::Reflect(bool is_hit_from_horizontal)
 		Set_Direction(-Ball_Direction);
 	else
 		Set_Direction(M_PI - Ball_Direction);
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Get_Center(double &center_x_pos, double &center_y_pos)
+{
+	center_x_pos = Center_X_Pos;
+	center_y_pos = Center_Y_Pos;
 }
 //------------------------------------------------------------------------------------------------------------
 bool ABall::Is_Moving_Up() const

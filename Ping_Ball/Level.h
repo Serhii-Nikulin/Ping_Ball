@@ -2,10 +2,17 @@
 
 #include "Falling_Letter.h"
 
+
+//------------------------------------------------------------------------------------------------------------
+struct SPoint
+{
+	int X, Y;
+};
 //------------------------------------------------------------------------------------------------------------
 class AsLevel: public AHit_Checker
 {
 public:
+	~AsLevel();
 	AsLevel();
 
 	virtual bool Check_Hit(double next_x_pos, double next_y_pos, ABall *ball);
@@ -19,13 +26,16 @@ public:
 
 	void Set_Current_Level(unsigned char level[AsLevel::Level_Height][AsLevel::Level_Width]);
 	bool Get_Next_Falling_Letter(int &index, AFalling_Letter **falling_letter);
+
 private:
 	void Draw_Brick(HDC hdc, RECT &brick_rect, EBrick_Type brick_type) const;
 
 	bool Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance);
 	bool Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distnace);
 
-	void Add_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball);
+	void Create_New_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball);
+	AActive_Brick* Select_Teleport_Destination_Brick();
+	void Add_New_Active_Brick(AActive_Brick *active_brick);
 	void Redraw_Brick(int brick_x, int brick_y);
 
 	bool Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_y);
@@ -51,6 +61,7 @@ private:
 	int Falling_Letter_Count;
 	AFalling_Letter *Falling_Letters[AsConfig::Max_Falling_Letter_Count];
 
-	AColor Parachute_Color;
+	int Teleport_Bricks_Count;
+	SPoint *Teleport_Bricks;
 };
 //------------------------------------------------------------------------------------------------------------

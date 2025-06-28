@@ -37,6 +37,9 @@ public:
 	static const AColor Red_Color;
 	static const AColor Blue_Color;
 	static const AColor White_Color;
+	const static AColor Red_Highlight_Unbreakable;
+	const static AColor Blue_Highlight_Unbreakable;
+	const static AColor Parachute_Color;
 	static const AColor Teleport_Color;
 
 	static HWND Hwnd;
@@ -51,7 +54,6 @@ public:
 	static const int Border_Y_Offset = 4;
 	static const int Max_X_Pos = 200;
 	static const int Max_Y_Pos = 199;
-
 
 	//Platform
 	static const int Platform_Y_Pos = 185;
