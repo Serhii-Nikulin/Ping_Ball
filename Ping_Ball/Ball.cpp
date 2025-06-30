@@ -30,7 +30,7 @@ int ABall::Hit_Checker_Count = 0;
 AHit_Checker* ABall::Hit_Checkers[];
 //------------------------------------------------------------------------------------------------------------
 ABall::ABall()
-	: Ball_State(EBS_Normal), Prev_Ball_State(EBS_Lost), Ball_Rect{}, Prev_Ball_Rect{}, Center_X_Pos(Start_Ball_X_Pos), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(6.0), Ball_Direction(M_PI_4), Rest_Distance(0.0), Parachute_Rect{}, Prev_Parachute_Rect{}
+	: Ball_State(EBS_Normal), Prev_Ball_State(EBS_Lost), Ball_Rect{}, Prev_Ball_Rect{}, Before_Teleport_Rect{}, Center_X_Pos(Start_Ball_X_Pos), Center_Y_Pos(Start_Ball_Y_Pos), Ball_Speed(6.0), Ball_Direction(M_PI_4), Rest_Distance(0.0), Parachute_Rect{}, Prev_Parachute_Rect{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
@@ -51,6 +51,9 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
 {
 	RECT intersection_rect{};
 
+	if (Ball_State == EBS_Teleporting and Prev_Ball_State == Ball_State)
+		return;
+
 	if (IntersectRect(&intersection_rect, &paint_area, &Prev_Ball_Rect))
 	{
 		AsConfig::BG_Color.Select(hdc);
@@ -65,7 +68,6 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
 			Clear_Parachute(hdc);
 			Prev_Ball_State = EBS_Lost;
 		}
-
 		return;
 
 	case EBS_On_Parachute:
@@ -73,9 +75,22 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
 		break;
 
 	case EBS_Off_Parachute:
-		Clear_Parachute(hdc);
 		Set_State(EBS_Normal, Center_X_Pos, Center_Y_Pos);
+		Clear_Parachute(hdc);
 		break;
+
+	case EBS_Teleporting:
+		if (Prev_Ball_State == EBS_On_Parachute)
+			Clear_Parachute(hdc);
+		else if (Prev_Ball_State == EBS_Normal)
+		{
+			AsConfig::BG_Color.Select(hdc);
+			Ellipse(hdc, Before_Teleport_Rect.left, Before_Teleport_Rect.top, Before_Teleport_Rect.right - 1, Before_Teleport_Rect.bottom - 1);
+		}
+
+		Prev_Ball_State = EBS_Teleporting;
+
+		return;
 	}
 
 	if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect))
@@ -85,13 +100,27 @@ void ABall::Draw(HDC hdc, RECT& paint_area)
 	}
 }
 //------------------------------------------------------------------------------------------------------------
+void ABall::Draw_Teleporting(HDC hdc, int step) const
+{
+	int top_y, low_y;
+
+	top_y = Ball_Rect.top + step / 2;
+	low_y = Ball_Rect.bottom - 1 - step / 2;
+
+	if (top_y > low_y)
+		return;
+
+	AsConfig::White_Color.Select(hdc);
+	Ellipse(hdc, Ball_Rect.left, top_y, Ball_Rect.right - 1, low_y);
+}
+//------------------------------------------------------------------------------------------------------------
 void ABall::Move()
 {
 	int i;
 	bool got_hit;
 	double next_x_pos, next_y_pos;
 
-	if (Ball_State == EBS_Lost or Ball_State == EBS_On_Platform)
+	if (Ball_State == EBS_Lost or Ball_State == EBS_On_Platform or Ball_State == EBS_Teleporting)
 		return;
 
 	Rest_Distance += Ball_Speed;
@@ -141,10 +170,10 @@ void ABall::Set_State(EBall_State new_state, double ball_x_pos, double ball_y_po
 	{
 	case EBS_Normal:
 		Ball_Speed = 6.0;
+		Rest_Distance = 0.0;
 		Ball_Direction = M_PI_4;
 		Center_X_Pos = ball_x_pos;
 		Center_Y_Pos = ball_y_pos;
-		Rest_Distance = 0.0;
 		
 		if (Ball_State == EBS_Off_Parachute)
 			Ball_Direction = M_PI / 3.0 * (1 + AsConfig::Rand(2) );
@@ -163,17 +192,35 @@ void ABall::Set_State(EBall_State new_state, double ball_x_pos, double ball_y_po
 
 	case EBS_On_Platform:
 		Ball_Speed = 0.0;
+		Rest_Distance = 0.0;
 		Center_X_Pos = ball_x_pos;
 		Center_Y_Pos = ball_y_pos;
-		Rest_Distance = 0.0;
 		Redraw();
 		break;
 
 	case EBS_Off_Parachute:
 		Ball_Speed = 0.0;
 		Rest_Distance = 0.0;
-		Redraw();
 		Redraw_Parachute();
+		Redraw();
+		break;
+
+	case EBS_Teleporting:
+		if (! (Ball_State == EBS_Normal or Ball_State == EBS_On_Parachute or Ball_State == EBS_Teleporting) )
+			return;
+
+		Before_Teleport_Rect = Ball_Rect;
+
+		Redraw();
+		Ball_Speed = 0.0;
+		Rest_Distance = 0.0;
+
+		Center_X_Pos = ball_x_pos;
+		Center_Y_Pos = ball_y_pos;
+
+		if (Ball_State == EBS_On_Parachute)
+			Redraw_Parachute();
+
 		break;
 	}
 
@@ -181,7 +228,7 @@ void ABall::Set_State(EBall_State new_state, double ball_x_pos, double ball_y_po
 	Ball_State = new_state;
 }
 //------------------------------------------------------------------------------------------------------------
-double ABall::Get_Direction() const
+double ABall::Get_Direction()
 {
 	return Ball_Direction;
 }
@@ -206,6 +253,12 @@ void ABall::Reflect(bool is_hit_from_horizontal)
 		Set_Direction(-Ball_Direction);
 	else
 		Set_Direction(M_PI - Ball_Direction);
+}
+//------------------------------------------------------------------------------------------------------------
+void ABall::Get_Center(double &center_x_pos, double &center_y_pos)
+{
+	center_x_pos = Center_X_Pos;
+	center_y_pos = Center_Y_Pos;
 }
 //------------------------------------------------------------------------------------------------------------
 bool ABall::Is_Moving_Up() const

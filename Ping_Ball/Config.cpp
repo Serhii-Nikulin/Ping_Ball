@@ -59,7 +59,10 @@ const AColor AsConfig::BG_Color(15, 15, 35);
 const AColor AsConfig::Red_Color(220, 100, 80);
 const AColor AsConfig::Blue_Color(80, 140, 210);
 const AColor AsConfig::White_Color(255, 255, 255);
-
+const AColor AsConfig::Red_Highlight_Unbreakable(AsConfig::Red_Color, 2 * AsConfig::Global_Scale);
+const AColor AsConfig::Blue_Highlight_Unbreakable(AsConfig::Blue_Color, 1 * AsConfig::Global_Scale);
+const AColor AsConfig::Parachute_Color(AsConfig::Red_Color, AsConfig::Blue_Color, AsConfig::Global_Scale);
+const AColor AsConfig::Teleport_Color(AsConfig::Blue_Color, AsConfig::BG_Color, 1 * AsConfig::Global_Scale);
 HPEN AsConfig::Letter_Pen(0);
 //------------------------------------------------------------------------------------------------------------
 void AsConfig::Round_Rect(HDC hdc, RECT &rect, int corner_size)

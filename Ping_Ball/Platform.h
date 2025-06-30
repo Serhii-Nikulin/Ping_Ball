@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Config.h"
-#include "Ball.h"
 #include "Falling_Letter.h"
 
 enum EPlatform_State { EPS_Is_Ready, EPS_Normal, EPS_Meltdown, EPS_Missing, EPS_Rolling, EPS_Expanding_Rolling };

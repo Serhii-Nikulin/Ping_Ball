@@ -69,7 +69,6 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 		{
 			Ball.Set_State(EBS_Normal);
 			Platform.Set_State(EPS_Normal);
-			Ball.Redraw();
 		}
         break;
     }
