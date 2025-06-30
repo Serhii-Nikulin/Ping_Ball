@@ -22,6 +22,9 @@ public:
 //------------------------------------------------------------------------------------------------------------
 class AActive_Brick: public AGraphics_Object
 {
+public:
+	void Get_Level_Pos(int &dest_brick_x, int &dest_brick_y);
+
 protected:
 	virtual ~AActive_Brick();
 
@@ -115,22 +118,29 @@ enum ETeleport_State
 	ETS_Done
 };
 //------------------------------------------------------------------------------------------------------------
+enum EDirection_Type
+{
+	EDT_Left, EDT_Up, EDT_Right, EDT_Down
+};
+//------------------------------------------------------------------------------------------------------------
 class AActive_Brick_Teleport: public AActive_Brick
 {
 public:
 	virtual ~AActive_Brick_Teleport();
+
 	AActive_Brick_Teleport(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball, AActive_Brick*destination_teleport_brick);
 
 	virtual void Act();
 	virtual void Draw(HDC hdc, RECT &paint_area);
 	virtual bool Is_Finished();
-
+	void Set_Ball(ABall *ball);
+	double Get_Brick_X_Pos(bool is_center);
+	double Get_Brick_Y_Pos(bool is_center);
 	static void Draw_In_Level(HDC hdc, RECT &rect, int step = 0);
 
-	void Set_Ball(ABall *ball);
+	EDirection_Type Release_Direction;
 
 private:
-
 	ETeleport_State Teleport_State;
 	ABall *Ball;
 	AActive_Brick* Destination_Teleport_Brick;

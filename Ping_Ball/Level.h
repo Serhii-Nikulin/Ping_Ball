@@ -33,13 +33,14 @@ private:
 	bool Check_Hit_From_Vertical(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distance);
 	bool Check_Hit_From_Horizontal(double next_x_pos, double next_y_pos, ABall *ball, int brick_x, int brick_y, double &distnace);
 
-	void Create_New_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball);
-	AActive_Brick* Select_Teleport_Destination_Brick();
+	bool Create_New_Active_Brick(EBrick_Type brick_type, int brick_x, int brick_y, ABall *ball, bool vertical_hit);
+	void Add_Active_Brick_Teleport(int brick_x, int brick_y, ABall *ball, bool vertical_hit);
+	AActive_Brick* Select_Teleport_Destination_Brick(int brick_x, int brick_y);
 	void Add_New_Active_Brick(AActive_Brick *active_brick);
 	void Redraw_Brick(int brick_x, int brick_y);
 
 	bool Add_Falling_Letter(EBrick_Type brick_type, int brick_x, int brick_y);
-	void On_Hit(int brick_x, int brick_y, ABall *ball);
+	bool On_Hit(int brick_x, int brick_y, ABall *ball, bool vertical_hit);
 
 	void Act_Objects(AGraphics_Object **object_array, const int max_objects_count, int &objects_count);
 	void Draw_Objects(HDC hdc, RECT &paint_area, AGraphics_Object **object_array, const int max_objects_count, int &objects_count);
@@ -58,7 +59,7 @@ private:
 	int Active_Bricks_Count;
 	AActive_Brick *Active_Bricks[AsConfig::Max_Active_Bricks_Count];
 
-	int Falling_Letter_Count;
+	int Falling_Letters_Count;
 	AFalling_Letter *Falling_Letters[AsConfig::Max_Falling_Letter_Count];
 
 	int Teleport_Bricks_Count;

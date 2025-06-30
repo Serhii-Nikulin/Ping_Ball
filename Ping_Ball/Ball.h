@@ -27,7 +27,7 @@ public:
 
 	bool Is_Moving_Up() const;
 	bool Is_Moving_Left() const;
-	double Get_Direction() const;
+	double Get_Direction();
 	void Set_Direction(double new_direction);
 	void Reflect(bool is_hit_from_horizontal);
 
@@ -44,7 +44,7 @@ private:
 	void Clear_Parachute(HDC hdc);
 
 	RECT Ball_Rect, Prev_Ball_Rect;
-	RECT Parachute_Rect, Prev_Parachute_Rect;
+	RECT Parachute_Rect, Prev_Parachute_Rect, Before_Teleport_Rect;
 	EBall_State Ball_State, Prev_Ball_State;
 
 	double Center_X_Pos;
