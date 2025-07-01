@@ -7,7 +7,8 @@ enum EBrick_Type: unsigned char {
 	EBT_Unbreakable, 
 	EBT_Multihit_1, EBT_Multihit_2, EBT_Multihit_3, EBT_Multihit_4,
 	EBT_Parachute,
-	EBT_Teleport
+	EBT_Teleport,
+	EBT_Ad
 };
 //------------------------------------------------------------------------------------------------------------
 class AGraphics_Object
@@ -17,6 +18,7 @@ public:
 
 	virtual void Act() = 0;
 	virtual void Draw(HDC hdc, RECT &paint_area) = 0;
+	virtual void Clear(HDC hdc, RECT& paint_area) = 0;
 	virtual bool Is_Finished() = 0;
 };
 //------------------------------------------------------------------------------------------------------------
@@ -24,6 +26,7 @@ class AActive_Brick: public AGraphics_Object
 {
 public:
 	void Get_Level_Pos(int &dest_brick_x, int &dest_brick_y);
+	virtual void Clear(HDC hdc, RECT& paint_area);
 
 protected:
 	virtual ~AActive_Brick();
@@ -146,5 +149,50 @@ private:
 	AActive_Brick* Destination_Teleport_Brick;
 	int Animation_Step;
 	static const int Max_Animation_Step = 10;
+};
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+// AsAdvertisement
+//------------------------------------------------------------------------------------------------------------
+class AsAdvertisement : public AGraphics_Object
+{
+public:
+	virtual ~AsAdvertisement();
+	AsAdvertisement(int level_x, int level_y, int width, int height);
+
+
+	virtual void Act();
+	virtual void Draw(HDC hdc, RECT &paint_area);
+	virtual void Clear(HDC hdc, RECT& paint_area);
+	virtual bool Is_Finished();
+private:
+	int Level_X, Level_Y;
+	int Width, Height;
+	RECT Rect;
+};
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+// AActive_Brick_Ad
+//------------------------------------------------------------------------------------------------------------
+class AActive_Brick_Ad: public AActive_Brick
+{
+public:
+	virtual ~AActive_Brick_Ad();
+	AActive_Brick_Ad(EBrick_Type brick_type, int brick_x, int brick_y);
+
+	virtual void Act();
+	virtual void Draw(HDC hdc, RECT &paint_area);
+	virtual bool Is_Finished();
+
+	static void Draw_In_Level(HDC hdc, RECT &rect);
+
+private:
+	static const int Ball_Size = 7;
 };
 //------------------------------------------------------------------------------------------------------------

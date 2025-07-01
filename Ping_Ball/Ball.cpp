@@ -24,7 +24,7 @@ bool AHit_Checker::Hit_Circle_On_Line(double distance, double position, double m
 
 //ABall
 const double ABall::Start_Ball_Y_Pos = AsConfig::Platform_Y_Pos - Radius;
-const double ABall::Start_Ball_X_Pos = (AsConfig::Border_X_Offset + AsConfig::Max_X_Pos) / 2 + 1;
+const double ABall::Start_Ball_X_Pos = (AsConfig::Border_X_Offset + AsConfig::Max_X_Pos) / 2 + 1.0;
 const double ABall::Radius = 2.0 - 0.5 / AsConfig::Global_Scale;
 int ABall::Hit_Checker_Count = 0;
 AHit_Checker* ABall::Hit_Checkers[];
@@ -182,6 +182,9 @@ void ABall::Set_State(EBall_State new_state, double ball_x_pos, double ball_y_po
 		break;
 
 	case EBS_Lost:
+		if (! (Ball_State == EBS_Normal || Ball_State == EBS_On_Parachute) )
+			AsConfig::Throw();
+
 		Ball_Speed = 0.0;
 		Rest_Distance = 0.0;
 
@@ -198,7 +201,14 @@ void ABall::Set_State(EBall_State new_state, double ball_x_pos, double ball_y_po
 		Redraw();
 		break;
 
+	case EBS_On_Parachute:
+		AsConfig::Throw();
+		break;
+
 	case EBS_Off_Parachute:
+		if (Ball_State != EBS_On_Parachute)
+			AsConfig::Throw();
+
 		Ball_Speed = 0.0;
 		Rest_Distance = 0.0;
 		Redraw_Parachute();
@@ -207,7 +217,7 @@ void ABall::Set_State(EBall_State new_state, double ball_x_pos, double ball_y_po
 
 	case EBS_Teleporting:
 		if (! (Ball_State == EBS_Normal or Ball_State == EBS_On_Parachute or Ball_State == EBS_Teleporting) )
-			return;
+			AsConfig::Throw();
 
 		Before_Teleport_Rect = Ball_Rect;
 
@@ -220,8 +230,10 @@ void ABall::Set_State(EBall_State new_state, double ball_x_pos, double ball_y_po
 
 		if (Ball_State == EBS_On_Parachute)
 			Redraw_Parachute();
-
 		break;
+
+	default:
+		AsConfig::Throw();
 	}
 
 	Prev_Ball_State = Ball_State;

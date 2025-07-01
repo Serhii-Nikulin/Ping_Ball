@@ -29,6 +29,7 @@ class AsConfig
 public:
 	static void Round_Rect(HDC hdc, RECT &rect, int corner_size = 2);
 	static int Rand(int range);
+	static void Throw();
 
 	static const int Global_Scale = 3;
 	static int Current_Timer_Tick;

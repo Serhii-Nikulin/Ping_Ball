@@ -20,12 +20,6 @@ void AFalling_Letter::Draw(HDC hdc, RECT &paint_area)
 {
     RECT intersection_rect{};
 
-    if (IntersectRect(&intersection_rect, &Prev_Letter_Cell, &paint_area) )
-    {
-		AsConfig::BG_Color.Select(hdc);
-        Rectangle(hdc, Prev_Letter_Cell.left, Prev_Letter_Cell.top, Prev_Letter_Cell.right, Prev_Letter_Cell.bottom);
-    }
-
 	if (Falling_Letter_State == EFLS_Finalizing)
 	{
 		Falling_Letter_State = EFLS_Finished;
@@ -34,6 +28,17 @@ void AFalling_Letter::Draw(HDC hdc, RECT &paint_area)
 
     if (IntersectRect(&intersection_rect, &Letter_Cell, &paint_area) )
         Draw_Brick_Letter(hdc);
+}
+//------------------------------------------------------------------------------------------------------------
+void AFalling_Letter::Clear(HDC hdc, RECT& paint_area)
+{
+    RECT intersection_rect{};
+
+    if (IntersectRect(&intersection_rect, &Prev_Letter_Cell, &paint_area) )
+    {
+        AsConfig::BG_Color.Select(hdc);
+        Rectangle(hdc, Prev_Letter_Cell.left, Prev_Letter_Cell.top, Prev_Letter_Cell.right, Prev_Letter_Cell.bottom);
+    }
 }
 //------------------------------------------------------------------------------------------------------------
 void AFalling_Letter::Act()

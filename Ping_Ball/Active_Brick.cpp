@@ -18,6 +18,10 @@ void AActive_Brick::Get_Level_Pos(int &dest_brick_x, int &dest_brick_y)
 	dest_brick_y = Level_Y;
 }
 //------------------------------------------------------------------------------------------------------------
+void AActive_Brick::Clear(HDC hdc, RECT& paint_area)
+{
+}
+//------------------------------------------------------------------------------------------------------------
 AActive_Brick::~AActive_Brick()
 {
 }
@@ -49,6 +53,8 @@ AActive_Brick_Red_Blue::~AActive_Brick_Red_Blue()
 AActive_Brick_Red_Blue::AActive_Brick_Red_Blue(EBrick_Type brick_type, int brick_x, int brick_y)
 	: AActive_Brick(brick_type, brick_x, brick_y), Fade_Step(0)
 {
+	if (! (brick_type == EBT_Red || brick_type == EBT_Blue) )
+		AsConfig::Throw();
 }
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick_Red_Blue::Act()
@@ -120,6 +126,10 @@ void AActive_Brick_Red_Blue::Draw_In_Level(HDC hdc, EBrick_Type brick_type, RECT
 
 	switch (brick_type)
 	{
+	case EBT_None:
+		color = &AsConfig::BG_Color;
+		break;
+
 	case EBT_Red:
 		color = &AsConfig::Red_Color;
 		break;
@@ -128,9 +138,8 @@ void AActive_Brick_Red_Blue::Draw_In_Level(HDC hdc, EBrick_Type brick_type, RECT
 		color = &AsConfig::Blue_Color;
 		break;
 
-	case EBT_None:
-		color = &AsConfig::BG_Color;
-		break;
+	default:
+		AsConfig::Throw();
 	}
 
 	if (color)
@@ -292,6 +301,9 @@ void AActive_Brick_Multihit::Draw_In_Level(HDC hdc, EBrick_Type brick_type, RECT
 	case EBT_Multihit_4:
 		Draw_Brick_Elements(hdc, brick_rect, 2, 4, 3);
 		break;
+
+	default:
+		AsConfig::Throw();
 	}
 }
 //------------------------------------------------------------------------------------------------------------
@@ -403,7 +415,7 @@ void AActive_Brick_Teleport::Act()
 					break;
 
 				default:
-					return;
+					AsConfig::Throw;
 				}
 
 				Ball->Set_State(EBS_Normal, ball_x_pos, ball_y_pos);
@@ -499,5 +511,107 @@ double AActive_Brick_Teleport::Get_Brick_Y_Pos(bool is_center)
 		ball_y_pos += AsConfig::Brick_Height / 2.0;
 
 	return ball_y_pos;
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+//Advertisement
+//------------------------------------------------------------------------------------------------------------
+AsAdvertisement::~AsAdvertisement()
+{
+}
+//------------------------------------------------------------------------------------------------------------
+AsAdvertisement::AsAdvertisement(int level_x, int level_y, int width, int height)
+	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Rect{}
+{
+	Rect.left = (AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width) * AsConfig::Global_Scale;
+	Rect.top = (AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
+	Rect.right = Rect.left + (Width * AsConfig::Cell_Width - 1) * AsConfig::Global_Scale;
+	Rect.bottom = Rect.top + (Height * AsConfig::Cell_Height - 1) * AsConfig::Global_Scale;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsAdvertisement::Act()
+{
+	InvalidateRect(AsConfig::Hwnd, &Rect, FALSE);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
+{
+	// 1.бг фон с синей рамкой
+	AsConfig::BG_Color.Select(hdc);
+	AsConfig::Blue_Color.Select_Pen(hdc);
+	AsConfig::Round_Rect(hdc, Rect);
+
+	// 2.1 белый стол
+
+	// 3. син€€ тень от м€ча
+
+	// 2.2 син€€ полоса стола
+
+	// 2.3 красна€ полоса стола
+
+	
+
+	// 4. красный м€ч
+}
+//------------------------------------------------------------------------------------------------------------
+void AsAdvertisement::Clear(HDC hdc, RECT& paint_area)
+{
+}
+//------------------------------------------------------------------------------------------------------------
+bool AsAdvertisement::Is_Finished()
+{
+	return false;
+}
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+// AActive_Brick_Ad
+//------------------------------------------------------------------------------------------------------------
+AActive_Brick_Ad::~AActive_Brick_Ad()
+{
+}
+//------------------------------------------------------------------------------------------------------------
+AActive_Brick_Ad::AActive_Brick_Ad(EBrick_Type brick_type, int brick_x, int brick_y)
+	: AActive_Brick(brick_type, brick_x, brick_y)
+{
+}
+//------------------------------------------------------------------------------------------------------------
+void AActive_Brick_Ad::Act()
+{
+}
+//------------------------------------------------------------------------------------------------------------
+void AActive_Brick_Ad::Draw(HDC hdc, RECT &paint_area)
+{
+}
+//------------------------------------------------------------------------------------------------------------
+bool AActive_Brick_Ad::Is_Finished()
+{
+	return false;
+}
+//------------------------------------------------------------------------------------------------------------
+void AActive_Brick_Ad::Draw_In_Level(HDC hdc, RECT &rect)
+{
+	int i;
+	int x = rect.left;
+	int y = rect.top;
+	const int& scale = AsConfig::Global_Scale;
+
+	for (i = 0; i < 2; i++)
+	{
+		AsConfig::Red_Color.Select(hdc);
+		Ellipse(hdc, x, y, x + Ball_Size * scale - 1, y + Ball_Size * scale - 1);
+
+		AsConfig::White_Color.Select(hdc);
+		Arc(hdc, x + 1 * scale, y + 1 * scale, x + (Ball_Size - 1) * scale - 1, y + (Ball_Size - 1) * scale - 1, 
+			x + (Ball_Size / 2) * scale, y, 
+			x, y + (Ball_Size / 2 + 1) * scale);
+
+		x += (Ball_Size + 1) * AsConfig::Global_Scale;
+	}
 }
 //------------------------------------------------------------------------------------------------------------
