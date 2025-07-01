@@ -163,15 +163,20 @@ public:
 	virtual ~AsAdvertisement();
 	AsAdvertisement(int level_x, int level_y, int width, int height);
 
-
 	virtual void Act();
 	virtual void Draw(HDC hdc, RECT &paint_area);
 	virtual void Clear(HDC hdc, RECT& paint_area);
 	virtual bool Is_Finished();
+
 private:
 	int Level_X, Level_Y;
 	int Width, Height;
 	RECT Rect;
+	HRGN Region;
+
+	static const int Ball_Size = 11;
+	static const int Vertex_Count = 5;
+	POINT Table[Vertex_Count];
 };
 //------------------------------------------------------------------------------------------------------------
 

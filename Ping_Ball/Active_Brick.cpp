@@ -521,15 +521,29 @@ double AActive_Brick_Teleport::Get_Brick_Y_Pos(bool is_center)
 //------------------------------------------------------------------------------------------------------------
 AsAdvertisement::~AsAdvertisement()
 {
+	DeleteObject(Region);
 }
 //------------------------------------------------------------------------------------------------------------
 AsAdvertisement::AsAdvertisement(int level_x, int level_y, int width, int height)
-	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Rect{}
+	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Rect{}, Region(0), Table{}
 {
-	Rect.left = (AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width) * AsConfig::Global_Scale;
-	Rect.top = (AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height) * AsConfig::Global_Scale;
-	Rect.right = Rect.left + (Width * AsConfig::Cell_Width - 1) * AsConfig::Global_Scale;
-	Rect.bottom = Rect.top + (Height * AsConfig::Cell_Height - 1) * AsConfig::Global_Scale;
+	int ad_x, ad_y;
+	static const int &scale = AsConfig::Global_Scale;
+	Rect.left = (AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width) * scale;
+	Rect.top = (AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height) * scale;
+	Rect.right = Rect.left + (Width * AsConfig::Cell_Width - 1) * scale;
+	Rect.bottom = Rect.top + (Height * AsConfig::Cell_Height - 1) * scale;
+
+	Region = CreateRectRgn(Rect.left, Rect.top, Rect.right, Rect.bottom);
+
+	ad_x = Rect.left;
+	ad_y = Rect.top;
+
+	Table[0] = POINT{ad_x + 1 * scale, ad_y + 15 * scale};
+	Table[1] = POINT{ad_x + 15 * scale + 1, ad_y + 10 * scale};
+	Table[2] = POINT{ad_x + 30 * scale - 1, ad_y + 15 * scale};
+	Table[3] = POINT{ad_x + 15 * scale + 1, ad_y + 20 * scale};
+	Table[4] = POINT{ad_x + 1 * scale, ad_y + 15 * scale};
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Act()
@@ -539,22 +553,53 @@ void AsAdvertisement::Act()
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 {
-	// 1.бг фон с синей рамкой
+	int ad_x = Rect.left;
+	int ad_y = Rect.top;
+	const int &scale = AsConfig::Global_Scale;
+	int ball_x, ball_y;
+
+	SelectClipRgn(hdc, Region);
+
+	// 1.bg and blue frame
 	AsConfig::BG_Color.Select(hdc);
 	AsConfig::Blue_Color.Select_Pen(hdc);
 	AsConfig::Round_Rect(hdc, Rect);
 
-	// 2.1 белый стол
+	// 2.1 white table
+	AsConfig::White_Color.Select(hdc);
+	Polygon(hdc, Table, Vertex_Count );
 
-	// 3. син€€ тень от м€ча
+	// 3. blue ball's shadow
+	AsConfig::Blue_Color.Select(hdc);
+	Ellipse(hdc, ad_x + 11 * scale, ad_y + 13 * scale, ad_x + 20 * scale, ad_y + 16 * scale - 1);
 
-	// 2.2 син€€ полоса стола
+	// 2.2 red border of table
+	AsConfig::Ad_Table_Red_Color.Select(hdc);
+	MoveToEx(hdc, ad_x + 1 * scale + 1, ad_y + 17 * scale, 0); // left
+	LineTo(hdc, ad_x + 15 * scale + 1, ad_y + 22 * scale); // bottom
+	LineTo(hdc, ad_x + 29 * scale + 1, ad_y + 17 * scale); // right
 
-	// 2.3 красна€ полоса стола
+	// 2.3 blue border of table
+	AsConfig::Ad_Table_Blue_Color.Select(hdc);
+
+	MoveToEx(hdc, ad_x + 1 * scale, ad_y + 16 * scale - 1, 0); // left
+	LineTo(hdc, ad_x + 15 * scale + 1, ad_y + 21 * scale - 1); // bottom
+	LineTo(hdc, ad_x + 30 * scale - 1, ad_y + 16 * scale - 1); // right
 
 	
+	// 4.1. red ball
+	ball_x = ad_x + 10 * scale;
+	ball_y = ad_y + 1 * scale;
+	AsConfig::Red_Color.Select(hdc);
+	Ellipse(hdc, ball_x, ball_y, ball_x + 11 * scale, ball_y + 11 * scale);
 
-	// 4. красный м€ч
+	// 4.2 highlight of red ball
+	AsConfig::Ad_Ball_Highlight_Color.Select_Pen(hdc);
+	Arc(hdc, ball_x + 2 * scale, ball_y + 2 * scale, ball_x + (Ball_Size - 2) * scale - 1, ball_y + (Ball_Size - 2) * scale - 1, 
+		ball_x + (Ball_Size / 2) * scale, ball_y, 
+		ball_x, ball_y + (Ball_Size / 2 + 1) * scale);
+
+	SelectClipRgn(hdc, 0);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Clear(HDC hdc, RECT& paint_area)

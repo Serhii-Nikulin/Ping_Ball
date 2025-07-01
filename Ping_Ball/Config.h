@@ -42,6 +42,9 @@ public:
 	const static AColor Blue_Highlight_Unbreakable;
 	const static AColor Parachute_Color;
 	static const AColor Teleport_Color;
+	static const AColor Ad_Ball_Highlight_Color;
+	static const AColor Ad_Table_Blue_Color;
+	static const AColor Ad_Table_Red_Color;
 
 	static HWND Hwnd;
 
