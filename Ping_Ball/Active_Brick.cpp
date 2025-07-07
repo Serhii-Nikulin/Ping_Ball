@@ -522,48 +522,73 @@ double AActive_Brick_Teleport::Get_Brick_Y_Pos(bool is_center)
 AsAdvertisement::~AsAdvertisement()
 {
 	DeleteObject(Region);
+
+	delete[] Bricks_Mask;
 }
 //------------------------------------------------------------------------------------------------------------
 AsAdvertisement::AsAdvertisement(int level_x, int level_y, int width, int height)
-	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Rect{}, Region(0), Table{}
+	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Ad_Rect{}, Region(0), Table{}, Bricks_Mask(0)
 {
 	int ad_x, ad_y;
 	static const int &scale = AsConfig::Global_Scale;
-	Rect.left = (AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width) * scale;
-	Rect.top = (AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height) * scale;
-	Rect.right = Rect.left + (Width * AsConfig::Cell_Width - 1) * scale;
-	Rect.bottom = Rect.top + (Height * AsConfig::Cell_Height - 1) * scale;
 
-	Region = CreateRectRgn(Rect.left, Rect.top, Rect.right, Rect.bottom);
+	Bricks_Mask = new bool[Width * Height];
+	memset(Bricks_Mask, 0, Width * Height * sizeof(bool) );
 
-	ad_x = Rect.left;
-	ad_y = Rect.top;
+	Ad_Rect.left = (AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width) * scale;
+	Ad_Rect.top = (AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height) * scale;
+	Ad_Rect.right = Ad_Rect.left + (Width * AsConfig::Cell_Width - 1) * scale;
+	Ad_Rect.bottom = Ad_Rect.top + (Height * AsConfig::Cell_Height - 1) * scale;
 
-	Table[0] = POINT{ad_x + 1 * scale, ad_y + 15 * scale};
-	Table[1] = POINT{ad_x + 15 * scale + 1, ad_y + 10 * scale};
-	Table[2] = POINT{ad_x + 30 * scale - 1, ad_y + 15 * scale};
-	Table[3] = POINT{ad_x + 15 * scale + 1, ad_y + 20 * scale};
-	Table[4] = POINT{ad_x + 1 * scale, ad_y + 15 * scale};
+	Region = CreateRectRgn(Ad_Rect.left, Ad_Rect.top, Ad_Rect.right, Ad_Rect.bottom);
+
+	ad_x = Ad_Rect.left;
+	ad_y = Ad_Rect.top;
+
+	Table[0] = POINT{ad_x + 1 * scale, ad_y + 15 * scale}; // left
+	Table[1] = POINT{ad_x + 15 * scale + 1, ad_y + 10 * scale}; // top
+	Table[2] = POINT{ad_x + 30 * scale - 1, ad_y + 15 * scale}; // right
+	Table[3] = POINT{ad_x + 15 * scale + 1, ad_y + 20 * scale}; // bottom
+	Table[4] = POINT{ad_x + 1 * scale, ad_y + 15 * scale}; // left
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Act()
 {
-	InvalidateRect(AsConfig::Hwnd, &Rect, FALSE);
+	int i, j;
+	RECT rect{};
+	int cell_width = AsConfig::Cell_Width * AsConfig::Global_Scale;
+	int cell_height = AsConfig::Cell_Height * AsConfig::Global_Scale;
+
+	for (i = 0; i < Height; i++)
+		for (j = 0; j < Width; j++)
+			if (Bricks_Mask[i * Width + j])
+			{
+				rect.left = Ad_Rect.left + j * cell_width;
+				rect.top = Ad_Rect.top + i * cell_height;
+				rect.right = rect.left + cell_width;
+				rect.bottom = rect.top + cell_height;
+
+				InvalidateRect(AsConfig::Hwnd, &rect, FALSE);
+			}
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 {
-	int ad_x = Rect.left;
-	int ad_y = Rect.top;
+	RECT intersection_rect{};
+	int ad_x = Ad_Rect.left;
+	int ad_y = Ad_Rect.top;
 	const int &scale = AsConfig::Global_Scale;
 	int ball_x, ball_y;
 
-	SelectClipRgn(hdc, Region);
+	if (! IntersectRect(&intersection_rect, &paint_area, &Ad_Rect) )
+		return;
+
+	//SelectClipRgn(hdc, Region);
 
 	// 1.bg and blue frame
 	AsConfig::BG_Color.Select(hdc);
 	AsConfig::Blue_Color.Select_Pen(hdc);
-	AsConfig::Round_Rect(hdc, Rect);
+	AsConfig::Round_Rect(hdc, Ad_Rect);
 
 	// 2.1 white table
 	AsConfig::White_Color.Select(hdc);
@@ -585,7 +610,6 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 	MoveToEx(hdc, ad_x + 1 * scale, ad_y + 16 * scale - 1, 0); // left
 	LineTo(hdc, ad_x + 15 * scale + 1, ad_y + 21 * scale - 1); // bottom
 	LineTo(hdc, ad_x + 30 * scale - 1, ad_y + 16 * scale - 1); // right
-
 	
 	// 4.1. red ball
 	ball_x = ad_x + 10 * scale;
@@ -596,19 +620,39 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 	// 4.2 highlight of red ball
 	AsConfig::Ad_Ball_Highlight_Color.Select_Pen(hdc);
 	Arc(hdc, ball_x + 2 * scale, ball_y + 2 * scale, ball_x + (Ball_Size - 2) * scale - 1, ball_y + (Ball_Size - 2) * scale - 1, 
-		ball_x + (Ball_Size / 2) * scale, ball_y, 
-		ball_x, ball_y + (Ball_Size / 2 + 1) * scale);
+		ball_x + (Ball_Size / 2.0) * scale, ball_y, 
+		ball_x, ball_y + (Ball_Size / 2.0 + 1) * scale);
 
-	SelectClipRgn(hdc, 0);
+	//SelectClipRgn(hdc, 0);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Clear(HDC hdc, RECT& paint_area)
 {
+	RECT intersection_rect{};
+
+	if (! IntersectRect(&intersection_rect, &paint_area, &Ad_Rect))
+		return;
+
+	AsConfig::BG_Color.Select(hdc);
+	AsConfig::Round_Rect(hdc, Ad_Rect);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsAdvertisement::Is_Finished()
 {
 	return false;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsAdvertisement::Show_Under_Brick(int brick_x, int brick_y)
+{
+	int x, y;
+
+	x = brick_x - Level_X;
+	y = brick_y - Level_Y;
+
+	if ( (x < 0 || x >= Width) || (y < 0 || y >= Height) )
+		AsConfig::Throw();
+
+	Bricks_Mask[y * Width + x] = 1;
 }
 //------------------------------------------------------------------------------------------------------------
 
@@ -621,13 +665,17 @@ AActive_Brick_Ad::~AActive_Brick_Ad()
 {
 }
 //------------------------------------------------------------------------------------------------------------
-AActive_Brick_Ad::AActive_Brick_Ad(EBrick_Type brick_type, int brick_x, int brick_y)
-	: AActive_Brick(brick_type, brick_x, brick_y)
+AActive_Brick_Ad::AActive_Brick_Ad(EBrick_Type brick_type, int brick_x, int brick_y, AsAdvertisement *advertisemetn)
+	: AActive_Brick(brick_type, brick_x, brick_y), Advertisement(advertisemetn)
 {
+	if (Advertisement)
+		Advertisement->Show_Under_Brick(brick_x, brick_y);
 }
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick_Ad::Act()
 {
+	if (Advertisement)
+		Advertisement->Act();
 }
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick_Ad::Draw(HDC hdc, RECT &paint_area)
@@ -646,6 +694,9 @@ void AActive_Brick_Ad::Draw_In_Level(HDC hdc, RECT &rect)
 	int y = rect.top;
 	const int& scale = AsConfig::Global_Scale;
 
+	AsConfig::BG_Color.Select(hdc);
+	Rectangle(hdc, rect.left, rect.top, rect.right + 1 * scale, rect.bottom + 1 * scale);
+
 	for (i = 0; i < 2; i++)
 	{
 		AsConfig::Red_Color.Select(hdc);
@@ -653,8 +704,8 @@ void AActive_Brick_Ad::Draw_In_Level(HDC hdc, RECT &rect)
 
 		AsConfig::White_Color.Select(hdc);
 		Arc(hdc, x + 1 * scale, y + 1 * scale, x + (Ball_Size - 1) * scale - 1, y + (Ball_Size - 1) * scale - 1, 
-			x + (Ball_Size / 2) * scale, y, 
-			x, y + (Ball_Size / 2 + 1) * scale);
+			x + (Ball_Size / 2.0) * scale, y, 
+			x, y + (Ball_Size / 2.0 + 1) * scale);
 
 		x += (Ball_Size + 1) * AsConfig::Global_Scale;
 	}

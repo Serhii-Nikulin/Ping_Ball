@@ -231,7 +231,11 @@ bool AsLevel::Create_New_Active_Brick(EBrick_Type brick_type, int brick_x, int b
 		return false;
 
 	case EBT_Ad:
-		active_brick = new AActive_Brick_Ad(EBT_Ad, brick_x, brick_y);
+		active_brick = new AActive_Brick_Ad(EBT_Ad, brick_x, brick_y, Advertisement);
+		Current_Level[brick_y][brick_x] = EBT_Invisible;
+		break;
+
+	case EBT_Invisible:
 		break;
 
 	default:
@@ -497,7 +501,7 @@ void AsLevel::Set_Current_Level(unsigned char level[AsLevel::Level_Height][AsLev
 		}
 	}
 
-	Advertisement = new AsAdvertisement(5, 6, 2, 3);
+	Advertisement = new AsAdvertisement(9, 6, 2, 3);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsLevel::Get_Next_Falling_Letter(int& index, AFalling_Letter** falling_letter)
@@ -557,6 +561,9 @@ void AsLevel::Draw_Brick(HDC hdc, RECT& brick_rect, EBrick_Type brick_type) cons
 		AActive_Brick_Ad::Draw_In_Level(hdc, brick_rect);
 		break;
 
+	case EBT_Invisible:
+		break;
+
 	default:
 		AsConfig::Throw();
 	}
@@ -567,7 +574,13 @@ void AsLevel::Draw(HDC hdc, RECT& paint_area)
 	int i, j;
 	RECT brick_rect{};
 	RECT intersection_rect{};
-	
+
+	if (Advertisement)
+		Advertisement->Clear(hdc, paint_area);
+
+	if (Advertisement)
+		Advertisement->Draw(hdc, paint_area);
+
 	Clear_Objects(hdc, paint_area, (AGraphics_Object**)&Falling_Letters, AsConfig::Max_Falling_Letter_Count);
 
 	if (IntersectRect(&intersection_rect, &paint_area, &Level_Rect))
@@ -587,10 +600,7 @@ void AsLevel::Draw(HDC hdc, RECT& paint_area)
 		Draw_Objects(hdc, paint_area, (AGraphics_Object**)&Active_Bricks, AsConfig::Max_Active_Bricks_Count);
 	}
 
-	Draw_Objects(hdc, paint_area, (AGraphics_Object**)&Falling_Letters, AsConfig::Max_Falling_Letter_Count);
-
-	if (Advertisement)
-		Advertisement->Draw(hdc, paint_area);
+	Draw_Objects(hdc, paint_area, (AGraphics_Object**)&Falling_Letters, AsConfig::Max_Falling_Letter_Count);	
 }
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Act()
@@ -599,8 +609,8 @@ void AsLevel::Act()
 
 	Act_Objects((AGraphics_Object**)&Falling_Letters, AsConfig::Max_Falling_Letter_Count, Falling_Letters_Count);
 
-	if (Advertisement)
-		Advertisement->Act();
+	/*if (Advertisement)
+		Advertisement->Act();*/
 }
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Act_Objects(AGraphics_Object** object_array, const int max_objects_count, int& objects_count)

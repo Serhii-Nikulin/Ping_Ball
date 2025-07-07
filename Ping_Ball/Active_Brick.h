@@ -8,7 +8,8 @@ enum EBrick_Type: unsigned char {
 	EBT_Multihit_1, EBT_Multihit_2, EBT_Multihit_3, EBT_Multihit_4,
 	EBT_Parachute,
 	EBT_Teleport,
-	EBT_Ad
+	EBT_Ad, 
+	EBT_Invisible
 };
 //------------------------------------------------------------------------------------------------------------
 class AGraphics_Object
@@ -168,11 +169,15 @@ public:
 	virtual void Clear(HDC hdc, RECT& paint_area);
 	virtual bool Is_Finished();
 
+	void Show_Under_Brick(int brick_x, int brick_y);
+
 private:
 	int Level_X, Level_Y;
 	int Width, Height;
-	RECT Rect;
+	RECT Ad_Rect;
 	HRGN Region;
+
+	bool *Bricks_Mask;
 
 	static const int Ball_Size = 11;
 	static const int Vertex_Count = 5;
@@ -189,7 +194,7 @@ class AActive_Brick_Ad: public AActive_Brick
 {
 public:
 	virtual ~AActive_Brick_Ad();
-	AActive_Brick_Ad(EBrick_Type brick_type, int brick_x, int brick_y);
+	AActive_Brick_Ad(EBrick_Type brick_type, int brick_x, int brick_y, AsAdvertisement *advertisemetn);
 
 	virtual void Act();
 	virtual void Draw(HDC hdc, RECT &paint_area);
@@ -199,5 +204,7 @@ public:
 
 private:
 	static const int Ball_Size = 7;
+	AsAdvertisement *Advertisement;
+
 };
 //------------------------------------------------------------------------------------------------------------
