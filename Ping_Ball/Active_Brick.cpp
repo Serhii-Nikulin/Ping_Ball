@@ -517,7 +517,8 @@ double AActive_Brick_Teleport::Get_Brick_Y_Pos(bool is_center)
 
 
 
-//Advertisement
+//AsAdvertisement
+const double AsAdvertisement::Ball_Acc = 0.05;
 //------------------------------------------------------------------------------------------------------------
 AsAdvertisement::~AsAdvertisement()
 {
@@ -537,9 +538,10 @@ AsAdvertisement::~AsAdvertisement()
 }
 //------------------------------------------------------------------------------------------------------------
 AsAdvertisement::AsAdvertisement(int level_x, int level_y, int width, int height)
-	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Ad_Rect{}, Ad_Region(0), Table{}, Bricks_Region(0)
+	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Ad_Rect{}, Ad_Region(0), Table{}, Bricks_Region(0), Ball_Center_X(0), Ball_Center_Y(0), Start_Ball_Y_Pos(0), Distance(0.0), Ratio(0.0), Gradient_Ratio(0.0), Time_Step(0), Time_Gradient(+1)
 {
 	int ad_x, ad_y;
+	int full_distance;
 	static const int &scale = AsConfig::Global_Scale;
 
 	Bricks_Region = new HRGN[Width * Height];
@@ -550,21 +552,24 @@ AsAdvertisement::AsAdvertisement(int level_x, int level_y, int width, int height
 	Ad_Rect.right = Ad_Rect.left + (Width * AsConfig::Cell_Width - 1) * scale;
 	Ad_Rect.bottom = Ad_Rect.top + (Height * AsConfig::Cell_Height - 1) * scale;
 
-	Ad_Region = CreateRectRgn(0, 0, 0, 0);
-
 	ad_x = Ad_Rect.left;
 	ad_y = Ad_Rect.top;
+
+	Ball_Center_X = ad_x + 10 * scale + int(Ball_Size * scale / 2.0);	
+	Ball_Center_Y = ad_y + 1 * scale + int(Ball_Size * scale / 2.0);	
+
+	Start_Ball_Y_Pos = ad_y - Ball_Size;
+	Ball_Center_Y = Start_Ball_Y_Pos;
+	Top_Theshold = Start_Ball_Y_Pos;
+	Bottom_Threshold = ad_y + 11 * scale;
+
+	full_distance = Bottom_Threshold - Top_Theshold;
+	Gradient_Ratio = 1.0 / full_distance;
 
 	Table[0] = POINT{ad_x + 1 * scale, ad_y + 15 * scale + 1}; // left
 	Table[1] = POINT{ad_x + 15 * scale + 1, ad_y + 10 * scale + 1}; // top
 	Table[2] = POINT{ad_x + 30 * scale - 1, ad_y + 15 * scale + 1}; // right
 	Table[3] = POINT{ad_x + 15 * scale + 1, ad_y + 20 * scale + 1}; // bottom
-
-	int i, j;
-
-	for (i = Level_Y; i < Level_Y + Height; i++)
-		for (j = Level_X; j < Level_X + Width; j++)
-			Show_Under_Brick(j, i);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Act()
@@ -585,6 +590,23 @@ void AsAdvertisement::Act()
 
 				InvalidateRect(AsConfig::Hwnd, &rect, FALSE);
 			}
+
+	if (Ball_Center_Y > Bottom_Threshold)
+	{
+		Ball_Center_Y = Bottom_Threshold;
+		Time_Gradient *= -1;
+	}
+	else if (Ball_Center_Y < Top_Theshold)
+	{
+		Ball_Center_Y = Top_Theshold;
+		Time_Gradient *= -1;
+	}
+
+	Time_Step += Time_Gradient;
+	Ratio = AsConfig::Global_Scale * (1.0 - Gradient_Ratio / AsConfig::Global_Scale * Distance) / 2.5;
+
+	Distance = Ball_Acc * Time_Step * Time_Step / 2.0;
+	Ball_Center_Y = Start_Ball_Y_Pos + (int)Distance;
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
@@ -598,6 +620,8 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 
 	if (! IntersectRect(&intersection_rect, &paint_area, &Ad_Rect) )
 		return;
+
+	Ad_Region = CreateRectRgn(0, 0, 0, 0);
 
 	SelectClipRgn(hdc, Ad_Region);
 
@@ -617,8 +641,11 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 	Polygon(hdc, Table, Vertex_Count);
 
 	// 3. blue ball's shadow
+
 	AsConfig::Blue_Color.Select(hdc);
-	Ellipse(hdc, ad_x + 11 * scale, ad_y + 13 * scale, ad_x + 20 * scale, ad_y + 16 * scale - 1);
+	//Ellipse(hdc, ad_x + 11 * scale, ad_y + 16 * scale, ad_x + 20 * scale, ad_y + 19 * scale - 1);
+	Ellipse(hdc, Ball_Center_X - 4.5 * scale * Ratio, ad_y + 17.5 * scale - 1.5 * scale * Ratio, 
+		Ball_Center_X + 4.5 * scale * Ratio, ad_y + 17.5 * scale + 1.5 * scale * Ratio - 1);
 
 	// 2.2 red border of table
 	AsConfig::Ad_Table_Red_Color.Select(hdc);
@@ -634,10 +661,11 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 	LineTo(hdc, ad_x + 30 * scale - 1, ad_y + 16 * scale - 1); // right
 	
 	// 4.1. red ball
-	ball_x = ad_x + 10 * scale;
-	ball_y = ad_y + 1 * scale;
+	ball_x = Ball_Center_X - Ball_Size * scale / 2.0;
+	ball_y = Ball_Center_Y - Ball_Size * scale / 2.0;
+
 	AsConfig::Red_Color.Select(hdc);
-	Ellipse(hdc, ball_x, ball_y, ball_x + 11 * scale, ball_y + 11 * scale);
+	Ellipse(hdc, ball_x, ball_y, ball_x + Ball_Size * scale, ball_y + Ball_Size * scale);
 
 	// 4.2 highlight of red ball
 	AsConfig::Ad_Ball_Highlight_Color.Select_Pen(hdc);
@@ -646,6 +674,7 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 		ball_x, ball_y + (Ball_Size / 2.0 + 1) * scale);
 
 	SelectClipRgn(hdc, 0);
+	DeleteObject(Ad_Region);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Clear(HDC hdc, RECT& paint_area)

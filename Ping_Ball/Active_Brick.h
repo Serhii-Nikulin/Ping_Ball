@@ -180,6 +180,18 @@ private:
 	HRGN *Bricks_Region;
 
 	static const int Ball_Size = 11;
+	
+	int Ball_Center_X;
+	int Ball_Center_Y;
+
+	int Start_Ball_Y_Pos;
+	double Distance;
+	int Time_Step;
+	int Top_Theshold, Bottom_Threshold;
+	int Time_Gradient;
+	double Ratio, Gradient_Ratio;
+	static const double Ball_Acc;
+
 	static const int Vertex_Count = 4;
 	POINT Table[Vertex_Count];
 };
