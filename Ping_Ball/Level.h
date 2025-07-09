@@ -43,8 +43,8 @@ private:
 	bool On_Hit(int brick_x, int brick_y, ABall *ball, bool vertical_hit);
 
 	void Act_Objects(AGraphics_Object **object_array, const int max_objects_count, int &objects_count);
-	void Draw_Objects(HDC hdc, RECT &paint_area, AGraphics_Object **object_array, const int max_objects_count, int &objects_count);
-
+	void Draw_Objects(HDC hdc, RECT &paint_area, AGraphics_Object **object_array, const int max_objects_count);
+	void Clear_Objects(HDC hdc, RECT& paint_area, AGraphics_Object** object_array, const int max_objects_count);
 	void Draw_Parachute_In_Level(HDC hdc, RECT &brick_rect) const;
 	void Draw_Elements_Of_Parachute(HDC hdc, RECT &brick_rect, int offset, int width) const;
 
@@ -64,5 +64,7 @@ private:
 
 	int Teleport_Bricks_Count;
 	SPoint *Teleport_Bricks;
+
+	AsAdvertisement *Advertisement;
 };
 //------------------------------------------------------------------------------------------------------------

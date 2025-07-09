@@ -30,6 +30,7 @@ public:
 
 	virtual void Act();
 	virtual void Draw(HDC hdc, RECT &paint_area);
+	virtual void Clear(HDC hdc, RECT& paint_area);
 	virtual bool Is_Finished();
 
 	void Get_Letter_Cell(RECT &letter_rect);

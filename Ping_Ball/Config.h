@@ -29,6 +29,7 @@ class AsConfig
 public:
 	static void Round_Rect(HDC hdc, RECT &rect, int corner_size = 2);
 	static int Rand(int range);
+	static void Throw();
 
 	static const int Global_Scale = 3;
 	static int Current_Timer_Tick;
@@ -41,13 +42,16 @@ public:
 	const static AColor Blue_Highlight_Unbreakable;
 	const static AColor Parachute_Color;
 	static const AColor Teleport_Color;
+	static const AColor Ad_Ball_Highlight_Color;
+	static const AColor Ad_Table_Blue_Color;
+	static const AColor Ad_Table_Red_Color;
 
 	static HWND Hwnd;
 
 	static const int FPS = 20;
 	static bool Has_Floor;
 	static double Moving_Size_Step;
-	static const int Hits_Per_Letter = 10;
+	static const int Hits_Per_Letter = 1;
 
 	//Border
 	static const int Border_X_Offset = 6;

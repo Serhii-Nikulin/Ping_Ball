@@ -63,6 +63,9 @@ const AColor AsConfig::Red_Highlight_Unbreakable(AsConfig::Red_Color, 2 * AsConf
 const AColor AsConfig::Blue_Highlight_Unbreakable(AsConfig::Blue_Color, 1 * AsConfig::Global_Scale);
 const AColor AsConfig::Parachute_Color(AsConfig::Red_Color, AsConfig::Blue_Color, AsConfig::Global_Scale);
 const AColor AsConfig::Teleport_Color(AsConfig::Blue_Color, AsConfig::BG_Color, 1 * AsConfig::Global_Scale);
+const AColor AsConfig::Ad_Ball_Highlight_Color(AsConfig::White_Color, 1.5 * AsConfig::Global_Scale);
+const AColor AsConfig::Ad_Table_Blue_Color(AsConfig::Blue_Color, 1 * AsConfig::Global_Scale);
+const AColor AsConfig::Ad_Table_Red_Color(AsConfig::Red_Color, 2 * AsConfig::Global_Scale);
 HPEN AsConfig::Letter_Pen(0);
 //------------------------------------------------------------------------------------------------------------
 void AsConfig::Round_Rect(HDC hdc, RECT &rect, int corner_size)
@@ -74,5 +77,10 @@ void AsConfig::Round_Rect(HDC hdc, RECT &rect, int corner_size)
 int AsConfig::Rand(int range)
 {
     return rand() * range / RAND_MAX;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsConfig::Throw()
+{
+	throw 13;
 }
 //------------------------------------------------------------------------------------------------------------
