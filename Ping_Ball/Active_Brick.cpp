@@ -521,35 +521,50 @@ double AActive_Brick_Teleport::Get_Brick_Y_Pos(bool is_center)
 //------------------------------------------------------------------------------------------------------------
 AsAdvertisement::~AsAdvertisement()
 {
-	DeleteObject(Region);
+	int i, j;
 
-	delete[] Bricks_Mask;
+	DeleteObject(Ad_Region);
+
+	for (i = 0; i < Height; i++)
+		for (j = 0; j < Width; j++)
+			if (Bricks_Region[i * Width + j] != 0)
+			{
+				DeleteObject(Bricks_Region[i * Width + j]);
+				Bricks_Region[i * Width + j] = 0;
+			}
+
+	delete[] Bricks_Region;
 }
 //------------------------------------------------------------------------------------------------------------
 AsAdvertisement::AsAdvertisement(int level_x, int level_y, int width, int height)
-	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Ad_Rect{}, Region(0), Table{}, Bricks_Mask(0)
+	: Level_X(level_x), Level_Y(level_y), Width(width), Height(height), Ad_Rect{}, Ad_Region(0), Table{}, Bricks_Region(0)
 {
 	int ad_x, ad_y;
 	static const int &scale = AsConfig::Global_Scale;
 
-	Bricks_Mask = new bool[Width * Height];
-	memset(Bricks_Mask, 0, Width * Height * sizeof(bool) );
+	Bricks_Region = new HRGN[Width * Height];
+	memset(Bricks_Region, 0, Width * Height * sizeof(HRGN) );
 
 	Ad_Rect.left = (AsConfig::Level_X_Offset + Level_X * AsConfig::Cell_Width) * scale;
 	Ad_Rect.top = (AsConfig::Level_Y_Offset + Level_Y * AsConfig::Cell_Height) * scale;
 	Ad_Rect.right = Ad_Rect.left + (Width * AsConfig::Cell_Width - 1) * scale;
 	Ad_Rect.bottom = Ad_Rect.top + (Height * AsConfig::Cell_Height - 1) * scale;
 
-	Region = CreateRectRgn(Ad_Rect.left, Ad_Rect.top, Ad_Rect.right, Ad_Rect.bottom);
+	Ad_Region = CreateRectRgn(0, 0, 0, 0);
 
 	ad_x = Ad_Rect.left;
 	ad_y = Ad_Rect.top;
 
-	Table[0] = POINT{ad_x + 1 * scale, ad_y + 15 * scale}; // left
-	Table[1] = POINT{ad_x + 15 * scale + 1, ad_y + 10 * scale}; // top
-	Table[2] = POINT{ad_x + 30 * scale - 1, ad_y + 15 * scale}; // right
-	Table[3] = POINT{ad_x + 15 * scale + 1, ad_y + 20 * scale}; // bottom
-	Table[4] = POINT{ad_x + 1 * scale, ad_y + 15 * scale}; // left
+	Table[0] = POINT{ad_x + 1 * scale, ad_y + 15 * scale + 1}; // left
+	Table[1] = POINT{ad_x + 15 * scale + 1, ad_y + 10 * scale + 1}; // top
+	Table[2] = POINT{ad_x + 30 * scale - 1, ad_y + 15 * scale + 1}; // right
+	Table[3] = POINT{ad_x + 15 * scale + 1, ad_y + 20 * scale + 1}; // bottom
+
+	int i, j;
+
+	for (i = Level_Y; i < Level_Y + Height; i++)
+		for (j = Level_X; j < Level_X + Width; j++)
+			Show_Under_Brick(j, i);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Act()
@@ -561,7 +576,7 @@ void AsAdvertisement::Act()
 
 	for (i = 0; i < Height; i++)
 		for (j = 0; j < Width; j++)
-			if (Bricks_Mask[i * Width + j])
+			if (Bricks_Region[i * Width + j] != 0)
 			{
 				rect.left = Ad_Rect.left + j * cell_width;
 				rect.top = Ad_Rect.top + i * cell_height;
@@ -574,6 +589,7 @@ void AsAdvertisement::Act()
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 {
+	int i, j;
 	RECT intersection_rect{};
 	int ad_x = Ad_Rect.left;
 	int ad_y = Ad_Rect.top;
@@ -583,7 +599,12 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 	if (! IntersectRect(&intersection_rect, &paint_area, &Ad_Rect) )
 		return;
 
-	//SelectClipRgn(hdc, Region);
+	SelectClipRgn(hdc, Ad_Region);
+
+	for (i = 0; i < Height; i++)
+		for (j = 0; j < Width; j++)
+			if (Bricks_Region[i * Width + j] != 0)
+				ExtSelectClipRgn(hdc, Bricks_Region[i * Width + j], RGN_OR);
 
 	// 1.bg and blue frame
 	AsConfig::BG_Color.Select(hdc);
@@ -592,7 +613,8 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 
 	// 2.1 white table
 	AsConfig::White_Color.Select(hdc);
-	Polygon(hdc, Table, Vertex_Count );
+	AsConfig::Blue_Color.Select_Pen(hdc);
+	Polygon(hdc, Table, Vertex_Count);
 
 	// 3. blue ball's shadow
 	AsConfig::Blue_Color.Select(hdc);
@@ -601,7 +623,7 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 	// 2.2 red border of table
 	AsConfig::Ad_Table_Red_Color.Select(hdc);
 	MoveToEx(hdc, ad_x + 1 * scale + 1, ad_y + 17 * scale, 0); // left
-	LineTo(hdc, ad_x + 15 * scale + 1, ad_y + 22 * scale); // bottom
+	LineTo(hdc, ad_x + 15 * scale + 1, ad_y + 22 * scale - 1); // bottom
 	LineTo(hdc, ad_x + 29 * scale + 1, ad_y + 17 * scale); // right
 
 	// 2.3 blue border of table
@@ -623,18 +645,11 @@ void AsAdvertisement::Draw(HDC hdc, RECT &paint_area)
 		ball_x + (Ball_Size / 2.0) * scale, ball_y, 
 		ball_x, ball_y + (Ball_Size / 2.0 + 1) * scale);
 
-	//SelectClipRgn(hdc, 0);
+	SelectClipRgn(hdc, 0);
 }
 //------------------------------------------------------------------------------------------------------------
 void AsAdvertisement::Clear(HDC hdc, RECT& paint_area)
 {
-	RECT intersection_rect{};
-
-	if (! IntersectRect(&intersection_rect, &paint_area, &Ad_Rect))
-		return;
-
-	AsConfig::BG_Color.Select(hdc);
-	AsConfig::Round_Rect(hdc, Ad_Rect);
 }
 //------------------------------------------------------------------------------------------------------------
 bool AsAdvertisement::Is_Finished()
@@ -645,6 +660,8 @@ bool AsAdvertisement::Is_Finished()
 void AsAdvertisement::Show_Under_Brick(int brick_x, int brick_y)
 {
 	int x, y;
+	RECT rect{};
+	HRGN region{};
 
 	x = brick_x - Level_X;
 	y = brick_y - Level_Y;
@@ -652,7 +669,12 @@ void AsAdvertisement::Show_Under_Brick(int brick_x, int brick_y)
 	if ( (x < 0 || x >= Width) || (y < 0 || y >= Height) )
 		AsConfig::Throw();
 
-	Bricks_Mask[y * Width + x] = 1;
+	rect.left = Ad_Rect.left + x * AsConfig::Cell_Width * AsConfig::Global_Scale;
+	rect.top = Ad_Rect.top + y * AsConfig::Cell_Height * AsConfig::Global_Scale;
+	rect.right = rect.left + AsConfig::Cell_Width * AsConfig::Global_Scale;
+	rect.bottom = rect.top + AsConfig::Cell_Height * AsConfig::Global_Scale;
+
+	Bricks_Region[y * Width + x] = CreateRectRgnIndirect(&rect);
 }
 //------------------------------------------------------------------------------------------------------------
 

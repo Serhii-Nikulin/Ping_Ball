@@ -8,9 +8,9 @@ unsigned char AsLevel::Level_01[AsLevel::Level_Height][AsLevel::Level_Width] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	2, 2, 2, 2, 0, 0, 0, 0, 0, 10,10,0,
-	1, 1, 1, 1, 0, 0, 0, 0, 0, 10,10,0,
-	2, 2, 2, 2, 0, 0, 0, 0, 0, 10,10,0,
+	2, 2, 2, 2, 0, 0, 0, 0, 0, 11,11,0,
+	1, 1, 1, 1, 0, 0, 0, 0, 0, 11,11,0,
+	2, 2, 2, 2, 0, 0, 0, 0, 0, 11,11,0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -576,9 +576,6 @@ void AsLevel::Draw(HDC hdc, RECT& paint_area)
 	RECT intersection_rect{};
 
 	if (Advertisement)
-		Advertisement->Clear(hdc, paint_area);
-
-	if (Advertisement)
 		Advertisement->Draw(hdc, paint_area);
 
 	Clear_Objects(hdc, paint_area, (AGraphics_Object**)&Falling_Letters, AsConfig::Max_Falling_Letter_Count);
@@ -605,12 +602,13 @@ void AsLevel::Draw(HDC hdc, RECT& paint_area)
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Act()
 {
+
 	Act_Objects((AGraphics_Object**)&Active_Bricks, AsConfig::Max_Active_Bricks_Count, Active_Bricks_Count);
 
 	Act_Objects((AGraphics_Object**)&Falling_Letters, AsConfig::Max_Falling_Letter_Count, Falling_Letters_Count);
 
-	/*if (Advertisement)
-		Advertisement->Act();*/
+	if (Advertisement)
+		Advertisement->Act();
 }
 //------------------------------------------------------------------------------------------------------------
 void AsLevel::Act_Objects(AGraphics_Object** object_array, const int max_objects_count, int& objects_count)

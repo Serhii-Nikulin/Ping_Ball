@@ -175,12 +175,12 @@ private:
 	int Level_X, Level_Y;
 	int Width, Height;
 	RECT Ad_Rect;
-	HRGN Region;
+	HRGN Ad_Region;
 
-	bool *Bricks_Mask;
+	HRGN *Bricks_Region;
 
 	static const int Ball_Size = 11;
-	static const int Vertex_Count = 5;
+	static const int Vertex_Count = 4;
 	POINT Table[Vertex_Count];
 };
 //------------------------------------------------------------------------------------------------------------
