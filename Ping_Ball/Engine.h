@@ -26,7 +26,8 @@ private:
 
 	EGame_State Game_State;
 
-	ABall Ball;
+	ABall Balls[AsConfig::Max_Balls_Count];
+
 	AsLevel Level;
 	AsPlatform Platform;
 	AsBorder Border;

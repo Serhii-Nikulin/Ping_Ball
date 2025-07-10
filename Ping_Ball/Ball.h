@@ -3,7 +3,7 @@
 #include "Config.h"
 
 //------------------------------------------------------------------------------------------------------------
-enum EBall_State { EBS_Normal, EBS_Lost, EBS_On_Platform, EBS_Off_Parachute, EBS_On_Parachute, EBS_Teleporting };
+enum EBall_State { EBS_Disable, EBS_Normal, EBS_Lost, EBS_On_Platform, EBS_Off_Parachute, EBS_On_Parachute, EBS_Teleporting };
 //------------------------------------------------------------------------------------------------------------
 class ABall;
 class AHit_Checker

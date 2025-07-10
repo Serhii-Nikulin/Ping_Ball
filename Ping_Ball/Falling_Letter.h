@@ -12,7 +12,7 @@ enum ELetter_Type
 	ELT_W, // wide platform
 	ELT_C, // clay platform 7
 
-	ELT_T, // triple bal 3
+	ELT_T, // triple ball 3
 	ELT_L, // lazer platform 3
 	ELT_F, // floor 3
 
@@ -20,7 +20,7 @@ enum ELetter_Type
 
 	ELT_Max
 };
-
+//------------------------------------------------------------------------------------------------------------
 enum EFalling_Letter_State {EFLS_Normal, EFLS_Finalizing, EFLS_Finished};
 //------------------------------------------------------------------------------------------------------------
 class AFalling_Letter: public AGraphics_Object
@@ -40,6 +40,7 @@ public:
 	static void Init();
 	static ELetter_Type Get_Random_Letter_Type();
 
+	const ELetter_Type Letter_Type;
 private:
 
 	void Draw_Brick_Letter(HDC hdc);
@@ -51,7 +52,6 @@ private:
 	int Rotation_Step;
 	int Next_Rotation_Tick;
 	const EBrick_Type Brick_Type;
-	const ELetter_Type Letter_Type;
 	RECT Letter_Cell, Prev_Letter_Cell;
 	EFalling_Letter_State Falling_Letter_State;
 	static const int Ticks_Per_Step = 4;

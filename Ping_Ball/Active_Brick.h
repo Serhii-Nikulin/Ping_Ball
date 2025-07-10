@@ -1,7 +1,8 @@
 #pragma once
 #include "Ball.h"
 
-enum EBrick_Type: unsigned char {
+enum EBrick_Type: unsigned char 
+{
 	EBT_None, 
 	EBT_Red, EBT_Blue, 
 	EBT_Unbreakable, 
