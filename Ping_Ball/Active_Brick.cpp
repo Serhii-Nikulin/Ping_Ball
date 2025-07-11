@@ -518,7 +518,7 @@ double AActive_Brick_Teleport::Get_Brick_Y_Pos(bool is_center)
 
 
 //AsAdvertisement
-const double AsAdvertisement::Ball_Acc = 0.05;
+const double AsAdvertisement::Ball_Acc = 0.1;
 //------------------------------------------------------------------------------------------------------------
 AsAdvertisement::~AsAdvertisement()
 {
@@ -561,7 +561,7 @@ AsAdvertisement::AsAdvertisement(int level_x, int level_y, int width, int height
 	Start_Ball_Y_Pos = ad_y - Ball_Size;
 	Ball_Center_Y = Start_Ball_Y_Pos;
 	Top_Theshold = Start_Ball_Y_Pos;
-	Bottom_Threshold = ad_y + 11 * scale;
+	Bottom_Threshold = ad_y + 12 * scale;
 
 	full_distance = Bottom_Threshold - Top_Theshold;
 	Gradient_Ratio = 1.0 / full_distance;
@@ -603,7 +603,7 @@ void AsAdvertisement::Act()
 	}
 
 	Time_Step += Time_Gradient;
-	Ratio = AsConfig::Global_Scale * (1.0 - Gradient_Ratio / AsConfig::Global_Scale * Distance) / 2.5;
+	Ratio = 1.0 - Gradient_Ratio / AsConfig::Global_Scale * Distance;
 
 	Distance = Ball_Acc * Time_Step * Time_Step / 2.0;
 	Ball_Center_Y = Start_Ball_Y_Pos + (int)Distance;
@@ -725,8 +725,8 @@ AActive_Brick_Ad::AActive_Brick_Ad(EBrick_Type brick_type, int brick_x, int bric
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick_Ad::Act()
 {
-	if (Advertisement)
-		Advertisement->Act();
+	/*if (Advertisement)
+		Advertisement->Act();*/
 }
 //------------------------------------------------------------------------------------------------------------
 void AActive_Brick_Ad::Draw(HDC hdc, RECT &paint_area)

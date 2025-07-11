@@ -73,6 +73,7 @@ public:
 	static const int Cell_Width = 16;
 	static const int Cell_Height = 8;
 
+	static const int Max_Balls_Count = 9;
 	static const int Max_Active_Bricks_Count = 20;
 	static const int Max_Falling_Letter_Count = 20;
 };
