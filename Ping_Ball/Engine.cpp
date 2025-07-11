@@ -3,15 +3,13 @@
 //AsEngine
 //------------------------------------------------------------------------------------------------------------
 AsEngine::AsEngine()
-//: Game_State(EGS_Play_Level)
+	//: Game_State(EGS_Play_Level)
 	: Game_State(EGS_Lost_Ball), Balls{}
 {
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Init_Engine(HWND hwnd)
 {
-	int i;
-
 	AsConfig::Hwnd = hwnd;
 	SYSTEMTIME sys_time;
 	FILETIME file_time;
@@ -38,10 +36,10 @@ void AsEngine::Init_Engine(HWND hwnd)
 
 	if (Game_State == EGS_Lost_Ball)
 	{
-		Balls[0].Set_State(EBS_Lost);
+		//Balls[0].Set_State(EBS_Lost);
 
-		for (i = 1; i < AsConfig::Max_Balls_Count; i++)
-			Balls[i].Set_State(EBS_Disable);
+		/*for (i = 1; i < AsConfig::Max_Balls_Count; i++)
+			Balls[i].Set_State(EBS_Disable);*/
 
 		Platform.Set_State(EPS_Missing);
 		//Ball.Redraw();
@@ -95,25 +93,12 @@ int AsEngine::On_Key_Down(EKey_Type key_type)
 //------------------------------------------------------------------------------------------------------------
 int AsEngine::On_Timer()
 {
-	int i;
-
 	AsConfig::Current_Timer_Tick += 1;
 
 	switch (Game_State)
 	{
 	case EGS_Play_Level:
-
-		for (i = 0; i < AsConfig::Max_Balls_Count; i++)
-		{
-			Balls[i].Move();
-
-			if (Balls[i].Get_State() == EBS_Lost)
-			{
-				Game_State = EGS_Lost_Ball;
-				Platform.Set_State(EPS_Meltdown);
-			}
-		}
-
+		Play_Level();
 		break;
 
 	case EGS_Lost_Ball:
@@ -127,20 +112,56 @@ int AsEngine::On_Timer()
 
 	case EGS_Restart_Level:
 		if (Platform.Get_State() == EPS_Is_Ready)
-		{
-			Game_State = EGS_Play_Level;
-			Balls[0].Set_State(EBS_On_Platform);
-
-			for (i = 1; i < AsConfig::Max_Balls_Count; i++)
-				Balls[i].Set_State(EBS_Disable);
-			//Balls[i].Set_State(EBS_On_Platform);
-		}
+			Restart_Level();		
 		break;
 	}
 
 	Act();
 
 	return 0;
+}
+//------------------------------------------------------------------------------------------------------------
+void AsEngine::Restart_Level()
+{
+	int i;
+
+	Game_State = EGS_Play_Level;
+
+	for (i = 0; i < 3; i++)
+		Balls[i].Set_State(EBS_On_Platform);
+
+	for (NULL; i < AsConfig::Max_Balls_Count; i++)
+		Balls[i].Set_State(EBS_Disable);
+}
+//------------------------------------------------------------------------------------------------------------
+void AsEngine::Play_Level()
+{
+	int i;
+	int active_balls = 0;
+	int lost_balls = 0;
+
+	for (i = 0; i < AsConfig::Max_Balls_Count; i++)
+	{
+		if (Balls[i].Get_State() == EBS_Disable)
+			continue;
+
+		active_balls += 1;
+
+		if (Balls[i].Get_State() == EBS_Lost)
+		{
+			lost_balls += 1;
+			continue;
+		}
+
+		Balls[i].Move();
+	}
+
+	if (active_balls == lost_balls)
+	{
+		Game_State = EGS_Lost_Ball;
+		Platform.Set_State(EPS_Meltdown);
+		Level.Stop_Activity();
+	}
 }
 //------------------------------------------------------------------------------------------------------------
 void AsEngine::Act()

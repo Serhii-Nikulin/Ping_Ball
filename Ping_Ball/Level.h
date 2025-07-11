@@ -20,6 +20,8 @@ public:
 	void Init();
 	void Draw(HDC hdc, RECT &paint_area);
 	void Act();
+	void Stop_Activity();
+
 	static const int Level_Height = 14;
 	static const int Level_Width = 12;
 	static unsigned char Level_01[AsLevel::Level_Height][AsLevel::Level_Width];
@@ -45,9 +47,12 @@ private:
 	void Act_Objects(AGraphics_Object **object_array, const int max_objects_count, int &objects_count);
 	void Draw_Objects(HDC hdc, RECT &paint_area, AGraphics_Object **object_array, const int max_objects_count);
 	void Clear_Objects(HDC hdc, RECT& paint_area, AGraphics_Object** object_array, const int max_objects_count);
+	void Destroy_All_Active_Objects();
+	void Destroy_Objects(AGraphics_Object **object_array, const int max_objects_count, int &objects_count);
 	void Draw_Parachute_In_Level(HDC hdc, RECT &brick_rect) const;
 	void Draw_Elements_Of_Parachute(HDC hdc, RECT &brick_rect, int offset, int width) const;
 
+	bool Cancel_All_Activity;
 	RECT Level_Rect{};
 	unsigned char Current_Level[AsLevel::Level_Height][AsLevel::Level_Width];
  
